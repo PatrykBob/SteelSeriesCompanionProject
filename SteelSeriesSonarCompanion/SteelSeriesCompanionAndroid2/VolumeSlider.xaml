@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="SteelSeriesCompanionAndroid2.VolumeSlider">
+    <VerticalStackLayout>
+        <Label 
+            x:Name="ChannelLabel"
+            Text="Channel"
+            VerticalOptions="Start" 
+            HorizontalOptions="Center" />
+        <Label
+            x:Name="VolumeLabel"
+            Text="Volume"
+            VerticalOptions="Start" 
+            HorizontalOptions="Center" />
+        <ContentView
+            x:Name="VolumeSliderRoot"
+            HeightRequest="200"
+            WidthRequest="50"
+            HorizontalOptions="Center"
+            VerticalOptions="Center">
+            <Slider 
+                x:Name="VolumeSliderControl"
+                Minimum="0" 
+                Maximum="1"
+                HorizontalOptions="Center"
+                VerticalOptions="Center"
+                WidthRequest="200" 
+                HeightRequest="50" 
+                Rotation="270"/>
+        </ContentView>
+        <CheckBox
+            x:Name="MuteCheckBox"
+            HorizontalOptions="Center"
+            VerticalOptions="End"/>
+    </VerticalStackLayout>
+</ContentView>

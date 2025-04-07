@@ -1,0 +1,20 @@
+﻿<Window x:Class="SteelSeriesSonarCompanion.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:SteelSeriesSonarCompanion"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+    <Grid>
+        <Slider x:Name="GameVolumeSlider" HorizontalAlignment="Left" Margin="69,0,0,0" VerticalAlignment="Center" Width="30" Height="312" Orientation="Vertical" Maximum="1" SmallChange="0.01" TickPlacement="TopLeft" LargeChange="0.1"/>
+        <Slider x:Name="ChatVolumeSlider" HorizontalAlignment="Left" Margin="176,0,0,0" VerticalAlignment="Center" Width="30" Height="312" Orientation="Vertical" Maximum="1" SmallChange="0.01" TickPlacement="TopLeft" LargeChange="0.1"/>
+        <Slider x:Name="MediaVolumeSlider" HorizontalAlignment="Left" Margin="286,0,0,0" VerticalAlignment="Center" Width="30" Height="312" Orientation="Vertical" Maximum="1" SmallChange="0.01" TickPlacement="TopLeft" LargeChange="0.1"/>
+        <Slider x:Name="AuxVolumeSlider" HorizontalAlignment="Center" VerticalAlignment="Center" Width="30" Height="312" Orientation="Vertical" Maximum="1" SmallChange="0.01" TickPlacement="TopLeft" LargeChange="0.1"/>
+        <CheckBox x:Name="GameMuteCheckBox" Content="Mute" HorizontalAlignment="Left" Margin="48,393,0,0" VerticalAlignment="Top"/>
+        <CheckBox x:Name="ChatMuteCheckBox" Content="Mute" HorizontalAlignment="Left" Margin="155,393,0,0" VerticalAlignment="Top"/>
+        <CheckBox x:Name="MediaMuteCheckBox" Content="Mute" HorizontalAlignment="Left" Margin="265,393,0,0" VerticalAlignment="Top"/>
+        <CheckBox x:Name="AuxMuteCheckBox" Content="Mute" HorizontalAlignment="Center" Margin="0,393,0,0" VerticalAlignment="Top"/>
+        <Slider x:Name="ChatMixSlider" HorizontalAlignment="Left" Margin="550,355,0,0" VerticalAlignment="Top" Width="120" Maximum="1" Minimum="-1" SmallChange="0.01" TickPlacement="BottomRight" Value="-1" TickFrequency="1" LargeChange="0.1"/>
+    </Grid>
+</Window>

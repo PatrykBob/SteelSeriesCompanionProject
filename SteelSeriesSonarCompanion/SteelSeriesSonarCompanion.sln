@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SteelSeriesSonarCompanionTr
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SteelSeriesCompanionAndroid2", "SteelSeriesCompanionAndroid2\SteelSeriesCompanionAndroid2.csproj", "{D5F62614-5AA5-4193-AEFA-3D9230386555}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SteelSeriesCompanionSharedCore", "SteelSeriesCompanionSharedCore\SteelSeriesCompanionSharedCore.csproj", "{8A3F46BB-E4D4-4470-AAF0-BF80F97BFAF1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -22,6 +24,10 @@ Global
 		{D5F62614-5AA5-4193-AEFA-3D9230386555}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
 		{D5F62614-5AA5-4193-AEFA-3D9230386555}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D5F62614-5AA5-4193-AEFA-3D9230386555}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8A3F46BB-E4D4-4470-AAF0-BF80F97BFAF1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8A3F46BB-E4D4-4470-AAF0-BF80F97BFAF1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8A3F46BB-E4D4-4470-AAF0-BF80F97BFAF1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8A3F46BB-E4D4-4470-AAF0-BF80F97BFAF1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

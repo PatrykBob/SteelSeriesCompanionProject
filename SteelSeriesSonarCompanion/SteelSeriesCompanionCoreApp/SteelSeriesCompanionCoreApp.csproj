@@ -9,14 +9,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Setup\SonarSetupConfig.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="Setup\SonarSetupConfig.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\SteelSeriesCompanionSharedCore\SteelSeriesCompanionSharedCore.csproj" />
   </ItemGroup>
 

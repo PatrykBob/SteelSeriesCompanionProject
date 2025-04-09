@@ -1,5 +1,8 @@
 ﻿using Newtonsoft.Json;
 using System.Diagnostics;
+using System.Globalization;
+using System.Net.Http;
+using System.Net.Http.Json;
 
 namespace SteelSeriesSonarCompanion.Communication.Internal
 {
@@ -63,7 +66,6 @@ namespace SteelSeriesSonarCompanion.Communication.Internal
 
 			return default;
 		}
-
 
 		private async Task<T?> SendGetRequest<T> (Uri uri)
 		{

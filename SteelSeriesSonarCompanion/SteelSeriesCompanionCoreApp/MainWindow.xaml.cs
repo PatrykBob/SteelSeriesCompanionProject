@@ -1,4 +1,5 @@
-﻿using SteelSeriesSonarCompanion.Communication.Internal;
+﻿using SteelSeriesCompanionCoreApp.Setup;
+using SteelSeriesSonarCompanion.Communication.Internal;
 using System.Windows;
 
 namespace SteelSeriesSonarCompanion
@@ -15,7 +16,14 @@ namespace SteelSeriesSonarCompanion
 
 		private async void Initialize ()
 		{
-			await InternalFacade.Initialize(6327);
+			if (SonarSetupLoader.TryGetSonarSetupPort(out int setupPort))
+			{
+				await InternalFacade.Initialize(setupPort);
+			}
+			else
+			{
+				// TODO inform user about problem
+			}
 		}
 	}
 }

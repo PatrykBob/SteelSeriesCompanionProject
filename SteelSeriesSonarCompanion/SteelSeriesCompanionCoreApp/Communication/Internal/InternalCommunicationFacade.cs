@@ -1,8 +1,6 @@
-﻿using Newtonsoft.Json;
-using System.Diagnostics;
-using System.Globalization;
+﻿using System.Diagnostics;
 using System.Net.Http;
-using System.Net.Http.Json;
+using SteelSeriesCompanion.SharedCore.Converters;
 
 namespace SteelSeriesSonarCompanion.Communication.Internal
 {
@@ -10,6 +8,7 @@ namespace SteelSeriesSonarCompanion.Communication.Internal
 	{
 		private int SonarCommunicationPort { get; set; }
 		private HttpClient CurrentHttpClient { get; set; }
+
 
 		public async Task Initialize (int sonarSetupPort)
 		{
@@ -76,7 +75,7 @@ namespace SteelSeriesSonarCompanion.Communication.Internal
 				if (response.IsSuccessStatusCode == true)
 				{
 					string responseContent = await response.Content.ReadAsStringAsync();
-					return ConvertFromJSON<T>(responseContent);
+					return JsonConverter.ConvertFromJSON<T>(responseContent);
 				}
 			}
 			catch (Exception e)
@@ -90,11 +89,6 @@ namespace SteelSeriesSonarCompanion.Communication.Internal
 		private async Task SendPutRequest (Uri uri, HttpContent content = null)
 		{
 			await CurrentHttpClient.PutAsync(uri, content);
-		}
-
-		private T? ConvertFromJSON<T> (string json)
-		{
-			return JsonConvert.DeserializeObject<T>(json);
 		}
 	}
 }

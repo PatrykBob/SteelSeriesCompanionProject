@@ -9,7 +9,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <Compile Remove="Setup\SonarSetupConfig.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Setup\SonarSetupConfig.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SteelSeriesCompanionSharedCore\SteelSeriesCompanionSharedCore.csproj" />
   </ItemGroup>
 
 </Project>

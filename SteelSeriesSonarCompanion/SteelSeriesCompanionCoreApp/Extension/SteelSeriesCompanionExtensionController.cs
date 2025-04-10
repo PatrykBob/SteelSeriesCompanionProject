@@ -24,11 +24,11 @@ namespace SteelSeriesCompanion.Extension
 
 			for (int i = 0; i < fileInfoCollection.Length; i++)
 			{
-				LoadExtension(fileInfoCollection[i]);
+				LoadExtension(fileInfoCollection[i], extensionCore);
 			}
 		}
 
-		private void LoadExtension (FileInfo extensionFile)
+		private void LoadExtension (FileInfo extensionFile, ISteelSeriesCompanionCore extensionCore)
 		{
 			Assembly DLL = Assembly.LoadFile(extensionFile.FullName);
 
@@ -38,6 +38,7 @@ namespace SteelSeriesCompanion.Extension
 
 				if (instance is BaseSteelSeriesCompanionExtension extension)
 				{
+					extension.Initialize(extensionCore);
 					ExtensionCollection.Add(extension);
 				}
 			}

@@ -1,29 +1,16 @@
-﻿using SteelSeriesCompanionCoreApp.Setup;
-using SteelSeriesSonarCompanion.Communication.Internal;
+﻿using SteelSeriesCompanion;
 using System.Windows;
 
 namespace SteelSeriesSonarCompanion
 {
 	public partial class MainWindow : Window
 	{
-		private InternalCommunicationFacade InternalFacade { get; set; } = new();
+		private SteelSeriesCompanionCore Core { get; set; } = new();
 
 		public MainWindow ()
 		{
-			Initialize();
+			Core.Initialize();
 			InitializeComponent();
-		}
-
-		private async void Initialize ()
-		{
-			if (SonarSetupLoader.TryGetSonarSetupPort(out int setupPort))
-			{
-				await InternalFacade.Initialize(setupPort);
-			}
-			else
-			{
-				// TODO inform user about problem
-			}
 		}
 	}
 }

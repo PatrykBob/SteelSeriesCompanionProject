@@ -14,6 +14,12 @@ namespace SteelSeriesCompanion.Extension
 		{
 			string path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, EXTENSION_FOLDER_NAME);
 			DirectoryInfo extensionDirectory = new(path);
+
+			if (extensionDirectory.Exists == false)
+			{
+				extensionDirectory.Create();
+			}
+
 			FileInfo[] fileInfoCollection = extensionDirectory.GetFiles();
 
 			for (int i = 0; i < fileInfoCollection.Length; i++)

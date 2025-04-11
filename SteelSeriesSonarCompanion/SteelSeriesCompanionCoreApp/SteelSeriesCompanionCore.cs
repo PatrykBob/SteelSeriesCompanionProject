@@ -12,7 +12,7 @@ namespace SteelSeriesCompanion
 
 		public async Task SetChannelVolume (SoundChannel channel, float volume)
 		{
-			await InternalFacade.SetChannelVolume(channel.ToString(), volume);
+			await InternalFacade.SetChannelVolume(channel, volume);
 		}
 
 		public async void Initialize ()

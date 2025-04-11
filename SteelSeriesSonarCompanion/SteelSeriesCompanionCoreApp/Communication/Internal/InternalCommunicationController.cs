@@ -4,7 +4,7 @@ using System.Net.Http;
 
 namespace SteelSeriesSonarCompanion.Communication.Internal
 {
-	public class InternalCommunicagionController
+	public class InternalCommunicationController
 	{
 		private int SonarCommunicationPort { get; set; }
 		private HttpClient CurrentHttpClient { get; set; }

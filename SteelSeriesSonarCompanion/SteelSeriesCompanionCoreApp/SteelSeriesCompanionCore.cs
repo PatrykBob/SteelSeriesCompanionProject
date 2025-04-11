@@ -15,6 +15,11 @@ namespace SteelSeriesCompanion
 			await InternalFacade.SetChannelVolume(channel, volume);
 		}
 
+		public async Task SetChannelMute (SoundChannel channel, bool mute)
+		{
+			await InternalFacade.SetChannelMute(channel, mute);
+		}
+
 		public async void Initialize ()
 		{
 			if (SonarSetupLoader.TryGetSonarSetupPort(out int setupPort))

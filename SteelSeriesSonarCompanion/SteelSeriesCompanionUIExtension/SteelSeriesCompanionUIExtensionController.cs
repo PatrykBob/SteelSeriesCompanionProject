@@ -8,10 +8,14 @@ namespace SteelSeriesCompanionUIExtension
 		public override void Initialize (ISteelSeriesCompanionCore companionCore)
 		{
 			base.Initialize(companionCore);
-			Trace.WriteLine("Hello from the extension !!!!!!");
-			Window1 window1 = new Window1();
-			window1.Show();
-			window1.Initialize(companionCore);
+			PrepareUI(companionCore);
+		}
+
+		private void PrepareUI (ISteelSeriesCompanionCore companionCore)
+		{
+			SteelSeriesCompanionWindow window = new();
+			window.Show();
+			window.Initialize(companionCore);
 		}
 	}
 }

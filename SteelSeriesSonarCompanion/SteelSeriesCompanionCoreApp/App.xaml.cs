@@ -1,14 +1,23 @@
-﻿using System.Configuration;
-using System.Data;
+﻿using SteelSeriesCompanion;
 using System.Windows;
 
 namespace SteelSeriesSonarCompanion
 {
-	/// <summary>
-	/// Interaction logic for App.xaml
-	/// </summary>
-	public partial class App : Application
+	public partial class App : System.Windows.Application
 	{
+		private SteelSeriesCompanionCore CompanionCore { get; set; } = new();
+
+		protected override void OnStartup (StartupEventArgs e)
+		{
+			base.OnStartup(e);
+			CompanionCore.Initialize();
+		}
+
+		protected override void OnExit (ExitEventArgs e)
+		{
+			CompanionCore.Dispose();
+			base.OnExit(e);
+		}
 	}
 
 }

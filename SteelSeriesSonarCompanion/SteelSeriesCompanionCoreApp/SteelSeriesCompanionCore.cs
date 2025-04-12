@@ -1,14 +1,16 @@
 ﻿using SteelSeriesCompanion.Extension;
 using SteelSeriesCompanion.SharedCore;
+using SteelSeriesCompanion.Tray;
 using SteelSeriesCompanionCoreApp.Setup;
 using SteelSeriesSonarCompanion.Communication.Internal;
 
 namespace SteelSeriesCompanion
 {
-	public class SteelSeriesCompanionCore : ISteelSeriesCompanionCore
+	public class SteelSeriesCompanionCore : ISteelSeriesCompanionCore, IDisposable
 	{
 		private InternalCommunicationFacade InternalFacade { get; set; } = new();
 		private SteelSeriesCompanionExtensionController ExtensionController { get; set; } = new();
+		private TrayController Tray { get; set; } = new();
 
 		public async Task SetChannelVolume (SoundChannel channel, float volume)
 		{
@@ -32,6 +34,12 @@ namespace SteelSeriesCompanion
 			}
 
 			ExtensionController.Initialize(this);
+			Tray.Initialize();
+		}
+
+		public void Dispose ()
+		{
+			Tray.Dispose();
 		}
 	}
 }

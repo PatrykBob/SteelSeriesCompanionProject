@@ -34,7 +34,8 @@ namespace SteelSeriesCompanion
 			}
 
 			ExtensionController.Initialize(this);
-			Tray.Initialize();
+			List<ToolStripMenuItem> extensionMenuItemCollection = ExtensionController.GetExtensionToolMenuItemCollection();
+			Tray.Initialize(extensionMenuItemCollection);
 		}
 
 		public void Dispose ()

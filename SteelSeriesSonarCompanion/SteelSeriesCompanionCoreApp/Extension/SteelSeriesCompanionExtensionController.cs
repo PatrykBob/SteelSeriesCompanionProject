@@ -28,6 +28,18 @@ namespace SteelSeriesCompanion.Extension
 			}
 		}
 
+		public List<ToolStripMenuItem> GetExtensionToolMenuItemCollection ()
+		{
+			List<ToolStripMenuItem> extensionMenuItemCollection = new();
+
+			for (int i = 0; i < ExtensionCollection.Count; i++)
+			{
+				extensionMenuItemCollection.Add(ExtensionCollection[i].GetExtensionMenuItem());
+			}
+
+			return extensionMenuItemCollection;
+		}
+
 		private void LoadExtension (FileInfo extensionFile, ISteelSeriesCompanionCore extensionCore)
 		{
 			Assembly DLL = Assembly.LoadFile(extensionFile.FullName);

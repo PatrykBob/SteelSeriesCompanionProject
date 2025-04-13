@@ -65,6 +65,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <ProjectReference Include="..\ExternalCommunicationShared\ExternalCommunicationShared.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
 	  <Compile Update="VolumeSlider.xaml.cs">
 	    <DependentUpon>VolumeSlider.xaml</DependentUpon>
 	  </Compile>

@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net8.0-windows</TargetFramework>
@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\SteelSeriesCompanionSharedCore\SteelSeriesCompanionSharedCore.csproj" />
+    <ProjectReference Include="..\SteelSeriesCompanionSharedExtensionCore\SteelSeriesCompanionSharedExtensionCore.csproj" />
   </ItemGroup>
 
 </Project>

@@ -7,12 +7,6 @@ namespace SteelSeriesCompanionUIExtension
 	{
 		private SteelSeriesCompanionWindow? ExtensionWindow { get; set; }
 
-		public override void Initialize (ISteelSeriesCompanionCore companionCore)
-		{
-			base.Initialize(companionCore);
-			PrepareUI(companionCore);
-		}
-
 		public override ToolStripMenuItem GetExtensionMenuItem ()
 		{
 			ToolStripMenuItem toolStripMwnuItem = new();
@@ -23,14 +17,18 @@ namespace SteelSeriesCompanionUIExtension
 
 			void ExtensionMenuClicked (object? sender, EventArgs e)
 			{
-				ExtensionWindow?.Show();
+				ShowUI();
 			}
 		}
 
-		private void PrepareUI (ISteelSeriesCompanionCore companionCore)
+		private void ShowUI ()
 		{
-			ExtensionWindow = new();
-			ExtensionWindow.Initialize(companionCore);
+			if (CompanionCore != null)
+			{
+				ExtensionWindow = new();
+				ExtensionWindow.Initialize(CompanionCore);
+				ExtensionWindow.Show();
+			}
 		}
 	}
 }

@@ -6,4 +6,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\SteelSeriesCompanionSharedCore\SteelSeriesCompanionSharedCore.csproj" />
+  </ItemGroup>
+
 </Project>

@@ -1,19 +1,24 @@
+using SteelSeriesCompanion.SharedCore;
 namespace SteelSeriesCompanionAndroid2;
 
 public partial class VolumeSlider : ContentView
 {
-	public event Action<float> OnVolumeChange = delegate { };
+	public event Action<SoundChannel, float> OnVolumeChange = delegate { };
 
-	public VolumeSlider()
+	private SoundChannel Channel { get; set; }
+
+	public VolumeSlider (SoundChannel channel)
 	{
 		InitializeComponent();
+		Channel = channel;
+		ChannelLabel.Text = Channel.ToString();
 		VolumeSliderControl.ValueChanged += OnVolumeSliderValueChanged;
 	}
 
-	private void OnVolumeSliderValueChanged (object sender, ValueChangedEventArgs e)
+	private void OnVolumeSliderValueChanged (object? sender, ValueChangedEventArgs e)
 	{
 		float volume = (float)e.NewValue;
-		OnVolumeChange(volume);
+		OnVolumeChange(Channel, volume);
 		VolumeLabel.Text = $"{volume * 100:F0}%";
 	}
 }

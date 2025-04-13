@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using SteelSeriesCompanion.SharedCore;
+using System.Globalization;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -16,17 +17,23 @@ namespace SteelSeriesCompanionAndroid2
 		public MainPage ()
 		{
 			InitializeComponent();
-			SpawnVolumeSlider();
+			SpawnVolumeSliders();
 		}
 
-		private void SpawnVolumeSlider ()
+		private void SpawnVolumeSliders ()
 		{
-			VolumeSlider volumeSlider = new VolumeSlider();
-			VolumeSlider volumeSlider2 = new VolumeSlider();
-			SliderRoot.Children.Add(volumeSlider);
-			SliderRoot.Children.Add(volumeSlider2);
+			SpawnVolumeSlider(SoundChannel.GAME);
+			SpawnVolumeSlider(SoundChannel.CHAT);
+			SpawnVolumeSlider(SoundChannel.MEDIA);
+			SpawnVolumeSlider(SoundChannel.AUX);
+			SpawnVolumeSlider(SoundChannel.MIC);
+		}
 
-			volumeSlider.OnVolumeChange += OnVolumeChange;
+		private void SpawnVolumeSlider (SoundChannel channel)
+		{
+			VolumeSlider volumeSlider = new VolumeSlider(channel);
+			SliderRoot.Children.Add(volumeSlider);
+			volumeSlider.OnVolumeChange += OnVolumeChanged;
 		}
 
 		private async Task DiscoverServer ()
@@ -60,7 +67,7 @@ namespace SteelSeriesCompanionAndroid2
 			}
 		}
 
-		private async void OnVolumeChange (float volume)
+		private async void OnVolumeChanged (SoundChannel channel, float volume)
 		{
 			if (Client.Connected)
 			{

@@ -15,6 +15,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExternalCommunicationShared
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SteelSeriesCompanionUIExtension", "SteelSeriesCompanionUIExtension\SteelSeriesCompanionUIExtension.csproj", "{9BF0A323-1545-4E88-B618-F6D14A02C408}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SteelSeriesCompanionSharedExtensionCore", "SteelSeriesCompanionSharedExtensionCore\SteelSeriesCompanionSharedExtensionCore.csproj", "{6BCF600B-79B2-4069-98D0-764D049C3B6D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -46,6 +48,10 @@ Global
 		{9BF0A323-1545-4E88-B618-F6D14A02C408}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9BF0A323-1545-4E88-B618-F6D14A02C408}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9BF0A323-1545-4E88-B618-F6D14A02C408}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6BCF600B-79B2-4069-98D0-764D049C3B6D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6BCF600B-79B2-4069-98D0-764D049C3B6D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6BCF600B-79B2-4069-98D0-764D049C3B6D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6BCF600B-79B2-4069-98D0-764D049C3B6D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

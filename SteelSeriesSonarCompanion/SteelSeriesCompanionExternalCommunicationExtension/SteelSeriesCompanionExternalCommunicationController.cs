@@ -48,17 +48,11 @@ namespace SteelSeriesCompanionExternalCommunicationExtension
 
 			while (true)
 			{
-				Trace.WriteLine("Waiting for connection");
-				Client = await Listener.AcceptTcpClientAsync();
+				StreamReader networkStream = await GetNetworkStreamAsync(Listener);
 
-				Trace.WriteLine("Connected");
-				NetworkStream stream = Client.GetStream();
-				StreamReader reader = new(stream);
-
-				while (reader != null)
+				while (networkStream != null)
 				{
-					string? message = await reader.ReadLineAsync();
-					Trace.WriteLine($"Received: {message}");
+					string? message = await networkStream.ReadLineAsync();
 
 					if (float.TryParse(message, NumberStyles.Any, CultureInfo.InvariantCulture, out float volume))
 					{
@@ -70,6 +64,13 @@ namespace SteelSeriesCompanionExternalCommunicationExtension
 					}
 				}
 			}
+		}
+
+		private async Task<StreamReader> GetNetworkStreamAsync (TcpListener listener)
+		{
+			TcpClient client = await listener.AcceptTcpClientAsync();
+			NetworkStream stream = client.GetStream();
+			return new StreamReader(stream);
 		}
 
 		private async Task RespondToServerRequest ()

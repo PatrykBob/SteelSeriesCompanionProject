@@ -37,7 +37,7 @@ namespace SteelSeriesCompanionExternalCommunicationExtension
 			Client?.Dispose();
 			Listener?.Dispose();
 
-			Listener = new(IPAddress.Any, 12345);
+			Listener = new(IPAddress.Any, 0);
 			Task.Run(StartListeningLoop);
 			Task.Run(RespondToServerRequest);
 		}

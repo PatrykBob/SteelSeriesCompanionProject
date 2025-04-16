@@ -8,5 +8,10 @@ namespace SteelSeriesCompanion.SharedCore.Converters
 		{
 			return JsonConvert.DeserializeObject<T>(json);
 		}
+
+		public static string ConvertToJSON<T> (T obj)
+		{
+			return JsonConvert.SerializeObject(obj);
+		}
 	}
 }

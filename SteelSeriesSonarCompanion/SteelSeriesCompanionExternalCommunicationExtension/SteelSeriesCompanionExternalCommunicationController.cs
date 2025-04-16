@@ -12,6 +12,7 @@ namespace SteelSeriesCompanionExternalCommunicationExtension
 	{
 		private TcpClient? Client { get; set; }
 		private TcpListener? Listener { get; set; }
+		private IPEndPoint? LocalEndPoint { get; set; }
 
 		public override void Initialize (ISteelSeriesCompanionCore companionCore)
 		{
@@ -37,6 +38,7 @@ namespace SteelSeriesCompanionExternalCommunicationExtension
 		private async void StartListeningLoop ()
 		{
 			Listener!.Start();
+			CacheLocalEndpoint();
 
 			while (true)
 			{
@@ -58,6 +60,14 @@ namespace SteelSeriesCompanionExternalCommunicationExtension
 			}
 		}
 
+		private void CacheLocalEndpoint ()
+		{
+			if (Listener!.LocalEndpoint is IPEndPoint ipEndPoint)
+			{
+				LocalEndPoint = GetLocalIPAddress(ipEndPoint.Port);
+			}
+		}
+
 		private async Task<StreamReader> GetNetworkStreamAsync (TcpListener listener)
 		{
 			TcpClient client = await listener.AcceptTcpClientAsync();
@@ -67,10 +77,7 @@ namespace SteelSeriesCompanionExternalCommunicationExtension
 
 		private async Task RespondToServerRequest ()
 		{
-			int broadcastPort = ExternalCommunicationConstProvider.BROADCAST_PORT;
-
-			UdpClient udpClient = new(broadcastPort);
-			IPEndPoint endPoint = new(IPAddress.Any, broadcastPort);
+			UdpClient udpClient = new(ExternalCommunicationConstProvider.BROADCAST_PORT);
 
 			while (true)
 			{
@@ -79,13 +86,13 @@ namespace SteelSeriesCompanionExternalCommunicationExtension
 
 				if (message == ExternalCommunicationConstProvider.SERVER_SEARCH_REQUEST)
 				{
-					byte[] response = Encoding.UTF8.GetBytes(GetLocalIPAddress());
+					byte[] response = Encoding.UTF8.GetBytes(LocalEndPoint!.ToString());
 					await udpClient.SendAsync(response, response.Length, result.RemoteEndPoint);
 				}
 			}
 		}
 
-		private string GetLocalIPAddress ()
+		private IPEndPoint GetLocalIPAddress (int port)
 		{
 			IPHostEntry host = Dns.GetHostEntry(Dns.GetHostName());
 
@@ -93,13 +100,11 @@ namespace SteelSeriesCompanionExternalCommunicationExtension
 			{
 				if (ip.AddressFamily == AddressFamily.InterNetwork)
 				{
-					return ip.ToString();
+					return new IPEndPoint(ip, port);
 				}
 			}
 
 			throw new Exception("No network adapters with an IPv4 address in the system!");
 		}
-
-		
 	}
 }

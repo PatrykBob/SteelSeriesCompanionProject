@@ -58,7 +58,8 @@ namespace SteelSeriesCompanionAndroid2
 
 			try
 			{
-				await Client.ConnectAsync(IPAddress.Parse(ServerIPAddress), 12345);
+				IPEndPoint endPoint = IPEndPoint.Parse(ServerIPAddress);
+				await Client.ConnectAsync(endPoint);
 				ConnectionLabel.Text = "Connected";
 			}
 			catch (Exception ex)

@@ -5,6 +5,7 @@ using System.Net.Sockets;
 using System.Net;
 using System.Text;
 using SteelSeriesCompanion.ExternalCommunication.Shared;
+using SteelSeriesCompanion.ExternalCommunication.Shared.Command;
 
 namespace SteelSeriesCompanionExternalCommunicationExtension
 {
@@ -35,7 +36,7 @@ namespace SteelSeriesCompanionExternalCommunicationExtension
 			Task.Run(RespondToServerRequest);
 		}
 
-		private async void StartListeningLoop ()
+		private async Task StartListeningLoop ()
 		{
 			Listener!.Start();
 			CacheLocalEndpoint();
@@ -48,13 +49,18 @@ namespace SteelSeriesCompanionExternalCommunicationExtension
 				{
 					string? message = await networkStream.ReadLineAsync();
 
-					if (float.TryParse(message, NumberStyles.Any, CultureInfo.InvariantCulture, out float volume))
+					if (message != null)
 					{
-						await CompanionCore!.SetChannelVolume(SoundChannel.GAME, volume);
-					}
-					else
-					{
-						Trace.WriteLine($"Invalid volume value: {message}");
+						BaseExternalCommunicationCommand? command = ExternalCommunicationCommandConverter.ConvertFromJson(message);
+
+						if (command != null)
+						{
+							command.ExecuteCommand(CompanionCore!);
+						}
+						else
+						{
+							Trace.WriteLine($"Invalid command: {message}");
+						}
 					}
 				}
 			}

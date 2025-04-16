@@ -1,4 +1,5 @@
-﻿using SteelSeriesCompanion.SharedCore;
+﻿using SteelSeriesCompanion.ExternalCommunication.Shared.Command;
+using SteelSeriesCompanion.SharedCore;
 using System.Globalization;
 using System.Net;
 using System.Net.Sockets;
@@ -68,23 +69,24 @@ namespace SteelSeriesCompanionAndroid2
 			}
 		}
 
-		private async void OnVolumeChanged (SoundChannel channel, float volume)
+		private void OnVolumeChanged (SoundChannel channel, float volume)
 		{
-			if (Client.Connected)
-			{
-				StreamWriter writer = new(Client.GetStream());
-				writer.AutoFlush = true;
-				await writer.WriteLineAsync(volume.ToString(CultureInfo.InvariantCulture));
-			}
+			SendCommand(new SetChannelVolumeCommand(channel, volume));
 		}
 
-		private async void OnMuteChanged (SoundChannel channel, bool isMuted)
+		private void OnMuteChanged (SoundChannel channel, bool isMuted)
+		{
+			SendCommand(new SetChannelMuteCommand(channel, isMuted));
+		}
+
+		private async void SendCommand (BaseExternalCommunicationCommand command)
 		{
 			if (Client.Connected)
 			{
 				StreamWriter writer = new(Client.GetStream());
 				writer.AutoFlush = true;
-				await writer.WriteLineAsync(isMuted.ToString());
+				string json = ExternalCommunicationCommandConverter.CovertToJson(command);
+				await writer.WriteLineAsync(json);
 			}
 		}
 	}

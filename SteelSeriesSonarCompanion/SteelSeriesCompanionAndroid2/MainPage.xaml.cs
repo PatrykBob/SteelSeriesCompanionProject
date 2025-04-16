@@ -31,9 +31,10 @@ namespace SteelSeriesCompanionAndroid2
 
 		private void SpawnVolumeSlider (SoundChannel channel)
 		{
-			VolumeSlider volumeSlider = new VolumeSlider(channel);
+			VolumeSlider volumeSlider = new(channel);
 			SliderRoot.Children.Add(volumeSlider);
 			volumeSlider.OnVolumeChange += OnVolumeChanged;
+			volumeSlider.OnMuteChange += OnMuteChanged;
 		}
 
 		private async Task DiscoverServer ()
@@ -47,7 +48,6 @@ namespace SteelSeriesCompanionAndroid2
 			UdpReceiveResult result = await udpClient.ReceiveAsync();
 			string response = Encoding.UTF8.GetString(result.Buffer);
 			ServerIPAddress = response;
-
 		}
 
 		private async void ConnectToServer (object sender, EventArgs e)
@@ -74,6 +74,16 @@ namespace SteelSeriesCompanionAndroid2
 				StreamWriter writer = new(Client.GetStream());
 				writer.AutoFlush = true;
 				await writer.WriteLineAsync(volume.ToString(CultureInfo.InvariantCulture));
+			}
+		}
+
+		private async void OnMuteChanged (SoundChannel channel, bool isMuted)
+		{
+			if (Client.Connected)
+			{
+				StreamWriter writer = new(Client.GetStream());
+				writer.AutoFlush = true;
+				await writer.WriteLineAsync(isMuted.ToString());
 			}
 		}
 	}

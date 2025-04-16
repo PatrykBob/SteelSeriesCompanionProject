@@ -4,6 +4,7 @@ namespace SteelSeriesCompanionAndroid2;
 public partial class VolumeSlider : ContentView
 {
 	public event Action<SoundChannel, float> OnVolumeChange = delegate { };
+	public event Action<SoundChannel, bool> OnMuteChange = delegate { };
 
 	private SoundChannel Channel { get; set; }
 
@@ -13,6 +14,7 @@ public partial class VolumeSlider : ContentView
 		Channel = channel;
 		ChannelLabel.Text = Channel.ToString();
 		VolumeSliderControl.ValueChanged += OnVolumeSliderValueChanged;
+		MuteCheckBox.CheckedChanged += OnMuteCheckBoxChanged;
 	}
 
 	private void OnVolumeSliderValueChanged (object? sender, ValueChangedEventArgs e)
@@ -20,5 +22,11 @@ public partial class VolumeSlider : ContentView
 		float volume = (float)e.NewValue;
 		OnVolumeChange(Channel, volume);
 		VolumeLabel.Text = $"{volume * 100:F0}%";
+	}
+
+	private void OnMuteCheckBoxChanged (object? sender, CheckedChangedEventArgs e)
+	{
+		bool isMuted = e.Value;
+		OnMuteChange(Channel, isMuted);
 	}
 }

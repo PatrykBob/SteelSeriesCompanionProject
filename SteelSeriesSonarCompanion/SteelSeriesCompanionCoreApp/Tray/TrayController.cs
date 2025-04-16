@@ -1,6 +1,5 @@
-﻿using System.ComponentModel;
-using System.Diagnostics;
-using System.Windows.Controls;
+﻿using SteelSeriesCompanion.SharedCore;
+using System.IO;
 
 namespace SteelSeriesCompanion.Tray
 {
@@ -8,12 +7,20 @@ namespace SteelSeriesCompanion.Tray
 	{
 		private NotifyIcon TrayIcon { get; set; } = new();
 
-		public void Initialize (List<ToolStripMenuItem> extensionMenuItemCollection)
+		private const string ICON_NAME = "icon.ico";
+
+		public void Initialize (List<SteelSeriesCompanionExtensionMenuItem> extensionMenuItemCollection)
 		{
 			ContextMenuStrip contextMenu = new();
-			contextMenu.Items.Add(extensionMenuItemCollection[0]);
+
+			for (int i = 0; i < extensionMenuItemCollection.Count; i++)
+			{
+				contextMenu.Items.Add(ConvertToToolStripMenuItem(extensionMenuItemCollection[i]));
+			}
+
 			TrayIcon.ContextMenuStrip = contextMenu;
-			TrayIcon.Icon = new Icon("C:\\Windows\\WinSxS\\wow64_microsoft-windows-onedrive-setup_31bf3856ad364e35_10.0.19041.1_none_e585f901f9ce93e6\\OneDrive.ico");
+			string path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ICON_NAME);
+			TrayIcon.Icon = new Icon(path);
 			TrayIcon.Visible = true;
 		}
 
@@ -21,6 +28,28 @@ namespace SteelSeriesCompanion.Tray
 		{
 			TrayIcon.Visible = false;
 			TrayIcon.Dispose();
+		}
+
+		private ToolStripMenuItem ConvertToToolStripMenuItem (SteelSeriesCompanionExtensionMenuItem extensionMenuItem)
+		{
+			ToolStripMenuItem menuItem = new();
+			menuItem.Text = extensionMenuItem.Text;
+
+			if (extensionMenuItem.SubMenuItemCollection.Count > 0)
+			{
+				for (int i = 0; i < extensionMenuItem.SubMenuItemCollection.Count; i++)
+				{
+					menuItem.DropDownItems.Add(ConvertToToolStripMenuItem(extensionMenuItem.SubMenuItemCollection[i]));
+				}
+			}
+			else
+			{
+				if (extensionMenuItem.ClickAction != null)
+				{
+					menuItem.Click += (_, _) => extensionMenuItem.ClickAction.Invoke();
+				}
+			}
+			return menuItem;
 		}
 	}
 }

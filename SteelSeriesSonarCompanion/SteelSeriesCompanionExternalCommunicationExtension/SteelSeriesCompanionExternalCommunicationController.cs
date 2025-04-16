@@ -13,23 +13,15 @@ namespace SteelSeriesCompanionExternalCommunicationExtension
 		private TcpClient? Client { get; set; }
 		private TcpListener? Listener { get; set; }
 
-		public override ToolStripMenuItem GetExtensionMenuItem ()
-		{
-			ToolStripMenuItem toolMenuItem = new();
-			toolMenuItem.Text = "Restart Communication";
-			toolMenuItem.Click += RestartCommunicationServer;
-			return toolMenuItem;
-		}
-
 		public override void Initialize (ISteelSeriesCompanionCore companionCore)
 		{
 			base.Initialize(companionCore);
 			RestartCommunicationServer();
 		}
 
-		private void RestartCommunicationServer (object? sender, EventArgs e)
+		public override SteelSeriesCompanionExtensionMenuItem GetExtensionMenuItem ()
 		{
-			RestartCommunicationServer();
+			return new SteelSeriesCompanionExtensionMenuItem("Restart Communication Server", RestartCommunicationServer);
 		}
 
 		private void RestartCommunicationServer ()
@@ -107,5 +99,7 @@ namespace SteelSeriesCompanionExternalCommunicationExtension
 
 			throw new Exception("No network adapters with an IPv4 address in the system!");
 		}
+
+		
 	}
 }

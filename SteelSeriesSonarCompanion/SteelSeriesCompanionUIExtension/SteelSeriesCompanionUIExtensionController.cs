@@ -1,5 +1,4 @@
 using SteelSeriesCompanion.SharedCore;
-using System.Windows.Forms;
 
 namespace SteelSeriesCompanionUIExtension
 {
@@ -7,18 +6,10 @@ namespace SteelSeriesCompanionUIExtension
 	{
 		private SteelSeriesCompanionWindow? ExtensionWindow { get; set; }
 
-		public override ToolStripMenuItem GetExtensionMenuItem ()
+		public override SteelSeriesCompanionExtensionMenuItem GetExtensionMenuItem ()
 		{
-			ToolStripMenuItem toolStripMwnuItem = new();
-			toolStripMwnuItem.Text = "Show UI";
-			toolStripMwnuItem.Click += ExtensionMenuClicked;
-
-			return toolStripMwnuItem;
-
-			void ExtensionMenuClicked (object? sender, EventArgs e)
-			{
-				ShowUI();
-			}
+			SteelSeriesCompanionExtensionMenuItem menuItem = new("Show UI", ShowUI);
+			return menuItem;
 		}
 
 		private void ShowUI ()

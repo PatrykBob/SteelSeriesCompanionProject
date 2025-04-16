@@ -28,9 +28,9 @@ namespace SteelSeriesCompanion.Extension
 			}
 		}
 
-		public List<ToolStripMenuItem> GetExtensionToolMenuItemCollection ()
+		public List<SteelSeriesCompanionExtensionMenuItem> GetExtensionToolMenuItemCollection ()
 		{
-			List<ToolStripMenuItem> extensionMenuItemCollection = new();
+			List<SteelSeriesCompanionExtensionMenuItem> extensionMenuItemCollection = new();
 
 			for (int i = 0; i < ExtensionCollection.Count; i++)
 			{

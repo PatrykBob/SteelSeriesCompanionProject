@@ -4,7 +4,7 @@
 	{
 		protected ISteelSeriesCompanionCore? CompanionCore { get; private set; }
 
-		public abstract ToolStripMenuItem GetExtensionMenuItem ();
+		public abstract SteelSeriesCompanionExtensionMenuItem GetExtensionMenuItem ();
 
 		public virtual void Initialize (ISteelSeriesCompanionCore companionCore)
 		{

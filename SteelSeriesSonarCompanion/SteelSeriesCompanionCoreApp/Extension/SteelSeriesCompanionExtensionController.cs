@@ -42,17 +42,44 @@ namespace SteelSeriesCompanion.Extension
 
 		private void LoadExtension (FileInfo extensionFile, ISteelSeriesCompanionCore extensionCore)
 		{
-			Assembly DLL = Assembly.LoadFile(extensionFile.FullName);
+			Assembly dll;
 
-			foreach (Type type in DLL.GetExportedTypes())
+			try
 			{
-				object? instance = Activator.CreateInstance(type);
+				dll = Assembly.LoadFile(extensionFile.FullName);
+			}
+			catch (Exception e)
+			{
+				return;
+			}
 
-				if (instance is BaseSteelSeriesCompanionExtension extension)
+			foreach (Type type in dll.GetExportedTypes())
+			{
+				if (IsCorrectType(type) == true)
 				{
-					extension.Initialize(extensionCore);
-					ExtensionCollection.Add(extension);
+					object? instance = Activator.CreateInstance(type);
+
+					if (instance is BaseSteelSeriesCompanionExtension extension)
+					{
+						extension.Initialize(extensionCore);
+						ExtensionCollection.Add(extension);
+					}
 				}
+			}
+
+			bool IsCorrectType (Type type)
+			{
+				if (type == typeof(BaseSteelSeriesCompanionExtension))
+				{
+					return true;
+				}
+
+				if (type.BaseType != null)
+				{
+					return IsCorrectType(type.BaseType);
+				}
+
+				return false;
 			}
 		}
 	}

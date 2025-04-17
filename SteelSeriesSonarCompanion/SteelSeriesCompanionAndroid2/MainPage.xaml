@@ -3,11 +3,21 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="SteelSeriesCompanionAndroid2.MainPage">
 
-    <ScrollView>
-        <HorizontalStackLayout
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="3*"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <HorizontalStackLayout 
             x:Name="SliderRoot"
             Padding="30,0"
-            Spacing="30">
+            Spacing="30"
+            HorizontalOptions="Center"
+            VerticalOptions="Center"
+            Grid.Row="0">
+        </HorizontalStackLayout>
+        <HorizontalStackLayout
+            Grid.Row="2">
             <Button
                 x:Name="ConnectButton"
                 Text="Connect"
@@ -18,6 +28,5 @@
                 x:Name="ConnectionLabel"
                 Text="Not connected"/>
         </HorizontalStackLayout>
-    </ScrollView>
-
+    </Grid>
 </ContentPage>

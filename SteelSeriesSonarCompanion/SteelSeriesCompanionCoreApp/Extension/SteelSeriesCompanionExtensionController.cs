@@ -33,7 +33,7 @@ namespace SteelSeriesCompanion.Extension
 		{
 			AppDomain.CurrentDomain.AssemblyResolve += (sender, args) =>
 			{
-				string assemblyName = args.Name + EXTENSION_POSTFIX;
+				string assemblyName = new AssemblyName(args.Name).Name + EXTENSION_POSTFIX;
 				string assemblyPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, EXTENSION_FOLDER_NAME, assemblyName);
 
 				if (File.Exists(assemblyPath))

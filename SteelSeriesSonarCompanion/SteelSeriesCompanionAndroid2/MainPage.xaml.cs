@@ -33,7 +33,7 @@ namespace SteelSeriesCompanionAndroid2
 		private void SpawnVolumeSlider (SoundChannel channel)
 		{
 			VolumeSlider volumeSlider = new(channel);
-			SliderRoot.Children.Add(volumeSlider);
+			SliderRoot.Add(volumeSlider, (int)channel);
 			volumeSlider.OnVolumeChange += OnVolumeChanged;
 			volumeSlider.OnMuteChange += OnMuteChanged;
 		}

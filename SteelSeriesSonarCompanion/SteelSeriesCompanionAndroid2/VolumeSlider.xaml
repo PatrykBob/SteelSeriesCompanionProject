@@ -2,39 +2,37 @@
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="SteelSeriesCompanionAndroid2.VolumeSlider">
-    <VerticalStackLayout
-        VerticalOptions="Center"
-        HorizontalOptions="Center">
+    <Grid 
+        RowDefinitions="Auto, Auto, *, Auto"
+        RowSpacing="20">
         <Label 
             x:Name="ChannelLabel"
             Text="Channel"
             VerticalOptions="Center" 
-            HorizontalOptions="Center"/>
+            HorizontalOptions="Center"
+            Grid.Row="0"/>
         <Label
             x:Name="VolumeLabel"
             Text="0%"
             VerticalOptions="Center" 
-            HorizontalOptions="Center"/>
-        <AbsoluteLayout
-            WidthRequest="50"
-            HeightRequest="220"
             HorizontalOptions="Center"
-            VerticalOptions="Center">
+            FontSize="16"
+            Grid.Row="1"/>
+        <Grid
+            x:Name="SliderLayout"
+            Grid.Row="2">
             <Slider 
                 x:Name="VolumeSliderControl"
                 Minimum="0" 
                 Maximum="1"
                 HorizontalOptions="Center"
                 VerticalOptions="Center"
-                WidthRequest="200" 
-                HeightRequest="50" 
-                Rotation="270"
-                AbsoluteLayout.LayoutBounds="0.5, 0.5, 50, 200"
-                />
-        </AbsoluteLayout>
+                Rotation="270"/>
+        </Grid>
         <CheckBox
             x:Name="MuteCheckBox"
             HorizontalOptions="Center"
-            VerticalOptions="Center"/>
-    </VerticalStackLayout>
+            VerticalOptions="Center"
+            Grid.Row="3"/>
+    </Grid>
 </ContentView>

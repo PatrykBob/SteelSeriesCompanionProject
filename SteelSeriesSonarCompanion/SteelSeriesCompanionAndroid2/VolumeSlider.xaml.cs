@@ -11,10 +11,13 @@ public partial class VolumeSlider : ContentView
 	public VolumeSlider (SoundChannel channel)
 	{
 		InitializeComponent();
+
 		Channel = channel;
 		ChannelLabel.Text = Channel.ToString();
+
 		VolumeSliderControl.ValueChanged += OnVolumeSliderValueChanged;
 		MuteCheckBox.CheckedChanged += OnMuteCheckBoxChanged;
+		SliderLayout.SizeChanged += OnSliderSizeChange;
 	}
 
 	private void OnVolumeSliderValueChanged (object? sender, ValueChangedEventArgs e)
@@ -28,5 +31,10 @@ public partial class VolumeSlider : ContentView
 	{
 		bool isMuted = e.Value;
 		OnMuteChange(Channel, isMuted);
+	}
+
+	private void OnSliderSizeChange (object? sender, EventArgs e)
+	{
+		VolumeSliderControl.WidthRequest = SliderLayout.Height;
 	}
 }

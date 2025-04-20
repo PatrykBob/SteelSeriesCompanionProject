@@ -17,6 +17,7 @@ namespace SteelSeriesCompanionAndroid2
 
 		public MainPage ()
 		{
+			Application.Current!.UserAppTheme = AppTheme.Dark;
 			InitializeComponent();
 			SpawnVolumeSliders();
 		}

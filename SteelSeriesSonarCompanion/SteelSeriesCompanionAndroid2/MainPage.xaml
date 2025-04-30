@@ -25,6 +25,11 @@
                 Text="Not connected"
                 HorizontalOptions="Center"
                 VerticalOptions="Center"/>
+            <Label
+                x:Name="CommandLabel"
+                Text="No command receive"
+                HorizontalOptions="Center"
+                VerticalOptions="Center"/>
         </HorizontalStackLayout>
     </Grid>
 </ContentPage>

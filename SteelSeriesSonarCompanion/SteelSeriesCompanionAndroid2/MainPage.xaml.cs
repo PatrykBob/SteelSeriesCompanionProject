@@ -62,11 +62,32 @@ namespace SteelSeriesCompanionAndroid2
 			{
 				IPEndPoint endPoint = IPEndPoint.Parse(ServerIPAddress);
 				await Client.ConnectAsync(endPoint);
+
+				Task.Run(StartListeningLoop);
+
 				ConnectionLabel.Text = "Connected";
 			}
 			catch (Exception ex)
 			{
 				ConnectionLabel.Text = $"Connection failed: {ex}";
+			}
+		}
+
+		private async void StartListeningLoop ()
+		{
+			StreamReader reader = new(Client.GetStream());
+
+			while (reader != null)
+			{
+				string? message = await reader.ReadLineAsync();
+
+				if (message != null)
+				{
+					Dispatcher.Dispatch(() =>
+					{
+						CommandLabel.Text = message;
+					});
+				}
 			}
 		}
 

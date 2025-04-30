@@ -1,24 +1,8 @@
 ﻿using SteelSeriesCompanion.SharedCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Printing;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 namespace SteelSeriesCompanionUIExtension
 {
-	/// <summary>
-	/// Logika interakcji dla klasy Window1.xaml
-	/// </summary>
 	public partial class SteelSeriesCompanionWindow : Window
 	{
 		private ISteelSeriesCompanionCore? CompanionCore { get; set; }
@@ -31,6 +15,38 @@ namespace SteelSeriesCompanionUIExtension
 		public void Initialize (ISteelSeriesCompanionCore companionCore)
 		{
 			CompanionCore = companionCore;
+			InitializeVolumeSliders();
+		}
+
+		private async void InitializeVolumeSliders ()
+		{
+			List<VolumeData> volumeSettings = await CompanionCore!.GetVolumeSettings();
+			InitializeVolumeSliders(volumeSettings);
+		}
+
+		private void InitializeVolumeSliders (List<VolumeData> volumeSettings)
+		{
+			foreach (VolumeData volumeData in volumeSettings)
+			{
+				switch (volumeData.Channel)
+				{
+					case SoundChannel.GAME:
+						GameVolumeSlider.Value = volumeData.Volume;
+						break;
+					case SoundChannel.CHAT:
+						ChatVolumeSlider.Value = volumeData.Volume;
+						break;
+					case SoundChannel.MEDIA:
+						MediaVolumeSlider.Value = volumeData.Volume;
+						break;
+					case SoundChannel.AUX:
+						AuxVolumeSlider.Value = volumeData.Volume;
+						break;
+					case SoundChannel.MIC:
+						MicrophoneVolumeSlider.Value = volumeData.Volume;
+						break;
+				}
+			}
 		}
 
 		private void GameVolumeSliderChange (object sender, RoutedPropertyChangedEventArgs<double> e)

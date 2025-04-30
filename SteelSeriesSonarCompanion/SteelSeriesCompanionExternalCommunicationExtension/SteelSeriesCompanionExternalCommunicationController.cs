@@ -15,6 +15,9 @@ namespace SteelSeriesCompanionExternalCommunicationExtension
 		private TcpListener? Listener { get; set; }
 		private IPEndPoint? LocalEndPoint { get; set; }
 
+		private StreamReader? Reader { get; set; }
+		private StreamWriter? Writer { get; set; }
+
 		public override void Initialize (ISteelSeriesCompanionCore companionCore)
 		{
 			base.Initialize(companionCore);
@@ -43,11 +46,11 @@ namespace SteelSeriesCompanionExternalCommunicationExtension
 
 			while (true)
 			{
-				StreamReader networkStream = await GetNetworkStreamAsync(Listener);
+				await CacheNetworkStreams(Listener);
 
-				while (networkStream != null)
+				while (Reader != null)
 				{
-					string? message = await networkStream.ReadLineAsync();
+					string? message = await Reader.ReadLineAsync();
 
 					if (message != null)
 					{
@@ -74,11 +77,16 @@ namespace SteelSeriesCompanionExternalCommunicationExtension
 			}
 		}
 
-		private async Task<StreamReader> GetNetworkStreamAsync (TcpListener listener)
+		private async Task CacheNetworkStreams (TcpListener listener)
 		{
 			TcpClient client = await listener.AcceptTcpClientAsync();
 			NetworkStream stream = client.GetStream();
-			return new StreamReader(stream);
+
+			Reader = new StreamReader(stream);
+			Writer = new StreamWriter(stream)
+			{
+				AutoFlush = true
+			};
 		}
 
 		private async Task RespondToServerRequest ()

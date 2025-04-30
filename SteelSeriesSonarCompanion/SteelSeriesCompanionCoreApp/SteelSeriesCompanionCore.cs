@@ -24,7 +24,7 @@ namespace SteelSeriesCompanion
 
 		public async void Initialize ()
 		{
-			if (SonarSetupLoader.TryGetSonarSetupPort(out int setupPort))
+			if (SonarSetupLoader.TryGetSonarSetupPort(out int setupPort) == true)
 			{
 				await InternalFacade.Initialize(setupPort);
 			}

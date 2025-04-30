@@ -25,21 +25,15 @@ namespace SteelSeriesSonarCompanion.Communication.Internal
 
 		private string ConvertSoundChannel (SoundChannel channel)
 		{
-			switch (channel)
+			return channel switch
 			{
-				case SoundChannel.GAME:
-					return "game";
-				case SoundChannel.CHAT:
-					return "chatRender";
-				case SoundChannel.MEDIA:
-					return "media";
-				case SoundChannel.AUX:
-					return "aux";
-				case SoundChannel.MIC:
-					return "chatCapture";
-				default:
-					return UnimplementedSoundChannel();
-			}
+				SoundChannel.GAME => "game",
+				SoundChannel.CHAT => "chatRender",
+				SoundChannel.MEDIA => "media",
+				SoundChannel.AUX => "aux",
+				SoundChannel.MIC => "chatCapture",
+				_ => UnimplementedSoundChannel(),
+			};
 
 			string UnimplementedSoundChannel ()
 			{

@@ -1,4 +1,5 @@
 ﻿using SteelSeriesCompanion.SharedCore.Converters;
+using SteelSeriesCompanionCoreApp.Communication.Internal;
 using System.Diagnostics;
 using System.Net.Http;
 
@@ -29,9 +30,10 @@ namespace SteelSeriesSonarCompanion.Communication.Internal
 			}
 		}
 
-		public async Task<object> GetSonarSettings ()
+		public async Task<VolumeSettingsResponse?> GetVolumeSettings ()
 		{
-			throw new NotImplementedException();
+			Uri settingsUri = InternalCommunicationAddressProvider.GetVolumeSettingsUri(SonarCommunicationPort);
+			return await SendGetRequest<VolumeSettingsResponse>(settingsUri);
 		}
 
 		public async Task SetChannelVolume (string channel, float volume)

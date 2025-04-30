@@ -12,6 +12,11 @@ namespace SteelSeriesCompanion
 		private SteelSeriesCompanionExtensionController ExtensionController { get; set; } = new();
 		private TrayController Tray { get; set; } = new();
 
+		public async Task<List<VolumeData>> GetVolumeSettings ()
+		{
+			return await InternalFacade.GetVolumeSettings();
+		}
+
 		public async Task SetChannelVolume (SoundChannel channel, float volume)
 		{
 			await InternalFacade.SetChannelVolume(channel, volume);

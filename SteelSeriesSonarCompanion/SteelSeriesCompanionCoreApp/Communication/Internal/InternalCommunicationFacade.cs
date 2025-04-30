@@ -1,4 +1,5 @@
 ﻿using SteelSeriesCompanion.SharedCore;
+using SteelSeriesCompanionCoreApp.Communication.Internal;
 
 namespace SteelSeriesSonarCompanion.Communication.Internal
 {
@@ -11,6 +12,18 @@ namespace SteelSeriesSonarCompanion.Communication.Internal
 			await CommunicationController.Initialize(sonarSetupPort);
 		}
 
+		public async Task<List<VolumeData>> GetVolumeSettings ()
+		{
+			VolumeSettingsResponse? volumeSettings = await CommunicationController.GetVolumeSettings();
+
+			if (volumeSettings != null)
+			{
+				return ConvertToVolumeDataCollection(volumeSettings);
+			}
+
+			return [];
+		}
+
 		public async Task SetChannelVolume (SoundChannel channel, float volume)
 		{
 			string channelName = ConvertSoundChannel(channel);
@@ -19,7 +32,7 @@ namespace SteelSeriesSonarCompanion.Communication.Internal
 
 		public async Task SetChannelMute (SoundChannel channel, bool mute)
 		{
-			string channelName = ConvertSoundChannel (channel);
+			string channelName = ConvertSoundChannel(channel);
 			await CommunicationController.SetChannelMute(channelName, mute);
 		}
 
@@ -39,6 +52,25 @@ namespace SteelSeriesSonarCompanion.Communication.Internal
 			{
 				return string.Empty;
 			}
+		}
+
+		private List<VolumeData> ConvertToVolumeDataCollection (VolumeSettingsResponse volumeSettings)
+		{
+			List<VolumeData> volumeDataCollection =
+			[
+				ConvertToVolumeData(SoundChannel.GAME, volumeSettings.devices.game),
+				ConvertToVolumeData(SoundChannel.CHAT, volumeSettings.devices.chatRender),
+				ConvertToVolumeData(SoundChannel.MEDIA, volumeSettings.devices.media),
+				ConvertToVolumeData(SoundChannel.AUX, volumeSettings.devices.aux),
+				ConvertToVolumeData(SoundChannel.MIC, volumeSettings.devices.chatCapture),
+			];
+
+			return volumeDataCollection;
+		}
+
+		private VolumeData ConvertToVolumeData (SoundChannel channel, VolumeSettingsResponse.VolumeResponse response)
+		{
+			return new VolumeData(channel, response.classic.volume, response.classic.muted);
 		}
 	}
 }

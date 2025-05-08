@@ -6,7 +6,7 @@ public partial class VolumeSlider : ContentView
 	public event Action<SoundChannel, float> OnVolumeChange = delegate { };
 	public event Action<SoundChannel, bool> OnMuteChange = delegate { };
 
-	private SoundChannel Channel { get; set; }
+	public SoundChannel Channel { get; private set; }
 
 	public VolumeSlider (SoundChannel channel)
 	{
@@ -20,11 +20,28 @@ public partial class VolumeSlider : ContentView
 		SliderLayout.SizeChanged += OnSliderSizeChange;
 	}
 
+	public void Setup (VolumeData volumeData)
+	{
+		SetVolume(volumeData.Volume);
+		SetMute(volumeData.Mute);
+	}
+
+	public void SetVolume (float volume)
+	{
+		VolumeSliderControl.Value = volume;
+		UpdateVolumeLabel();
+	}
+
+	public void SetMute (bool mute)
+	{
+		MuteCheckBox.IsChecked = mute;
+	}
+
 	private void OnVolumeSliderValueChanged (object? sender, ValueChangedEventArgs e)
 	{
 		float volume = (float)e.NewValue;
 		OnVolumeChange(Channel, volume);
-		VolumeLabel.Text = $"{volume * 100:F0}%";
+		UpdateVolumeLabel();
 	}
 
 	private void OnMuteCheckBoxChanged (object? sender, CheckedChangedEventArgs e)
@@ -36,5 +53,11 @@ public partial class VolumeSlider : ContentView
 	private void OnSliderSizeChange (object? sender, EventArgs e)
 	{
 		VolumeSliderControl.WidthRequest = SliderLayout.Height;
+	}
+
+	private void UpdateVolumeLabel ()
+	{
+		float volume = (float)VolumeSliderControl.Value;
+		VolumeLabel.Text = $"{volume * 100:F0}%";
 	}
 }

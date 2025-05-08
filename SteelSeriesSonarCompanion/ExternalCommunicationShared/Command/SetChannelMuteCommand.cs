@@ -13,11 +13,5 @@ namespace SteelSeriesCompanion.ExternalCommunication.Shared.Command
 		{
 			core.SetChannelMute(channel, mute);
 		}
-
-		public class MuteData (SoundChannel channel, bool mute)
-		{
-			public SoundChannel channel = channel;
-			public bool mute = mute;
-		}
 	}
 }

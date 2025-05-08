@@ -13,11 +13,5 @@ namespace SteelSeriesCompanion.ExternalCommunication.Shared.Command
 		{
 			core.SetChannelVolume(channel, volume);
 		}
-
-		public class VolumeData (SoundChannel channel, float volume)
-		{
-			public SoundChannel channel = channel;
-			public float volume = volume;
-		}
 	}
 }

@@ -4,11 +4,11 @@ namespace SteelSeriesCompanion.ExternalCommunication.Shared.Command
 {
 	public class BaseExternalCommunicationCommand
 	{
-		public string Command { get; }
+		public string CommandName { get; }
 
-		public BaseExternalCommunicationCommand (string command)
+		public BaseExternalCommunicationCommand (string commandName)
 		{
-			Command = command;
+			CommandName = commandName;
 		}
 
 		public virtual void ExecuteCommand (ISteelSeriesCompanionCore core)

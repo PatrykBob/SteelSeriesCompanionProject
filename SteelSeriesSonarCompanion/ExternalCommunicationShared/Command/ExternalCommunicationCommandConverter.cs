@@ -11,11 +11,11 @@ namespace SteelSeriesCompanion.ExternalCommunication.Shared.Command
 
 		public static BaseExternalCommunicationCommand? ConvertFromJson (string json)
 		{
-			BaseExternalCommunicationCommand? test = JsonConverter.ConvertFromJSON<BaseExternalCommunicationCommand>(json);
+			BaseExternalCommunicationCommand? command = JsonConverter.ConvertFromJSON<BaseExternalCommunicationCommand>(json);
 
-			if (test != null)
+			if (command != null)
 			{
-				return test.Command switch
+				return command.CommandName switch
 				{
 					SetChannelMuteCommand.COMMAND_NAME => JsonConverter.ConvertFromJSON<SetChannelMuteCommand>(json),
 					SetChannelVolumeCommand.COMMAND_NAME => JsonConverter.ConvertFromJSON<SetChannelVolumeCommand>(json),

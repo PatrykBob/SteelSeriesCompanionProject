@@ -25,6 +25,7 @@ namespace SteelSeriesCompanion.ExternalCommunication.Shared.Command
 				{
 					SetChannelMuteCommand.COMMAND_NAME => JsonConverter.ConvertFromJSON<SetChannelMuteCommand>(json),
 					SetChannelVolumeCommand.COMMAND_NAME => JsonConverter.ConvertFromJSON<SetChannelVolumeCommand>(json),
+					RequestVolumeSetupCommand.COMMAND_NAME => JsonConverter.ConvertFromJSON<RequestVolumeSetupCommand>(json),
 					_ => null,
 				};
 			}

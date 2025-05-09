@@ -8,6 +8,8 @@ namespace SteelSeriesCompanion
 {
 	public class SteelSeriesCompanionCore : ISteelSeriesCompanionCore, IDisposable
 	{
+		public event EventHandler<List<VolumeData>> VolumeSetupChanged = delegate { };
+
 		private InternalCommunicationFacade InternalFacade { get; set; } = new();
 		private SteelSeriesCompanionExtensionController ExtensionController { get; set; } = new();
 		private TrayController Tray { get; set; } = new();
@@ -25,6 +27,12 @@ namespace SteelSeriesCompanion
 		public async Task SetChannelMute (object? sender, SoundChannel channel, bool mute)
 		{
 			await InternalFacade.SetChannelMute(channel, mute);
+		}
+
+		public async Task RequestVolumeSetup (object? sender)
+		{
+			List<VolumeData> volumeDataCollection = await InternalFacade.GetVolumeSettings();
+			VolumeSetupChanged.Invoke(sender, volumeDataCollection);
 		}
 
 		public async void Initialize ()

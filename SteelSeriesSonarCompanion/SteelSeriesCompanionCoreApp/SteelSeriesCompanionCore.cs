@@ -17,12 +17,12 @@ namespace SteelSeriesCompanion
 			return await InternalFacade.GetVolumeSettings();
 		}
 
-		public async Task SetChannelVolume (SoundChannel channel, float volume)
+		public async Task SetChannelVolume (object? sender, SoundChannel channel, float volume)
 		{
 			await InternalFacade.SetChannelVolume(channel, volume);
 		}
 
-		public async Task SetChannelMute (SoundChannel channel, bool mute)
+		public async Task SetChannelMute (object? sender, SoundChannel channel, bool mute)
 		{
 			await InternalFacade.SetChannelMute(channel, mute);
 		}

@@ -58,7 +58,7 @@ namespace SteelSeriesCompanionExternalCommunicationExtension
 
 						if (command != null)
 						{
-							command.ExecuteCommand(CompanionCore!);
+							command.ExecuteCommand(this, CompanionCore!);
 						}
 						else
 						{

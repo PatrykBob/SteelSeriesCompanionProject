@@ -11,7 +11,7 @@ namespace SteelSeriesCompanion.ExternalCommunication.Shared.Command
 			CommandName = commandName;
 		}
 
-		public virtual void ExecuteCommand (ISteelSeriesCompanionCore core)
+		public virtual void ExecuteCommand (object? sender, ISteelSeriesCompanionCore core)
 		{
 
 		}

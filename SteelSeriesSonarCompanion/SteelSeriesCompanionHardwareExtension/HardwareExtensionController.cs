@@ -62,7 +62,7 @@ namespace SteelSeriesCompanionHardwareExtension
 			{
 				VolumeMap[channel] = volume;
 				Trace.WriteLine($"Channel {channel} volume changed from {previousVolume} to {volume}");
-				CompanionCore!.SetChannelVolume(channel, (float)volume / 1023);
+				CompanionCore!.SetChannelVolume(this, channel, (float)volume / 1023);
 			}
 		}
 	}

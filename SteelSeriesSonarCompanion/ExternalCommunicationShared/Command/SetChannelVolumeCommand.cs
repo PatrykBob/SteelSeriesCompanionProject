@@ -9,9 +9,10 @@ namespace SteelSeriesCompanion.ExternalCommunication.Shared.Command
 
 		public const string COMMAND_NAME = "SetVolume";
 
-		public override void ExecuteCommand (ISteelSeriesCompanionCore core)
+		public override void ExecuteCommand (object? sender, ISteelSeriesCompanionCore core)
 		{
-			core.SetChannelVolume(channel, volume);
+			base.ExecuteCommand(sender, core);
+			core.SetChannelVolume(sender, channel, volume);
 		}
 	}
 }

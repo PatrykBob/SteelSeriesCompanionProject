@@ -9,9 +9,10 @@ namespace SteelSeriesCompanion.ExternalCommunication.Shared.Command
 
 		public const string COMMAND_NAME = "SetMute";
 
-		public override void ExecuteCommand (ISteelSeriesCompanionCore core)
+		public override void ExecuteCommand (object? sender, ISteelSeriesCompanionCore core)
 		{
-			core.SetChannelMute(channel, mute);
+			base.ExecuteCommand(sender, core);
+			core.SetChannelMute(sender, channel, mute);
 		}
 	}
 }

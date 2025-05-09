@@ -83,7 +83,7 @@ namespace SteelSeriesCompanionUIExtension
 		{
 			if (CompanionCore != null)
 			{
-				CompanionCore.SetChannelVolume(channel, volume);
+				CompanionCore.SetChannelVolume(this, channel, volume);
 			}
 		}
 	}

@@ -6,6 +6,7 @@ using System.Net;
 using System.Text;
 using SteelSeriesCompanion.ExternalCommunication.Shared;
 using SteelSeriesCompanion.ExternalCommunication.Shared.Command;
+using SteelSeriesCompanion.ExternalCommunication.Shared.Event;
 
 namespace SteelSeriesCompanionExternalCommunicationExtension
 {
@@ -21,12 +22,25 @@ namespace SteelSeriesCompanionExternalCommunicationExtension
 		public override void Initialize (ISteelSeriesCompanionCore companionCore)
 		{
 			base.Initialize(companionCore);
+			AttachToEvents();
 			RestartCommunicationServer();
 		}
 
 		public override SteelSeriesCompanionExtensionMenuItem GetExtensionMenuItem ()
 		{
 			return new SteelSeriesCompanionExtensionMenuItem("Restart Communication Server", RestartCommunicationServer);
+		}
+
+		private void AttachToEvents ()
+		{
+			CompanionCore!.VolumeSetupChanged += Test;
+
+			void Test (object? sender, List<VolumeData> volumeDataCollection)
+			{
+				VolumeSetupEvent volumeSetupEvent = new(volumeDataCollection);
+				string json = ExternalCommunicationCommandConverter.ConvertToJson(volumeSetupEvent);
+				Writer?.WriteLine(json);
+			}
 		}
 
 		private void RestartCommunicationServer ()

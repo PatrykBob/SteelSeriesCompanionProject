@@ -1,4 +1,5 @@
 ﻿using SteelSeriesCompanion.ExternalCommunication.Shared.Command;
+using SteelSeriesCompanion.ExternalCommunication.Shared.Event;
 using SteelSeriesCompanion.SharedCore;
 using System.Globalization;
 using System.Net;
@@ -12,6 +13,8 @@ namespace SteelSeriesCompanionAndroid2
 	{
 		private string ServerIPAddress { get; set; }
 		private TcpClient Client { get; set; } = new();
+
+		private List<VolumeSlider> VolumeSliderCollection { get; } = new();
 
 		private const string SERVER_SEARCH_REQUEST = "DISCOVER_SERVER";
 
@@ -37,6 +40,8 @@ namespace SteelSeriesCompanionAndroid2
 			SliderRoot.Add(volumeSlider, (int)channel);
 			volumeSlider.OnVolumeChange += OnVolumeChanged;
 			volumeSlider.OnMuteChange += OnMuteChanged;
+
+			VolumeSliderCollection.Add(volumeSlider);
 		}
 
 		private async Task DiscoverServer ()
@@ -66,6 +71,7 @@ namespace SteelSeriesCompanionAndroid2
 				Task.Run(StartListeningLoop);
 
 				ConnectionLabel.Text = "Connected";
+				SendCommand(new RequestVolumeSetupCommand());
 			}
 			catch (Exception ex)
 			{
@@ -83,10 +89,27 @@ namespace SteelSeriesCompanionAndroid2
 
 				if (message != null)
 				{
-					Dispatcher.Dispatch(() =>
+					BaseExternalCommunicationEvent? externalEvent = ExternalCommunicationCommandConverter.ConvertEventFromJson(message);
+
+					if (externalEvent is VolumeSetupEvent volumeSetupEvent)
 					{
-						CommandLabel.Text = message;
-					});
+						Dispatcher.Dispatch(() =>
+						{
+							for (int i = 0; i < volumeSetupEvent.VolumeDataCollection.Count; i++)
+							{
+								VolumeData volumeData = volumeSetupEvent.VolumeDataCollection[i];
+
+								for (int j = 0; j < VolumeSliderCollection.Count; j++)
+								{
+									if (VolumeSliderCollection[i].Channel == volumeData.Channel)
+									{
+										VolumeSliderCollection[i].Setup(volumeData);
+										break;
+									}
+								}
+							}
+						});
+					}
 				}
 			}
 		}

@@ -25,6 +25,7 @@
                 x:Name="VolumeSliderControl"
                 Minimum="0" 
                 Maximum="1"
+                HeightRequest="50"
                 HorizontalOptions="Center"
                 VerticalOptions="Center"
                 Rotation="270"/>

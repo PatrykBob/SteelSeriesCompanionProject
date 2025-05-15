@@ -38,7 +38,7 @@ namespace SteelSeriesCompanionExternalCommunicationExtension
 			void Test (object? sender, List<VolumeData> volumeDataCollection)
 			{
 				VolumeSetupEvent volumeSetupEvent = new(volumeDataCollection);
-				string json = ExternalCommunicationCommandConverter.ConvertToJson(volumeSetupEvent);
+				string json = ExternalCommunicationEventConverter.ConvertToJson(volumeSetupEvent);
 				Writer?.WriteLine(json);
 			}
 		}

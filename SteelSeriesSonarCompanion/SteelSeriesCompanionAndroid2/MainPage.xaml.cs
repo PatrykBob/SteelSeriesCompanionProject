@@ -89,7 +89,7 @@ namespace SteelSeriesCompanionAndroid2
 
 				if (message != null)
 				{
-					BaseExternalCommunicationEvent? externalEvent = ExternalCommunicationCommandConverter.ConvertEventFromJson(message);
+					BaseExternalCommunicationEvent? externalEvent = ExternalCommunicationEventConverter.ConvertEventFromJson(message);
 
 					if (externalEvent is VolumeSetupEvent volumeSetupEvent)
 					{

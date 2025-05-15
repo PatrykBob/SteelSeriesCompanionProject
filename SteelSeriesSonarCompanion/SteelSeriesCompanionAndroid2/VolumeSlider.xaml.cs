@@ -28,13 +28,19 @@ public partial class VolumeSlider : ContentView
 
 	public void SetVolume (float volume)
 	{
-		VolumeSliderControl.Value = volume;
-		UpdateVolumeLabel();
+		Dispatcher.Dispatch(() =>
+		{
+			VolumeSliderControl.Value = volume;
+			UpdateVolumeLabel();
+		});
 	}
 
 	public void SetMute (bool mute)
 	{
-		MuteCheckBox.IsChecked = mute;
+		Dispatcher.Dispatch(() =>
+		{
+			MuteCheckBox.IsChecked = mute;
+		});
 	}
 
 	private void OnVolumeSliderValueChanged (object? sender, ValueChangedEventArgs e)

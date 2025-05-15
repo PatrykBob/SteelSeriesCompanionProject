@@ -14,20 +14,9 @@
             Grid.Row="2"
             Padding="20"
             Spacing="20">
-            <Button
-                x:Name="ConnectButton"
-                Text="Connect"
-                HorizontalOptions="Center"
-                VerticalOptions="Center"
-                Clicked="ConnectToServer"/>
             <Label
                 x:Name="ConnectionLabel"
                 Text="Not connected"
-                HorizontalOptions="Center"
-                VerticalOptions="Center"/>
-            <Label
-                x:Name="CommandLabel"
-                Text="No command receive"
                 HorizontalOptions="Center"
                 VerticalOptions="Center"/>
         </HorizontalStackLayout>

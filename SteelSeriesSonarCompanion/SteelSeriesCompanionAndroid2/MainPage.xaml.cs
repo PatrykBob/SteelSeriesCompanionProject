@@ -11,6 +11,8 @@ namespace SteelSeriesCompanionAndroid2
 {
 	public partial class MainPage : ContentPage
 	{
+		public event Action<List<VolumeData>> ExternalVolumeSetupChanged = delegate { };
+
 		private string ServerIPAddress { get; set; }
 		private TcpClient Client { get; set; } = new();
 
@@ -23,6 +25,8 @@ namespace SteelSeriesCompanionAndroid2
 			Application.Current!.UserAppTheme = AppTheme.Dark;
 			InitializeComponent();
 			SpawnVolumeSliders();
+			AttachToEvents();
+			Task.Run(ConnectToServer);
 		}
 
 		private void SpawnVolumeSliders ()
@@ -44,6 +48,28 @@ namespace SteelSeriesCompanionAndroid2
 			VolumeSliderCollection.Add(volumeSlider);
 		}
 
+		private void AttachToEvents ()
+		{
+			ExternalVolumeSetupChanged += OnExternalVolumeSetupChanged;
+		}
+
+		private void OnExternalVolumeSetupChanged (List<VolumeData> volumeDataCollection)
+		{
+			for (int i = 0; i < volumeDataCollection.Count; i++)
+			{
+				VolumeData volumeData = volumeDataCollection[i];
+
+				for (int j = 0; j < VolumeSliderCollection.Count; j++)
+				{
+					if (VolumeSliderCollection[i].Channel == volumeData.Channel)
+					{
+						VolumeSliderCollection[i].Setup(volumeData);
+						break;
+					}
+				}
+			}
+		}
+
 		private async Task DiscoverServer ()
 		{
 			UdpClient udpClient = new();
@@ -57,7 +83,7 @@ namespace SteelSeriesCompanionAndroid2
 			ServerIPAddress = response;
 		}
 
-		private async void ConnectToServer (object sender, EventArgs e)
+		private async void ConnectToServer ()
 		{
 			ConnectionLabel.Text = "Connecting...";
 
@@ -90,27 +116,16 @@ namespace SteelSeriesCompanionAndroid2
 				if (message != null)
 				{
 					BaseExternalCommunicationEvent? externalEvent = ExternalCommunicationEventConverter.ConvertEventFromJson(message);
-
-					if (externalEvent is VolumeSetupEvent volumeSetupEvent)
-					{
-						Dispatcher.Dispatch(() =>
-						{
-							for (int i = 0; i < volumeSetupEvent.VolumeDataCollection.Count; i++)
-							{
-								VolumeData volumeData = volumeSetupEvent.VolumeDataCollection[i];
-
-								for (int j = 0; j < VolumeSliderCollection.Count; j++)
-								{
-									if (VolumeSliderCollection[i].Channel == volumeData.Channel)
-									{
-										VolumeSliderCollection[i].Setup(volumeData);
-										break;
-									}
-								}
-							}
-						});
-					}
+					NotifyOnExternalEvent(externalEvent);
 				}
+			}
+		}
+
+		private void NotifyOnExternalEvent (BaseExternalCommunicationEvent? externalEvent)
+		{
+			if (externalEvent is VolumeSetupEvent volumeSetupEvent)
+			{
+				ExternalVolumeSetupChanged(volumeSetupEvent.VolumeDataCollection);
 			}
 		}
 

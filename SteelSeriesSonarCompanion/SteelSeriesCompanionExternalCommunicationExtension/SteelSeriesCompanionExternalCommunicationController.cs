@@ -33,14 +33,14 @@ namespace SteelSeriesCompanionExternalCommunicationExtension
 
 		private void AttachToEvents ()
 		{
-			CompanionCore!.VolumeSetupChanged += Test;
+			CompanionCore!.VolumeSetupChanged += OnVolumeSetupChanged;
+		}
 
-			void Test (object? sender, List<VolumeData> volumeDataCollection)
-			{
-				VolumeSetupEvent volumeSetupEvent = new(volumeDataCollection);
-				string json = ExternalCommunicationEventConverter.ConvertToJson(volumeSetupEvent);
-				Writer?.WriteLine(json);
-			}
+		private void OnVolumeSetupChanged (object? sender, List<VolumeData> volumeDataCollection)
+		{
+			VolumeSetupEvent volumeSetupEvent = new(volumeDataCollection);
+			string json = ExternalCommunicationEventConverter.ConvertToJson(volumeSetupEvent);
+			Writer?.WriteLine(json);
 		}
 
 		private void RestartCommunicationServer ()

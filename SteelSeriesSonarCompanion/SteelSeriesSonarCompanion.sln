@@ -3,21 +3,21 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.13.35919.96
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SteelSeriesSonarCompanion.Android", "SteelSeriesCompanionAndroid2\SteelSeriesSonarCompanion.Android.csproj", "{D5F62614-5AA5-4193-AEFA-3D9230386555}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SteelSeriesSonarCompanion.Android", "Android\SteelSeriesSonarCompanion.Android.csproj", "{D5F62614-5AA5-4193-AEFA-3D9230386555}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SteelSeriesSonarCompanion.Shared.Core", "SteelSeriesCompanionSharedCore\SteelSeriesSonarCompanion.Shared.Core.csproj", "{8A3F46BB-E4D4-4470-AAF0-BF80F97BFAF1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SteelSeriesSonarCompanion.Shared.Core", "Shared.Core\SteelSeriesSonarCompanion.Shared.Core.csproj", "{8A3F46BB-E4D4-4470-AAF0-BF80F97BFAF1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SteelSeriesSonarCompanion.CoreApp", "SteelSeriesCompanionCoreApp\SteelSeriesSonarCompanion.CoreApp.csproj", "{F26E295E-5C66-4B5D-8D62-E5B4425B0242}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SteelSeriesSonarCompanion.CoreApp", "CoreApp\SteelSeriesSonarCompanion.CoreApp.csproj", "{F26E295E-5C66-4B5D-8D62-E5B4425B0242}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SteelSeriesSonarCompanion.Extension.ExternalCommunicationShared", "ExternalCommunicationShared\SteelSeriesSonarCompanion.Extension.ExternalCommunicationShared.csproj", "{0FD96677-9071-C82F-7210-704AF9D66460}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SteelSeriesSonarCompanion.Extension.ExternalCommunicationShared", "Extension.ExternalCommunicationShared\SteelSeriesSonarCompanion.Extension.ExternalCommunicationShared.csproj", "{0FD96677-9071-C82F-7210-704AF9D66460}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SteelSeriesSonarCompanion.Extension.UI", "SteelSeriesCompanionUIExtension\SteelSeriesSonarCompanion.Extension.UI.csproj", "{9BF0A323-1545-4E88-B618-F6D14A02C408}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SteelSeriesSonarCompanion.Extension.UI", "Extension.UI\SteelSeriesSonarCompanion.Extension.UI.csproj", "{9BF0A323-1545-4E88-B618-F6D14A02C408}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SteelSeriesSonarCompanion.Shared.ExtensionCore", "SteelSeriesCompanionSharedExtensionCore\SteelSeriesSonarCompanion.Shared.ExtensionCore.csproj", "{6BCF600B-79B2-4069-98D0-764D049C3B6D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SteelSeriesSonarCompanion.Shared.ExtensionCore", "Shared.ExtensionCore\SteelSeriesSonarCompanion.Shared.ExtensionCore.csproj", "{6BCF600B-79B2-4069-98D0-764D049C3B6D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SteelSeriesSonarCompanion.Extension.ExternalCommunication", "SteelSeriesCompanionExternalCommunicationExtension\SteelSeriesSonarCompanion.Extension.ExternalCommunication.csproj", "{0A56B9D2-F462-4A49-89D4-EDFC79BA45A5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SteelSeriesSonarCompanion.Extension.ExternalCommunication", "Extension.ExternalCommunication\SteelSeriesSonarCompanion.Extension.ExternalCommunication.csproj", "{0A56B9D2-F462-4A49-89D4-EDFC79BA45A5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SteelSeriesSonarCompanion.Extension.Hardware", "SteelSeriesCompanionHardwareExtension\SteelSeriesSonarCompanion.Extension.Hardware.csproj", "{931DB116-7D6B-4308-8CB5-DE9E662BD4E3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SteelSeriesSonarCompanion.Extension.Hardware", "Extension.Hardware\SteelSeriesSonarCompanion.Extension.Hardware.csproj", "{931DB116-7D6B-4308-8CB5-DE9E662BD4E3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

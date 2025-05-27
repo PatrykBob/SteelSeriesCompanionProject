@@ -21,10 +21,10 @@
 		<Nullable>enable</Nullable>
 
 		<!-- Display name -->
-		<ApplicationTitle>SteelSeriesCompanionAndroid2</ApplicationTitle>
+		<ApplicationTitle>SteelSeriesCompanionAndroid</ApplicationTitle>
 
 		<!-- App Identifier -->
-		<ApplicationId>com.companyname.steelseriescompanionandroid2</ApplicationId>
+		<ApplicationId>com.companyname.steelseriescompanionandroid</ApplicationId>
 
 		<!-- Versions -->
 		<ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
@@ -65,7 +65,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\ExternalCommunicationShared\SteelSeriesSonarCompanion.Extension.ExternalCommunicationShared.csproj" />
+	  <ProjectReference Include="..\Extension.ExternalCommunicationShared\SteelSeriesSonarCompanion.Extension.ExternalCommunicationShared.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>

@@ -11,14 +11,7 @@ namespace SteelSeriesCompanion.Tray
 
 		public void Initialize (List<SteelSeriesCompanionExtensionMenuItem> extensionMenuItemCollection)
 		{
-			ContextMenuStrip contextMenu = new();
-
-			for (int i = 0; i < extensionMenuItemCollection.Count; i++)
-			{
-				contextMenu.Items.Add(ConvertToToolStripMenuItem(extensionMenuItemCollection[i]));
-			}
-
-			TrayIcon.ContextMenuStrip = contextMenu;
+			TrayIcon.ContextMenuStrip = GenerateContextMenu(extensionMenuItemCollection);
 			string path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ICON_NAME);
 			TrayIcon.Icon = new Icon(path);
 			TrayIcon.Visible = true;
@@ -28,6 +21,31 @@ namespace SteelSeriesCompanion.Tray
 		{
 			TrayIcon.Visible = false;
 			TrayIcon.Dispose();
+		}
+
+		private ContextMenuStrip GenerateContextMenu (List<SteelSeriesCompanionExtensionMenuItem> extensionMenuItemCollection)
+		{
+			ContextMenuStrip contextMenu = new();
+
+			for (int i = 0; i < extensionMenuItemCollection.Count; i++)
+			{
+				contextMenu.Items.Add(ConvertToToolStripMenuItem(extensionMenuItemCollection[i]));
+			}
+
+			AddExitItem();
+
+			return contextMenu;
+
+			void AddExitItem ()
+			{
+				contextMenu.Items.Add(new ToolStripSeparator());
+				contextMenu.Items.Add("Exit", null, Exit);
+			}
+
+			void Exit (object? sender, EventArgs e)
+			{
+				Environment.Exit(0);
+			}
 		}
 
 		private ToolStripMenuItem ConvertToToolStripMenuItem (SteelSeriesCompanionExtensionMenuItem extensionMenuItem)

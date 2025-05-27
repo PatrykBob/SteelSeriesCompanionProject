@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.13.35919.96
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SteelSeriesSonarCompanion.Android", "Android\SteelSeriesSonarCompanion.Android.csproj", "{D5F62614-5AA5-4193-AEFA-3D9230386555}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SteelSeriesSonarCompanion.External.App", "External.App\SteelSeriesSonarCompanion.External.App.csproj", "{D5F62614-5AA5-4193-AEFA-3D9230386555}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SteelSeriesSonarCompanion.Shared.Core", "Shared.Core\SteelSeriesSonarCompanion.Shared.Core.csproj", "{8A3F46BB-E4D4-4470-AAF0-BF80F97BFAF1}"
 EndProject

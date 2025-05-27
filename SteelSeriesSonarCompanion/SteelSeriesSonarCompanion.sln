@@ -17,8 +17,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SteelSeriesCompanionSharedE
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SteelSeriesCompanionExternalCommunicationExtension", "SteelSeriesCompanionExternalCommunicationExtension\SteelSeriesCompanionExternalCommunicationExtension.csproj", "{0A56B9D2-F462-4A49-89D4-EDFC79BA45A5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SerialPortTesting", "SerialPortTesting\SerialPortTesting.csproj", "{F35BC5F7-1F0A-493A-B3D3-A07AF750ACB1}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SteelSeriesCompanionHardwareExtension", "SteelSeriesCompanionHardwareExtension\SteelSeriesCompanionHardwareExtension.csproj", "{931DB116-7D6B-4308-8CB5-DE9E662BD4E3}"
 EndProject
 Global
@@ -56,10 +54,6 @@ Global
 		{0A56B9D2-F462-4A49-89D4-EDFC79BA45A5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0A56B9D2-F462-4A49-89D4-EDFC79BA45A5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0A56B9D2-F462-4A49-89D4-EDFC79BA45A5}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F35BC5F7-1F0A-493A-B3D3-A07AF750ACB1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F35BC5F7-1F0A-493A-B3D3-A07AF750ACB1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F35BC5F7-1F0A-493A-B3D3-A07AF750ACB1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F35BC5F7-1F0A-493A-B3D3-A07AF750ACB1}.Release|Any CPU.Build.0 = Release|Any CPU
 		{931DB116-7D6B-4308-8CB5-DE9E662BD4E3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{931DB116-7D6B-4308-8CB5-DE9E662BD4E3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{931DB116-7D6B-4308-8CB5-DE9E662BD4E3}.Release|Any CPU.ActiveCfg = Release|Any CPU

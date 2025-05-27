@@ -1,7 +1,7 @@
 ﻿using Android.App;
 using Android.Runtime;
 
-namespace SteelSeriesCompanionAndroid2
+namespace SteelSeriesSonarCompanion.External.App
 {
 	[Application]
 	public class MainApplication : MauiApplication

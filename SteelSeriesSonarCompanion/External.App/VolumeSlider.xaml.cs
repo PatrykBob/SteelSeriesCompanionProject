@@ -1,6 +1,6 @@
 using SteelSeriesSonarCompanion.Shared.Core;
 
-namespace SteelSeriesCompanionAndroid2
+namespace SteelSeriesSonarCompanion.External.App
 {
 	public partial class VolumeSlider : ContentView
 	{

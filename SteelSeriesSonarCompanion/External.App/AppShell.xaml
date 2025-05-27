@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <Shell
-    x:Class="SteelSeriesCompanionAndroid2.AppShell"
+    x:Class="SteelSeriesSonarCompanion.External.App.AppShell"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:local="clr-namespace:SteelSeriesCompanionAndroid2"
+    xmlns:local="clr-namespace:SteelSeriesSonarCompanion.External.App"
     Shell.FlyoutBehavior="Flyout"
-    Title="SteelSeriesCompanionAndroid2">
+    Title="SteelSeries Sonar Companion">
 
     <ShellContent
         Title="Home"

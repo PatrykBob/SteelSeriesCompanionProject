@@ -1,7 +1,7 @@
 ﻿using ObjCRuntime;
 using UIKit;
 
-namespace SteelSeriesCompanionAndroid2
+namespace SteelSeriesSonarCompanion.External.App
 {
 	public class Program
 	{

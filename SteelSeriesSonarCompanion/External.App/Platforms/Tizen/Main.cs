@@ -2,7 +2,7 @@ using Microsoft.Maui;
 using Microsoft.Maui.Hosting;
 using System;
 
-namespace SteelSeriesCompanionAndroid2
+namespace SteelSeriesSonarCompanion.External.App
 {
 	internal class Program : MauiApplication
 	{

@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 
-namespace SteelSeriesCompanionAndroid2
+namespace SteelSeriesSonarCompanion.External.App
 {
 	public static class MauiProgram
 	{

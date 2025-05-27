@@ -1,6 +1,6 @@
 ﻿using Foundation;
 
-namespace SteelSeriesCompanionAndroid2
+namespace SteelSeriesSonarCompanion.External.App
 {
 	[Register("AppDelegate")]
 	public class AppDelegate : MauiUIApplicationDelegate

@@ -1,4 +1,4 @@
-﻿namespace SteelSeriesCompanionAndroid2
+﻿namespace SteelSeriesSonarCompanion.External.App
 {
 	public partial class AppShell : Shell
 	{

@@ -13,6 +13,7 @@ Future plans:
 - Option to enable/disable Sonar features (e.g. Equalizer)
 - Option to import equalizer settings from files
 - Support for Streamer Mode
+- Code improvements
 
 Known problems:
 - Currently only the default SteelSeries Sonar installation folder is supported

@@ -10,7 +10,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\SteelSeriesCompanionSharedExtensionCore\SteelSeriesCompanionSharedExtensionCore.csproj" />
+    <ProjectReference Include="..\SteelSeriesCompanionSharedExtensionCore\SteelSeriesSonarCompanion.Shared.ExtensionCore.csproj" />
   </ItemGroup>
 
   <ItemGroup>

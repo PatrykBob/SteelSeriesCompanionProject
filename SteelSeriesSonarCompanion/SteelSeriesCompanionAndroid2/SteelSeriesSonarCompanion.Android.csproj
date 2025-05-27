@@ -65,7 +65,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\ExternalCommunicationShared\ExternalCommunicationShared.csproj" />
+	  <ProjectReference Include="..\ExternalCommunicationShared\SteelSeriesSonarCompanion.Extension.ExternalCommunicationShared.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>

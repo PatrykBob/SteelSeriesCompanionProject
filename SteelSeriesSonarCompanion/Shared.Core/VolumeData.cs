@@ -1,4 +1,4 @@
-﻿namespace SteelSeriesCompanion.SharedCore
+﻿namespace SteelSeriesSonarCompanion.Shared.Core
 {
 	public class VolumeData
 	{

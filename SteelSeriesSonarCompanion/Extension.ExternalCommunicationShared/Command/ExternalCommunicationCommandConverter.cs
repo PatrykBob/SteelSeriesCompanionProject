@@ -1,6 +1,6 @@
-﻿using SteelSeriesCompanion.SharedCore.Converters;
+﻿using SteelSeriesSonarCompanion.Shared.Core;
 
-namespace SteelSeriesCompanion.ExternalCommunication.Shared.Command
+namespace SteelSeriesSonarCompanion.Extension.ExternalCommunicationShared.Command
 {
 	public static class ExternalCommunicationCommandConverter
 	{

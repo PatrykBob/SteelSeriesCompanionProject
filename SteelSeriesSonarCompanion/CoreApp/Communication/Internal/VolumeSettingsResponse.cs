@@ -1,4 +1,4 @@
-﻿namespace SteelSeriesCompanionCoreApp.Communication.Internal
+﻿namespace SteelSeriesSonarCompanion.CoreApp.Communication.Internal
 {
 	public class VolumeSettingsResponse
 	{

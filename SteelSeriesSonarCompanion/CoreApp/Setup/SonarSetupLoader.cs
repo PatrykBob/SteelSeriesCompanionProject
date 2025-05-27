@@ -1,7 +1,7 @@
-﻿using SteelSeriesCompanion.SharedCore.Converters;
+﻿using SteelSeriesSonarCompanion.Shared.Core;
 using System.IO;
 
-namespace SteelSeriesCompanionCoreApp.Setup
+namespace SteelSeriesSonarCompanion.CoreApp.Setup
 {
 	public static class SonarSetupLoader
 	{

@@ -1,10 +1,11 @@
-﻿using SteelSeriesCompanion.Extension;
-using SteelSeriesCompanion.SharedCore;
-using SteelSeriesCompanion.Tray;
-using SteelSeriesCompanionCoreApp.Setup;
-using SteelSeriesSonarCompanion.Communication.Internal;
+﻿using SteelSeriesSonarCompanion.CoreApp.Communication.Internal;
+using SteelSeriesSonarCompanion.CoreApp.Extension;
+using SteelSeriesSonarCompanion.CoreApp.Setup;
+using SteelSeriesSonarCompanion.CoreApp.Tray;
+using SteelSeriesSonarCompanion.Shared.Core;
+using SteelSeriesSonarCompanion.Shared.ExtensionCore.Extension;
 
-namespace SteelSeriesCompanion
+namespace SteelSeriesSonarCompanion.CoreApp
 {
 	public class SteelSeriesCompanionCore : ISteelSeriesCompanionCore, IDisposable
 	{

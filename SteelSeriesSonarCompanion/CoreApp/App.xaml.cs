@@ -1,4 +1,4 @@
-﻿using SteelSeriesCompanion;
+﻿using SteelSeriesSonarCompanion.CoreApp;
 using System.Windows;
 
 namespace SteelSeriesSonarCompanion

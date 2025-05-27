@@ -1,4 +1,4 @@
-﻿namespace SteelSeriesCompanion.SharedCore
+﻿namespace SteelSeriesSonarCompanion.Shared.ExtensionCore.Extension
 {
 	public class SteelSeriesCompanionExtensionMenuItem
 	{

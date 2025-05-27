@@ -1,7 +1,6 @@
-﻿using SteelSeriesCompanion.SharedCore;
-using SteelSeriesCompanionCoreApp.Communication.Internal;
+﻿using SteelSeriesSonarCompanion.Shared.Core;
 
-namespace SteelSeriesSonarCompanion.Communication.Internal
+namespace SteelSeriesSonarCompanion.CoreApp.Communication.Internal
 {
 	public class InternalCommunicationFacade
 	{

@@ -1,4 +1,4 @@
-﻿namespace SteelSeriesCompanionCoreApp.Setup
+﻿namespace SteelSeriesSonarCompanion.CoreApp.Setup
 {
 	public class SonarSetupConfig
 	{

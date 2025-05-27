@@ -1,6 +1,6 @@
-﻿using SteelSeriesCompanion.SharedCore;
+﻿using SteelSeriesSonarCompanion.Shared.ExtensionCore.Extension;
 
-namespace SteelSeriesCompanion.ExternalCommunication.Shared.Command
+namespace SteelSeriesSonarCompanion.Extension.ExternalCommunicationShared.Command
 {
 	public class BaseExternalCommunicationCommand
 	{

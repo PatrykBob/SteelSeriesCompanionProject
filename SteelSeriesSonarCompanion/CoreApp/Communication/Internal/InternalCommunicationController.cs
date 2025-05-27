@@ -1,9 +1,8 @@
-﻿using SteelSeriesCompanion.SharedCore.Converters;
-using SteelSeriesCompanionCoreApp.Communication.Internal;
+﻿using SteelSeriesSonarCompanion.Shared.Core;
 using System.Diagnostics;
 using System.Net.Http;
 
-namespace SteelSeriesSonarCompanion.Communication.Internal
+namespace SteelSeriesSonarCompanion.CoreApp.Communication.Internal
 {
 	public class InternalCommunicationController
 	{

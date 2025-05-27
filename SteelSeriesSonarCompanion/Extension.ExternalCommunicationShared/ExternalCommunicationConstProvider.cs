@@ -1,4 +1,4 @@
-﻿namespace SteelSeriesCompanion.ExternalCommunication.Shared
+﻿namespace SteelSeriesSonarCompanion.Extension.ExternalCommunicationShared
 {
 	public static class ExternalCommunicationConstProvider
 	{

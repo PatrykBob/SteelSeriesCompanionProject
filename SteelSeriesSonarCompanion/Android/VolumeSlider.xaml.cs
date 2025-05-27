@@ -1,69 +1,71 @@
-using SteelSeriesCompanion.SharedCore;
-namespace SteelSeriesCompanionAndroid2;
+using SteelSeriesSonarCompanion.Shared.Core;
 
-public partial class VolumeSlider : ContentView
+namespace SteelSeriesCompanionAndroid2
 {
-	public event Action<SoundChannel, float> OnVolumeChange = delegate { };
-	public event Action<SoundChannel, bool> OnMuteChange = delegate { };
-
-	public SoundChannel Channel { get; private set; }
-
-	public VolumeSlider (SoundChannel channel)
+	public partial class VolumeSlider : ContentView
 	{
-		InitializeComponent();
+		public event Action<SoundChannel, float> OnVolumeChange = delegate { };
+		public event Action<SoundChannel, bool> OnMuteChange = delegate { };
 
-		Channel = channel;
-		ChannelLabel.Text = Channel.ToString();
+		public SoundChannel Channel { get; private set; }
 
-		VolumeSliderControl.ValueChanged += OnVolumeSliderValueChanged;
-		MuteCheckBox.CheckedChanged += OnMuteCheckBoxChanged;
-		SliderLayout.SizeChanged += OnSliderSizeChange;
-	}
-
-	public void Setup (VolumeData volumeData)
-	{
-		SetVolume(volumeData.Volume);
-		SetMute(volumeData.Mute);
-	}
-
-	public void SetVolume (float volume)
-	{
-		Dispatcher.Dispatch(() =>
+		public VolumeSlider (SoundChannel channel)
 		{
-			VolumeSliderControl.Value = volume;
+			InitializeComponent();
+
+			Channel = channel;
+			ChannelLabel.Text = Channel.ToString();
+
+			VolumeSliderControl.ValueChanged += OnVolumeSliderValueChanged;
+			MuteCheckBox.CheckedChanged += OnMuteCheckBoxChanged;
+			SliderLayout.SizeChanged += OnSliderSizeChange;
+		}
+
+		public void Setup (VolumeData volumeData)
+		{
+			SetVolume(volumeData.Volume);
+			SetMute(volumeData.Mute);
+		}
+
+		public void SetVolume (float volume)
+		{
+			Dispatcher.Dispatch(() =>
+			{
+				VolumeSliderControl.Value = volume;
+				UpdateVolumeLabel();
+			});
+		}
+
+		public void SetMute (bool mute)
+		{
+			Dispatcher.Dispatch(() =>
+			{
+				MuteCheckBox.IsChecked = mute;
+			});
+		}
+
+		private void OnVolumeSliderValueChanged (object? sender, ValueChangedEventArgs e)
+		{
+			float volume = (float)e.NewValue;
+			OnVolumeChange(Channel, volume);
 			UpdateVolumeLabel();
-		});
-	}
+		}
 
-	public void SetMute (bool mute)
-	{
-		Dispatcher.Dispatch(() =>
+		private void OnMuteCheckBoxChanged (object? sender, CheckedChangedEventArgs e)
 		{
-			MuteCheckBox.IsChecked = mute;
-		});
-	}
+			bool isMuted = e.Value;
+			OnMuteChange(Channel, isMuted);
+		}
 
-	private void OnVolumeSliderValueChanged (object? sender, ValueChangedEventArgs e)
-	{
-		float volume = (float)e.NewValue;
-		OnVolumeChange(Channel, volume);
-		UpdateVolumeLabel();
-	}
+		private void OnSliderSizeChange (object? sender, EventArgs e)
+		{
+			VolumeSliderControl.WidthRequest = SliderLayout.Height;
+		}
 
-	private void OnMuteCheckBoxChanged (object? sender, CheckedChangedEventArgs e)
-	{
-		bool isMuted = e.Value;
-		OnMuteChange(Channel, isMuted);
-	}
-
-	private void OnSliderSizeChange (object? sender, EventArgs e)
-	{
-		VolumeSliderControl.WidthRequest = SliderLayout.Height;
-	}
-
-	private void UpdateVolumeLabel ()
-	{
-		float volume = (float)VolumeSliderControl.Value;
-		VolumeLabel.Text = $"{volume * 100:F0}%";
+		private void UpdateVolumeLabel ()
+		{
+			float volume = (float)VolumeSliderControl.Value;
+			VolumeLabel.Text = $"{volume * 100:F0}%";
+		}
 	}
 }

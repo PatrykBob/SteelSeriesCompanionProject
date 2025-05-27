@@ -1,4 +1,4 @@
-﻿namespace SteelSeriesCompanion.ExternalCommunication.Shared.Event
+﻿namespace SteelSeriesSonarCompanion.Extension.ExternalCommunicationShared.Event
 {
 	public class BaseExternalCommunicationEvent
 	{

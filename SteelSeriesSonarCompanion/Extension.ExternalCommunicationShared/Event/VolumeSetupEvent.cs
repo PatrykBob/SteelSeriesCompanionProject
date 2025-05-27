@@ -1,6 +1,6 @@
-﻿using SteelSeriesCompanion.SharedCore;
+﻿using SteelSeriesSonarCompanion.Shared.Core;
 
-namespace SteelSeriesCompanion.ExternalCommunication.Shared.Event
+namespace SteelSeriesSonarCompanion.Extension.ExternalCommunicationShared.Event
 {
 	public class VolumeSetupEvent : BaseExternalCommunicationEvent
 	{

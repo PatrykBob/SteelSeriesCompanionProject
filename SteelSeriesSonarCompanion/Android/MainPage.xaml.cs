@@ -1,11 +1,9 @@
-﻿using SteelSeriesCompanion.ExternalCommunication.Shared.Command;
-using SteelSeriesCompanion.ExternalCommunication.Shared.Event;
-using SteelSeriesCompanion.SharedCore;
-using System.Globalization;
+﻿using SteelSeriesSonarCompanion.Extension.ExternalCommunicationShared.Command;
+using SteelSeriesSonarCompanion.Extension.ExternalCommunicationShared.Event;
+using SteelSeriesSonarCompanion.Shared.Core;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace SteelSeriesCompanionAndroid2
 {

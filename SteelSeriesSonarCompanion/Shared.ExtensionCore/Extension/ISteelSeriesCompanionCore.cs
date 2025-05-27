@@ -1,4 +1,6 @@
-﻿namespace SteelSeriesCompanion.SharedCore
+﻿using SteelSeriesSonarCompanion.Shared.Core;
+
+namespace SteelSeriesSonarCompanion.Shared.ExtensionCore.Extension
 {
 	public interface ISteelSeriesCompanionCore
 	{

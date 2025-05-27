@@ -1,6 +1,6 @@
 ﻿using System.Globalization;
 
-namespace SteelSeriesSonarCompanion.Communication.Internal
+namespace SteelSeriesSonarCompanion.CoreApp.Communication.Internal
 {
 	public static class InternalCommunicationAddressProvider
 	{

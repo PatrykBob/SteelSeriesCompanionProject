@@ -1,6 +1,7 @@
-﻿using SteelSeriesCompanion.SharedCore;
+﻿using SteelSeriesSonarCompanion.Shared.Core;
+using SteelSeriesSonarCompanion.Shared.ExtensionCore.Extension;
 
-namespace SteelSeriesCompanion.ExternalCommunication.Shared.Command
+namespace SteelSeriesSonarCompanion.Extension.ExternalCommunicationShared.Command
 {
 	public class SetChannelMuteCommand (SoundChannel channel, bool mute) : BaseExternalCommunicationCommand(COMMAND_NAME)
 	{

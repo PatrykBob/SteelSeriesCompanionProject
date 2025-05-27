@@ -1,6 +1,7 @@
-using SteelSeriesCompanion.SharedCore;
+using SteelSeriesCompanionUIExtension;
+using SteelSeriesSonarCompanion.Shared.ExtensionCore.Extension;
 
-namespace SteelSeriesCompanionUIExtension
+namespace SteelSeriesSonarCompanion.Extension.UI
 {
 	public class SteelSeriesCompanionUIExtensionController : BaseSteelSeriesCompanionExtension
 	{

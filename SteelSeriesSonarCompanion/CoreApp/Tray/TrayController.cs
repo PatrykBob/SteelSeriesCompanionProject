@@ -1,7 +1,7 @@
-﻿using SteelSeriesCompanion.SharedCore;
+﻿using SteelSeriesSonarCompanion.Shared.ExtensionCore.Extension;
 using System.IO;
 
-namespace SteelSeriesCompanion.Tray
+namespace SteelSeriesSonarCompanion.CoreApp.Tray
 {
 	public class TrayController : IDisposable
 	{

@@ -1,9 +1,9 @@
-
-using SteelSeriesCompanion.SharedCore;
+using SteelSeriesSonarCompanion.Shared.Core;
+using SteelSeriesSonarCompanion.Shared.ExtensionCore.Extension;
 using System.Diagnostics;
 using System.IO.Ports;
 
-namespace SteelSeriesCompanionHardwareExtension
+namespace SteelSeriesSonarCompanion.Extension.Hardware
 {
 	public class HardwareExtensionController : BaseSteelSeriesCompanionExtension
 	{

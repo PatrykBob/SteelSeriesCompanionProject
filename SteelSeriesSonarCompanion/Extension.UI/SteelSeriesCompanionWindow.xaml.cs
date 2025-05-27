@@ -1,4 +1,5 @@
-﻿using SteelSeriesCompanion.SharedCore;
+﻿using SteelSeriesSonarCompanion.Shared.Core;
+using SteelSeriesSonarCompanion.Shared.ExtensionCore.Extension;
 using System.Windows;
 
 namespace SteelSeriesCompanionUIExtension

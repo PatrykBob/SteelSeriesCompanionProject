@@ -1,8 +1,8 @@
-﻿using SteelSeriesCompanion.SharedCore;
+﻿using SteelSeriesSonarCompanion.Shared.ExtensionCore.Extension;
 using System.IO;
 using System.Reflection;
 
-namespace SteelSeriesCompanion.Extension
+namespace SteelSeriesSonarCompanion.CoreApp.Extension
 {
 	public class SteelSeriesCompanionExtensionController
 	{

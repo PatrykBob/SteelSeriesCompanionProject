@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace SteelSeriesCompanion.SharedCore.Converters
+namespace SteelSeriesSonarCompanion.Shared.Core
 {
 	public static class JsonConverter
 	{

@@ -1,14 +1,15 @@
-﻿using SteelSeriesCompanion.SharedCore;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Globalization;
 using System.Net.Sockets;
 using System.Net;
 using System.Text;
-using SteelSeriesCompanion.ExternalCommunication.Shared;
-using SteelSeriesCompanion.ExternalCommunication.Shared.Command;
-using SteelSeriesCompanion.ExternalCommunication.Shared.Event;
+using SteelSeriesSonarCompanion.Shared.Core;
+using SteelSeriesSonarCompanion.Extension.ExternalCommunicationShared.Event;
+using SteelSeriesSonarCompanion.Extension.ExternalCommunicationShared;
+using SteelSeriesSonarCompanion.Extension.ExternalCommunicationShared.Command;
+using SteelSeriesSonarCompanion.Shared.ExtensionCore.Extension;
 
-namespace SteelSeriesCompanionExternalCommunicationExtension
+namespace SteelSeriesSonarCompanion.Extension.ExternalCommunication
 {
 	public class SteelSeriesCompanionExternalCommunicationController : BaseSteelSeriesCompanionExtension
 	{

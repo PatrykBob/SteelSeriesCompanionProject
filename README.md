@@ -8,6 +8,13 @@ To run the application, build CoreApp and the selected extensions and place them
 
 Unfortunately, the current version does not include error handling, so most problems have to be solved by restarting the application.
 
+Future plans:
+- Error handling
+- Option to enable/disable Sonar features (e.g. Equalizer)
+- Option to import equalizer settings from files
+- Support for Streamer Mode
+- Code improvements
+
 Known problems:
 - Currently only the default SteelSeries Sonar installation folder is supported
 - System.IO.Ports library is added to CoreApp, because without it, the connection to Arduino did not work

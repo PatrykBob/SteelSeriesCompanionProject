@@ -31,6 +31,9 @@ namespace SteelSeriesCompanionUIExtension
 			{
 				switch (volumeData.Channel)
 				{
+					case SoundChannel.MASTER:
+						MasterVolumeSlider.Value = volumeData.Volume;
+						break;
 					case SoundChannel.GAME:
 						GameVolumeSlider.Value = volumeData.Volume;
 						break;
@@ -48,6 +51,11 @@ namespace SteelSeriesCompanionUIExtension
 						break;
 				}
 			}
+		}
+
+		private void MasterVolumeSliderChange (object sender, RoutedPropertyChangedEventArgs<double> e)
+		{
+			SetChannelVolume(SoundChannel.MASTER, e);
 		}
 
 		private void GameVolumeSliderChange (object sender, RoutedPropertyChangedEventArgs<double> e)

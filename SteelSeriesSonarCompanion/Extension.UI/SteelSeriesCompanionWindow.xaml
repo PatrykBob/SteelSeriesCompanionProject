@@ -7,10 +7,11 @@
         mc:Ignorable="d"
         Title="SteelSeries Companion" Height="450" Width="800">
     <Grid>
-        <Slider x:Name="GameVolumeSlider" HorizontalAlignment="Left" Margin="60,50,0,0" VerticalAlignment="Top" Width="20" Orientation="Vertical" Height="324" ValueChanged="GameVolumeSliderChange" Maximum="1"/>
-        <Slider x:Name="ChatVolumeSlider" HorizontalAlignment="Left" Margin="160,50,0,0" VerticalAlignment="Top" Width="20" Orientation="Vertical" Height="324" ValueChanged="ChatVolumeSliderChange" Maximum="1"/>
-        <Slider x:Name="MediaVolumeSlider" HorizontalAlignment="Left" Margin="260,50,0,0" VerticalAlignment="Top" Width="20" Orientation="Vertical" Height="324" ValueChanged="MediaVolumeSliderChange" Maximum="1"/>
-        <Slider x:Name="AuxVolumeSlider" HorizontalAlignment="Left" Margin="360,50,0,0" VerticalAlignment="Top" Width="20" Orientation="Vertical" Height="324" ValueChanged="AuxVolumeSliderChange" Maximum="1"/>
-        <Slider x:Name="MicrophoneVolumeSlider" HorizontalAlignment="Left" Margin="460,50,0,0" VerticalAlignment="Top" Width="20" Orientation="Vertical" Height="324" ValueChanged="MicrophoneVolumeSliderChange" Maximum="1"/>
+        <Slider x:Name="MasterVolumeSlider" HorizontalAlignment="Left" Margin="60,50,0,0" VerticalAlignment="Top" Width="20" Orientation="Vertical" Height="324" ValueChanged="MasterVolumeSliderChange" Maximum="1"/>
+        <Slider x:Name="GameVolumeSlider" HorizontalAlignment="Left" Margin="160,50,0,0" VerticalAlignment="Top" Width="20" Orientation="Vertical" Height="324" ValueChanged="GameVolumeSliderChange" Maximum="1"/>
+        <Slider x:Name="ChatVolumeSlider" HorizontalAlignment="Left" Margin="260,50,0,0" VerticalAlignment="Top" Width="20" Orientation="Vertical" Height="324" ValueChanged="ChatVolumeSliderChange" Maximum="1"/>
+        <Slider x:Name="MediaVolumeSlider" HorizontalAlignment="Left" Margin="360,50,0,0" VerticalAlignment="Top" Width="20" Orientation="Vertical" Height="324" ValueChanged="MediaVolumeSliderChange" Maximum="1"/>
+        <Slider x:Name="AuxVolumeSlider" HorizontalAlignment="Left" Margin="460,50,0,0" VerticalAlignment="Top" Width="20" Orientation="Vertical" Height="324" ValueChanged="AuxVolumeSliderChange" Maximum="1"/>
+        <Slider x:Name="MicrophoneVolumeSlider" HorizontalAlignment="Left" Margin="560,50,0,0" VerticalAlignment="Top" Width="20" Orientation="Vertical" Height="324" ValueChanged="MicrophoneVolumeSliderChange" Maximum="1"/>
     </Grid>
 </Window>

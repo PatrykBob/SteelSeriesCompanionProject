@@ -29,6 +29,7 @@ namespace SteelSeriesSonarCompanion.External.App
 
 		private void SpawnVolumeSliders ()
 		{
+			SpawnVolumeSlider(SoundChannel.MASTER);
 			SpawnVolumeSlider(SoundChannel.GAME);
 			SpawnVolumeSlider(SoundChannel.CHAT);
 			SpawnVolumeSlider(SoundChannel.MEDIA);
@@ -107,17 +108,17 @@ namespace SteelSeriesSonarCompanion.External.App
 		{
 			StreamReader reader = new(Client.GetStream());
 
-			while (reader != null)
-			{
-				string? message = await reader.ReadLineAsync();
-
-				if (message != null)
+				while (reader != null)
 				{
-					BaseExternalCommunicationEvent? externalEvent = ExternalCommunicationEventConverter.ConvertEventFromJson(message);
-					NotifyOnExternalEvent(externalEvent);
+					string? message = await reader.ReadLineAsync();
+
+					if (message != null)
+					{
+						BaseExternalCommunicationEvent? externalEvent = ExternalCommunicationEventConverter.ConvertEventFromJson(message);
+						NotifyOnExternalEvent(externalEvent);
+					}
 				}
 			}
-		}
 
 		private void NotifyOnExternalEvent (BaseExternalCommunicationEvent? externalEvent)
 		{

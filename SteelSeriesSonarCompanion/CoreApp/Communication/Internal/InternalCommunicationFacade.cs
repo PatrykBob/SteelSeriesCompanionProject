@@ -24,14 +24,23 @@ namespace SteelSeriesSonarCompanion.CoreApp.Communication.Internal
 
 		public async Task<List<VolumeData>> GetVolumeSettings ()
 		{
+			List<VolumeData> volumeDataCollection = [GetMasterVolumeData()];
 			VolumeSettingsResponse? volumeSettings = await CommunicationController.GetVolumeSettings();
 
 			if (volumeSettings != null)
 			{
-				return ConvertToVolumeDataCollection(volumeSettings);
+				volumeDataCollection.AddRange(ConvertToVolumeDataCollection(volumeSettings));
 			}
 
-			return [];
+			return volumeDataCollection;
+		}
+
+		public VolumeData GetMasterVolumeData ()
+		{
+			float? volume = AudioController.GetMasterVolume();
+			bool? mute = AudioController.GetMasterMute();
+
+			return new VolumeData(SoundChannel.MASTER, volume ??= 0.0f, mute ??= false);
 		}
 
 		public async Task SetChannelVolume (SoundChannel channel, float volume)
@@ -49,8 +58,15 @@ namespace SteelSeriesSonarCompanion.CoreApp.Communication.Internal
 
 		public async Task SetChannelMute (SoundChannel channel, bool mute)
 		{
-			string channelName = ConvertSoundChannel(channel);
-			await CommunicationController.SetChannelMute(channelName, mute);
+			if (channel == SoundChannel.MASTER)
+			{
+				AudioController.SetMasterMute(mute);
+			}
+			else
+			{
+				string channelName = ConvertSoundChannel(channel);
+				await CommunicationController.SetChannelMute(channelName, mute);
+			}
 		}
 
 		private string ConvertSoundChannel (SoundChannel channel)

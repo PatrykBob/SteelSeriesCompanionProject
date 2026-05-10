@@ -12,6 +12,8 @@ namespace SteelSeriesSonarCompanion.CoreApp.Communication.Internal
 		private const string PUT_CLASSIC_VOLUME_ENDPOINT_FORMAT = "{0}:{1}/volumeSettings/classic/{2}/Volume/{3}";
 		private const string PUT_CLASSIC_MUTE_ENDPOINT_FORMAT = "{0}:{1}/volumeSettings/classic/{2}/Mute/{3}";
 		private const string CHAT_MIX_ENDPOINT_FORMAT = "{0}:{1}/ChatMix?balance={2}";
+		private const string CONFIG_ENDPOINT_FORMAT = "{0}:{1}/configs";
+		private const string CONFIG_SELECTED_ENDPOINT_FORMAT = "{0}:{1}/configs/selected";
 
 		public static Uri GetCommunicationAddress (int port)
 		{
@@ -41,6 +43,16 @@ namespace SteelSeriesSonarCompanion.CoreApp.Communication.Internal
 		public static Uri GetChatMixAddress (int port, float value)
 		{
 			return new Uri(string.Format(CHAT_MIX_ENDPOINT_FORMAT, LOCALHOST_ADDRESS, port, value.ToString(CultureInfo.InvariantCulture)));
+		}
+
+		public static Uri GetConfigAddress (int port)
+		{
+			return new Uri(string.Format(CONFIG_ENDPOINT_FORMAT, LOCALHOST_ADDRESS, port));
+		}
+
+		public static Uri GetConfigSelectedAddress (int port)
+		{
+			return new Uri(string.Format(CONFIG_SELECTED_ENDPOINT_FORMAT, LOCALHOST_ADDRESS, port));
 		}
 	}
 }

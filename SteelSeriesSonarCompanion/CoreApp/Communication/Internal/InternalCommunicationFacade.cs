@@ -11,6 +11,16 @@ namespace SteelSeriesSonarCompanion.CoreApp.Communication.Internal
 			await CommunicationController.Initialize(sonarSetupPort);
 		}
 
+		public async Task<List<ChannelConfigResponse>> GetConfig ()
+		{
+            return await CommunicationController.GetConfig();
+		}
+
+		public async Task<ChannelConfigResponse?> PostConfig (ChannelConfigResponse config)
+		{
+			return await CommunicationController.PostConfig(config);
+		}
+
 		public async Task<List<VolumeData>> GetVolumeSettings ()
 		{
 			VolumeSettingsResponse? volumeSettings = await CommunicationController.GetVolumeSettings();

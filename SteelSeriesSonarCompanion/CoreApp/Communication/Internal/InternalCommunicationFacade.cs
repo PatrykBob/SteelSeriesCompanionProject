@@ -5,6 +5,7 @@ namespace SteelSeriesSonarCompanion.CoreApp.Communication.Internal
 	public class InternalCommunicationFacade
 	{
 		private InternalCommunicationController CommunicationController { get; set; } = new();
+		private AudioSourceController AudioController { get; set; } = new();
 
 		public async Task Initialize (int sonarSetupPort)
 		{
@@ -13,7 +14,7 @@ namespace SteelSeriesSonarCompanion.CoreApp.Communication.Internal
 
 		public async Task<List<ChannelConfigResponse>> GetConfig ()
 		{
-            return await CommunicationController.GetConfig();
+			return await CommunicationController.GetConfig();
 		}
 
 		public async Task<ChannelConfigResponse?> PostConfig (ChannelConfigResponse config)
@@ -35,8 +36,15 @@ namespace SteelSeriesSonarCompanion.CoreApp.Communication.Internal
 
 		public async Task SetChannelVolume (SoundChannel channel, float volume)
 		{
-			string channelName = ConvertSoundChannel(channel);
-			await CommunicationController.SetChannelVolume(channelName, volume);
+			if (channel == SoundChannel.MASTER)
+			{
+				AudioController.SetMasterVolume(volume);
+			}
+			else
+			{
+				string channelName = ConvertSoundChannel(channel);
+				await CommunicationController.SetChannelVolume(channelName, volume);
+			}
 		}
 
 		public async Task SetChannelMute (SoundChannel channel, bool mute)

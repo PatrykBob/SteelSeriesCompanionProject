@@ -2,6 +2,7 @@
 {
 	public enum SoundChannel
 	{
+		MASTER,
 		GAME,
 		CHAT,
 		MEDIA,

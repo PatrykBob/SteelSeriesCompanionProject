@@ -59,9 +59,9 @@ namespace SteelSeriesSonarCompanion.External.App
 
 				for (int j = 0; j < VolumeSliderCollection.Count; j++)
 				{
-					if (VolumeSliderCollection[i].Channel == volumeData.Channel)
+					if (VolumeSliderCollection[j].Channel == volumeData.Channel)
 					{
-						VolumeSliderCollection[i].Setup(volumeData);
+						VolumeSliderCollection[j].Setup(volumeData);
 						break;
 					}
 				}

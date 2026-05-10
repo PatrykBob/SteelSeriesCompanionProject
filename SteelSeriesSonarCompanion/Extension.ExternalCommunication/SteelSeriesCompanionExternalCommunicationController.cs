@@ -50,18 +50,18 @@ namespace SteelSeriesSonarCompanion.Extension.ExternalCommunication
 			Listener?.Dispose();
 
 			Listener = new(IPAddress.Any, 0);
-			Task.Run(StartListeningLoop);
-			Task.Run(RespondToServerRequest);
+			Listener!.Start();
+
+			CacheLocalEndpoint();
+			_ = StartListeningLoop();
+			_ = RespondToServerRequest();
 		}
 
 		private async Task StartListeningLoop ()
 		{
-			Listener!.Start();
-			CacheLocalEndpoint();
-
 			while (true)
 			{
-				await CacheNetworkStreams(Listener);
+				await CacheNetworkStreams(Listener!);
 
 				while (Reader != null)
 				{

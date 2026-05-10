@@ -7,8 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Extension.ExternalCommunicationShared\SteelSeriesSonarCompanion.Extension.ExternalCommunicationShared.csproj" />
-    <ProjectReference Include="..\Shared.ExtensionCore\SteelSeriesSonarCompanion.Shared.ExtensionCore.csproj" />
+    <ProjectReference Include="..\Extension.ExternalCommunicationShared\SteelSeriesSonarCompanion.Extension.ExternalCommunicationShared.csproj">
+      <Private></Private>
+    </ProjectReference>
+    <ProjectReference Include="..\Shared.ExtensionCore\SteelSeriesSonarCompanion.Shared.ExtensionCore.csproj">
+      <Private></Private>
+    </ProjectReference>
   </ItemGroup>
 
 </Project>

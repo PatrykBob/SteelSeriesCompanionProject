@@ -60,17 +60,21 @@ namespace SteelSeriesSonarCompanion.External.App
 		{
 			for (int i = 0; i < volumeDataCollection.Count; i++)
 			{
-				VolumeData volumeData = volumeDataCollection[i];
+				FindVolumeSlider(volumeDataCollection[i].Channel)?.Setup(volumeDataCollection[i]);
+			}
+		}
 
-				for (int j = 0; j < VolumeSliderCollection.Count; j++)
+		private VolumeSlider? FindVolumeSlider (SoundChannel channel)
+		{
+			for (int i = 0; i < VolumeSliderCollection.Count; i++)
+			{
+				if (VolumeSliderCollection[i].Channel == channel)
 				{
-					if (VolumeSliderCollection[j].Channel == volumeData.Channel)
-					{
-						VolumeSliderCollection[j].Setup(volumeData);
-						break;
-					}
+					return VolumeSliderCollection[i];
 				}
 			}
+
+			return null;
 		}
 
 		private async Task DiscoverServer ()
@@ -157,6 +161,14 @@ namespace SteelSeriesSonarCompanion.External.App
 			else if (externalEvent is VolumeSetupEvent volumeSetupEvent)
 			{
 				ExternalVolumeSetupChanged(volumeSetupEvent.VolumeDataCollection);
+			}
+			else if (externalEvent is ChannelVolumeEvent channelVolumeEvent)
+			{
+				FindVolumeSlider(channelVolumeEvent.Channel)?.SetVolume(channelVolumeEvent.Volume);
+			}
+			else if (externalEvent is ChannelMuteEvent channelMuteEvent)
+			{
+				FindVolumeSlider(channelMuteEvent.Channel)?.SetMute(channelMuteEvent.Mute);
 			}
 		}
 

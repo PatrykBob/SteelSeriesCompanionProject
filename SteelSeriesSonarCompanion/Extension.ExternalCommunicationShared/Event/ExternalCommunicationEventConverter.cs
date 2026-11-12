@@ -19,6 +19,8 @@ namespace SteelSeriesSonarCompanion.Extension.ExternalCommunicationShared.Event
 				{
 					VolumeSetupEvent.EVENT_NAME => JsonConverter.ConvertFromJSON<VolumeSetupEvent>(json),
 					AuthenticatedEvent.EVENT_NAME => JsonConverter.ConvertFromJSON<AuthenticatedEvent>(json),
+					ChannelVolumeEvent.EVENT_NAME => JsonConverter.ConvertFromJSON<ChannelVolumeEvent>(json),
+					ChannelMuteEvent.EVENT_NAME => JsonConverter.ConvertFromJSON<ChannelMuteEvent>(json),
 					_ => null,
 				};
 			}

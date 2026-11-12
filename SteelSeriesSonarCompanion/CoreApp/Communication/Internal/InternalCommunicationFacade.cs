@@ -19,7 +19,7 @@ namespace SteelSeriesSonarCompanion.CoreApp.Communication.Internal
 			CommunicationController.Dispose();
 		}
 
-		public async Task<List<ChannelConfigResponse>> GetConfig ()
+		public async Task<List<ChannelConfigResponse>?> GetConfig ()
 		{
 			return await CommunicationController.GetConfig();
 		}

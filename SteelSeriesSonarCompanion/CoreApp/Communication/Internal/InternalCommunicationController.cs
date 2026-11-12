@@ -2,6 +2,8 @@
 using SteelSeriesSonarCompanion.Shared.Core;
 using System.Diagnostics;
 using System.Net.Http;
+using System.Net.Security;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 
 namespace SteelSeriesSonarCompanion.CoreApp.Communication.Internal
@@ -26,8 +28,18 @@ namespace SteelSeriesSonarCompanion.CoreApp.Communication.Internal
         private static HttpClient CreateHttpClient ()
         {
             HttpClientHandler handler = new();
-            handler.ServerCertificateCustomValidationCallback = (_, _, _, _) => true;
+            handler.ServerCertificateCustomValidationCallback = IsTrustedCertificate;
             return new HttpClient(handler);
+        }
+
+        private static bool IsTrustedCertificate (HttpRequestMessage request, X509Certificate2? certificate, X509Chain? chain, SslPolicyErrors errors)
+        {
+            if (errors == SslPolicyErrors.None)
+            {
+                return true;
+            }
+
+            return request.RequestUri?.IsLoopback == true;
         }
 
         public async Task<List<ChannelConfigResponse>?> GetConfig ()

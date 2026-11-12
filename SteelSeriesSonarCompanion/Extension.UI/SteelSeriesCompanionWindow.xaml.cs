@@ -1,6 +1,7 @@
 ﻿using SteelSeriesSonarCompanion.Shared.Core;
 using SteelSeriesSonarCompanion.Shared.ExtensionCore.Extension;
 using System.Windows;
+using System.Windows.Controls;
 
 namespace SteelSeriesCompanionUIExtension
 {
@@ -17,7 +18,24 @@ namespace SteelSeriesCompanionUIExtension
 		public void Initialize (ISteelSeriesCompanionCore companionCore)
 		{
 			CompanionCore = companionCore;
+			CompanionCore.ChannelVolumeChanged += OnChannelVolumeChanged;
 			InitializeVolumeSliders();
+		}
+
+		protected override void OnClosed (EventArgs e)
+		{
+			CompanionCore!.ChannelVolumeChanged -= OnChannelVolumeChanged;
+			base.OnClosed(e);
+		}
+
+		private void OnChannelVolumeChanged (object? sender, ChannelVolumeChangedEventArgs e)
+		{
+			if (sender == this)
+			{
+				return;
+			}
+
+			Dispatcher.BeginInvoke(() => SetSliderVolume(e.Channel, e.Volume));
 		}
 
 		private async void InitializeVolumeSliders ()
@@ -28,11 +46,26 @@ namespace SteelSeriesCompanionUIExtension
 
 		private void InitializeVolumeSliders (List<VolumeData> volumeSettings)
 		{
+			foreach (VolumeData volumeData in volumeSettings)
+			{
+				SetSliderVolume(volumeData.Channel, volumeData.Volume);
+			}
+		}
+
+		private void SetSliderVolume (SoundChannel channel, float volume)
+		{
+			Slider? slider = GetVolumeSlider(channel);
+
+			if (slider == null)
+			{
+				return;
+			}
+
 			IsApplyingVolumeSettings = true;
 
 			try
 			{
-				ApplyVolumeSettings(volumeSettings);
+				slider.Value = volume;
 			}
 			finally
 			{
@@ -40,32 +73,18 @@ namespace SteelSeriesCompanionUIExtension
 			}
 		}
 
-		private void ApplyVolumeSettings (List<VolumeData> volumeSettings)
+		private Slider? GetVolumeSlider (SoundChannel channel)
 		{
-			foreach (VolumeData volumeData in volumeSettings)
+			return channel switch
 			{
-				switch (volumeData.Channel)
-				{
-					case SoundChannel.MASTER:
-						MasterVolumeSlider.Value = volumeData.Volume;
-						break;
-					case SoundChannel.GAME:
-						GameVolumeSlider.Value = volumeData.Volume;
-						break;
-					case SoundChannel.CHAT:
-						ChatVolumeSlider.Value = volumeData.Volume;
-						break;
-					case SoundChannel.MEDIA:
-						MediaVolumeSlider.Value = volumeData.Volume;
-						break;
-					case SoundChannel.AUX:
-						AuxVolumeSlider.Value = volumeData.Volume;
-						break;
-					case SoundChannel.MIC:
-						MicrophoneVolumeSlider.Value = volumeData.Volume;
-						break;
-				}
-			}
+				SoundChannel.MASTER => MasterVolumeSlider,
+				SoundChannel.GAME => GameVolumeSlider,
+				SoundChannel.CHAT => ChatVolumeSlider,
+				SoundChannel.MEDIA => MediaVolumeSlider,
+				SoundChannel.AUX => AuxVolumeSlider,
+				SoundChannel.MIC => MicrophoneVolumeSlider,
+				_ => null,
+			};
 		}
 
 		private void MasterVolumeSliderChange (object sender, RoutedPropertyChangedEventArgs<double> e)

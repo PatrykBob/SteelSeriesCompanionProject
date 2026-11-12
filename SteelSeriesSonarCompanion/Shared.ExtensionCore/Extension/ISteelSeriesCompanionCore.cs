@@ -10,5 +10,6 @@ namespace SteelSeriesSonarCompanion.Shared.ExtensionCore.Extension
 		public Task SetChannelVolume (object? sender, SoundChannel channel, float volume);
 		public Task SetChannelMute (object? sender, SoundChannel channel, bool mute);
 		public Task RequestVolumeSetup (object? sender);
+		public void ShowNotification (string message);
 	}
 }

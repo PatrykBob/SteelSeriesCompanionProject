@@ -25,6 +25,11 @@ namespace SteelSeriesSonarCompanion.CoreApp.Tray
 			TrayIcon.ShowBalloonTip(BALLOON_TIMEOUT_MS, TRAY_TITLE, message, ToolTipIcon.Warning);
 		}
 
+		public void ShowInfo (string message)
+		{
+			TrayIcon.ShowBalloonTip(BALLOON_TIMEOUT_MS, TRAY_TITLE, message, ToolTipIcon.Info);
+		}
+
 		public void Dispose ()
 		{
 			TrayIcon.Visible = false;

@@ -38,6 +38,11 @@ namespace SteelSeriesSonarCompanion.CoreApp
 			VolumeSetupChanged.Invoke(sender, volumeDataCollection);
 		}
 
+		public void ShowNotification (string message)
+		{
+			Tray.ShowInfo(message);
+		}
+
 		public async void Initialize ()
 		{
 			bool isConnectedToSonar = await InternalFacade.Initialize();

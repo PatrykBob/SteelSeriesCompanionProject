@@ -37,6 +37,11 @@ namespace SteelSeriesSonarCompanion.Extension.Hardware
 			return new SteelSeriesCompanionExtensionMenuItem("Reset Port", Initialize);
 		}
 
+		public override void Dispose ()
+		{
+			ClosePort();
+		}
+
 		private void Initialize ()
 		{
 			ClosePort();

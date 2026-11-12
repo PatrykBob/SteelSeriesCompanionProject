@@ -10,6 +10,8 @@ namespace SteelSeriesSonarCompanion.CoreApp
 	public class SteelSeriesCompanionCore : ISteelSeriesCompanionCore, IDisposable
 	{
 		public event EventHandler<List<VolumeData>> VolumeSetupChanged = delegate { };
+		public event EventHandler<ChannelVolumeChangedEventArgs> ChannelVolumeChanged = delegate { };
+		public event EventHandler<ChannelMuteChangedEventArgs> ChannelMuteChanged = delegate { };
 
 		private InternalCommunicationFacade InternalFacade { get; set; } = new();
 		private SteelSeriesCompanionExtensionController ExtensionController { get; set; } = new();
@@ -36,7 +38,9 @@ namespace SteelSeriesSonarCompanion.CoreApp
 				return;
 			}
 
-			await InternalFacade.SetChannelVolume(channel, Math.Clamp(volume, 0f, 1f));
+			float clampedVolume = Math.Clamp(volume, 0f, 1f);
+			await InternalFacade.SetChannelVolume(channel, clampedVolume);
+			ChannelVolumeChanged.Invoke(sender, new ChannelVolumeChangedEventArgs(channel, clampedVolume));
 		}
 
 		public async Task SetChannelMute (object? sender, SoundChannel channel, bool mute)
@@ -47,6 +51,7 @@ namespace SteelSeriesSonarCompanion.CoreApp
 			}
 
 			await InternalFacade.SetChannelMute(channel, mute);
+			ChannelMuteChanged.Invoke(sender, new ChannelMuteChangedEventArgs(channel, mute));
 		}
 
 		private bool IsKnownChannel (SoundChannel channel)

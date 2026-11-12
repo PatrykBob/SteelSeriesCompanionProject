@@ -5,6 +5,8 @@ namespace SteelSeriesSonarCompanion.Shared.ExtensionCore.Extension
 	public interface ISteelSeriesCompanionCore
 	{
 		public event EventHandler<List<VolumeData>> VolumeSetupChanged;
+		public event EventHandler<ChannelVolumeChangedEventArgs> ChannelVolumeChanged;
+		public event EventHandler<ChannelMuteChangedEventArgs> ChannelMuteChanged;
 
 		public Task<List<VolumeData>> GetVolumeSettings ();
 		public Task SetChannelVolume (object? sender, SoundChannel channel, float volume);

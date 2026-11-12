@@ -11,7 +11,6 @@ namespace SteelSeriesSonarCompanion.External.App
 	{
 		public event Action<List<VolumeData>> ExternalVolumeSetupChanged = delegate { };
 
-		private string ServerIPAddress { get; set; }
 		private TcpClient Client { get; set; } = new();
 		private StreamWriter? Writer { get; set; }
 		private SemaphoreSlim WriterLock { get; } = new(1, 1);
@@ -23,10 +22,12 @@ namespace SteelSeriesSonarCompanion.External.App
 		private HashSet<SoundChannel> ThrottledChannels { get; } = new();
 
 		private static readonly TimeSpan VOLUME_SEND_INTERVAL = TimeSpan.FromMilliseconds(50);
+		private static readonly TimeSpan DISCOVERY_TIMEOUT = TimeSpan.FromSeconds(3);
 
 		private const string SERVER_SEARCH_REQUEST = "DISCOVER_SERVER";
 		private const string TOKEN_PREFERENCE_KEY = "PairingToken";
 		private const string NOT_PAIRED_MESSAGE = "Not paired - click Remote App > Pair New Device on the PC, then tap Pair with PC in the menu";
+		private const string SERVER_NOT_FOUND_MESSAGE = "PC not found - make sure the companion is running on the same network";
 
 		public MainPage ()
 		{
@@ -83,17 +84,19 @@ namespace SteelSeriesSonarCompanion.External.App
 			return null;
 		}
 
-		private async Task DiscoverServer ()
+		private async Task<IPEndPoint> DiscoverServer ()
 		{
-			UdpClient udpClient = new();
-			udpClient.EnableBroadcast = true;
-			IPEndPoint endPoint = new(IPAddress.Broadcast, 8888);
+			using UdpClient udpClient = new()
+			{
+				EnableBroadcast = true
+			};
+			IPEndPoint broadcastEndPoint = new(IPAddress.Broadcast, 8888);
 			byte[] request = Encoding.UTF8.GetBytes(SERVER_SEARCH_REQUEST);
-			await udpClient.SendAsync(request, request.Length, endPoint);
+			await udpClient.SendAsync(request, request.Length, broadcastEndPoint);
 
-			UdpReceiveResult result = await udpClient.ReceiveAsync();
-			string response = Encoding.UTF8.GetString(result.Buffer);
-			ServerIPAddress = response;
+			using CancellationTokenSource timeout = new(DISCOVERY_TIMEOUT);
+			UdpReceiveResult result = await udpClient.ReceiveAsync(timeout.Token);
+			return IPEndPoint.Parse(Encoding.UTF8.GetString(result.Buffer));
 		}
 
 		public void Reconnect ()
@@ -109,11 +112,9 @@ namespace SteelSeriesSonarCompanion.External.App
 		{
 			ConnectionLabel.Text = "Connecting...";
 
-			await DiscoverServer();
-
 			try
 			{
-				IPEndPoint endPoint = IPEndPoint.Parse(ServerIPAddress);
+				IPEndPoint endPoint = await DiscoverServer();
 				await Client.ConnectAsync(endPoint);
 
 				TcpClient client = Client;
@@ -125,9 +126,13 @@ namespace SteelSeriesSonarCompanion.External.App
 
 				SendCommand(new AuthenticateCommand(DeviceInfo.Name, Preferences.Get(TOKEN_PREFERENCE_KEY, null)));
 			}
+			catch (OperationCanceledException)
+			{
+				ConnectionLabel.Text = SERVER_NOT_FOUND_MESSAGE;
+			}
 			catch (Exception ex)
 			{
-				ConnectionLabel.Text = $"Connection failed: {ex}";
+				ConnectionLabel.Text = $"Connection failed: {ex.Message}";
 			}
 		}
 

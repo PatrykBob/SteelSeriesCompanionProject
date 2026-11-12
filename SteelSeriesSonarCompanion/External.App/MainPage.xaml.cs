@@ -13,6 +13,8 @@ namespace SteelSeriesSonarCompanion.External.App
 
 		private string ServerIPAddress { get; set; }
 		private TcpClient Client { get; set; } = new();
+		private StreamWriter? Writer { get; set; }
+		private SemaphoreSlim WriterLock { get; } = new(1, 1);
 
 		private List<VolumeSlider> VolumeSliderCollection { get; } = new();
 
@@ -93,6 +95,7 @@ namespace SteelSeriesSonarCompanion.External.App
 		public void Reconnect ()
 		{
 			IsAuthenticated = false;
+			Writer = null;
 			Client.Dispose();
 			Client = new TcpClient();
 			ConnectToServer();
@@ -110,6 +113,10 @@ namespace SteelSeriesSonarCompanion.External.App
 				await Client.ConnectAsync(endPoint);
 
 				TcpClient client = Client;
+				Writer = new StreamWriter(client.GetStream())
+				{
+					AutoFlush = true
+				};
 				Task.Run(() => StartListeningLoop(client));
 
 				SendCommand(new AuthenticateCommand(DeviceInfo.Name, Preferences.Get(TOKEN_PREFERENCE_KEY, null)));
@@ -196,12 +203,26 @@ namespace SteelSeriesSonarCompanion.External.App
 
 		private async void SendCommand (BaseExternalCommunicationCommand command)
 		{
-			if (Client.Connected)
+			StreamWriter? writer = Writer;
+
+			if (writer == null)
 			{
-				StreamWriter writer = new(Client.GetStream());
-				writer.AutoFlush = true;
-				string json = ExternalCommunicationCommandConverter.CovertToJson(command);
+				return;
+			}
+
+			string json = ExternalCommunicationCommandConverter.CovertToJson(command);
+			await WriterLock.WaitAsync();
+
+			try
+			{
 				await writer.WriteLineAsync(json);
+			}
+			catch (Exception e) when (e is IOException or ObjectDisposedException)
+			{
+			}
+			finally
+			{
+				WriterLock.Release();
 			}
 		}
 	}

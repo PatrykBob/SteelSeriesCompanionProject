@@ -5,8 +5,10 @@ namespace SteelSeriesSonarCompanion.CoreApp.Setup
 {
 	public static class SonarSetupLoader
 	{
-		private const string SONAR_SETUP_FILE_PATH = "C:\\ProgramData\\SteelSeries\\GG\\coreProps.json";
+		private const string SONAR_SETUP_RELATIVE_PATH = "SteelSeries\\GG\\coreProps.json";
 		private const char ADDRESS_SPLIT_CHARACTER = ':';
+
+		private static readonly string SONAR_SETUP_FILE_PATH = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), SONAR_SETUP_RELATIVE_PATH);
 
 		public static bool TryGetSonarSetupPort (out int setupPort)
 		{

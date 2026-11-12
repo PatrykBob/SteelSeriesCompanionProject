@@ -16,7 +16,11 @@ namespace SteelSeriesSonarCompanion.External.App
 
 		private List<VolumeSlider> VolumeSliderCollection { get; } = new();
 
+		private bool IsAuthenticated { get; set; }
+
 		private const string SERVER_SEARCH_REQUEST = "DISCOVER_SERVER";
+		private const string TOKEN_PREFERENCE_KEY = "PairingToken";
+		private const string NOT_PAIRED_MESSAGE = "Not paired - click Remote App > Pair New Device on the PC, then restart the app";
 
 		public MainPage ()
 		{
@@ -95,8 +99,7 @@ namespace SteelSeriesSonarCompanion.External.App
 
 				Task.Run(StartListeningLoop);
 
-				ConnectionLabel.Text = "Connected";
-				SendCommand(new RequestVolumeSetupCommand());
+				SendCommand(new AuthenticateCommand(DeviceInfo.Name, Preferences.Get(TOKEN_PREFERENCE_KEY, null)));
 			}
 			catch (Exception ex)
 			{
@@ -127,15 +130,32 @@ namespace SteelSeriesSonarCompanion.External.App
 			{
 			}
 
-			MainThread.BeginInvokeOnMainThread(() => ConnectionLabel.Text = "Disconnected");
+			string disconnectedText = IsAuthenticated == true ? "Disconnected" : NOT_PAIRED_MESSAGE;
+			MainThread.BeginInvokeOnMainThread(() => ConnectionLabel.Text = disconnectedText);
 		}
 
 		private void NotifyOnExternalEvent (BaseExternalCommunicationEvent? externalEvent)
 		{
-			if (externalEvent is VolumeSetupEvent volumeSetupEvent)
+			if (externalEvent is AuthenticatedEvent authenticatedEvent)
+			{
+				OnAuthenticated(authenticatedEvent);
+			}
+			else if (externalEvent is VolumeSetupEvent volumeSetupEvent)
 			{
 				ExternalVolumeSetupChanged(volumeSetupEvent.VolumeDataCollection);
 			}
+		}
+
+		private void OnAuthenticated (AuthenticatedEvent authenticatedEvent)
+		{
+			if (authenticatedEvent.NewToken != null)
+			{
+				Preferences.Set(TOKEN_PREFERENCE_KEY, authenticatedEvent.NewToken);
+			}
+
+			IsAuthenticated = true;
+			MainThread.BeginInvokeOnMainThread(() => ConnectionLabel.Text = "Connected");
+			SendCommand(new RequestVolumeSetupCommand());
 		}
 
 		private void OnVolumeChanged (SoundChannel channel, float volume)

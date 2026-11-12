@@ -57,7 +57,7 @@ namespace SteelSeriesSonarCompanion.CoreApp.Tray
 
 			void Exit (object? sender, EventArgs e)
 			{
-				Environment.Exit(0);
+				System.Windows.Application.Current.Shutdown();
 			}
 		}
 

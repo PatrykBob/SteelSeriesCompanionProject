@@ -14,6 +14,11 @@ namespace SteelSeriesSonarCompanion.Extension.UI
 			return menuItem;
 		}
 
+		public override void Dispose ()
+		{
+			ExtensionWindow?.Close();
+		}
+
 		private void ShowUI ()
 		{
 			if (CompanionCore == null)

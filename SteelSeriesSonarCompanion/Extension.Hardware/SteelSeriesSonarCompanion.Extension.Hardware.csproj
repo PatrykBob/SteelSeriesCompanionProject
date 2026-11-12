@@ -15,4 +15,15 @@
     <ProjectReference Include="..\Shared.ExtensionCore\SteelSeriesSonarCompanion.Shared.ExtensionCore.csproj" />
   </ItemGroup>
 
+  <!-- HACK: The plain lib/ copy of System.IO.Ports is a stub that throws PlatformNotSupportedException, so embed runtimes/win instead -->
+  <Target Name="EmbedPackageAssemblies" AfterTargets="ResolvePackageAssets">
+    <ItemGroup>
+      <EmbeddedResource Include="@(RuntimeTargetsCopyLocalItems)"
+                        Condition="'%(RuntimeTargetsCopyLocalItems.NuGetPackageId)' == 'System.IO.Ports'
+                                   and '%(RuntimeTargetsCopyLocalItems.RuntimeIdentifier)' == 'win'
+                                   and '%(RuntimeTargetsCopyLocalItems.AssetType)' == 'runtime'"
+                        LogicalName="%(Filename)%(Extension)" />
+    </ItemGroup>
+  </Target>
+
 </Project>

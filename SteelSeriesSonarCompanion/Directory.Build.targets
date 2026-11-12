@@ -1,0 +1,16 @@
+<Project>
+  <PropertyGroup>
+    <CompanionExtensionDir>$(MSBuildThisFileDirectory)CoreApp\bin\$(Configuration)\net8.0-windows\Extension\</CompanionExtensionDir>
+  </PropertyGroup>
+
+  <Target Name="CopyToCompanionExtensionFolder"
+          AfterTargets="Build"
+          Condition="$(MSBuildProjectName.StartsWith('SteelSeriesSonarCompanion.Extension.'))">
+    <Copy SourceFiles="$(TargetPath)"
+          DestinationFolder="$(CompanionExtensionDir)"
+          SkipUnchangedFiles="true"
+          Retries="0"
+          ContinueOnError="WarnAndContinue" />
+    <Message Importance="high" Text="Copied $(TargetFileName) to $(CompanionExtensionDir)" />
+  </Target>
+</Project>

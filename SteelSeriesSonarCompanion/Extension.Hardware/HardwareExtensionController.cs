@@ -20,6 +20,12 @@ namespace SteelSeriesSonarCompanion.Extension.Hardware
 
 		private static readonly Regex LinePattern = new(@"^(\d+)A(\d+)B(\d+)C$", RegexOptions.Compiled);
 
+		static HardwareExtensionController ()
+		{
+			// HACK: Must run before any method that uses SerialPort is compiled
+			EmbeddedAssemblyResolver.Register();
+		}
+
 		public override void Initialize (ISteelSeriesCompanionCore companionCore)
 		{
 			base.Initialize(companionCore);

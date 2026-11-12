@@ -25,6 +25,11 @@ namespace SteelSeriesSonarCompanion.CoreApp
 
 		public async Task SetChannelVolume (object? sender, SoundChannel channel, float volume)
 		{
+			if (IsKnownChannel(channel) == false)
+			{
+				return;
+			}
+
 			if (float.IsFinite(volume) == false)
 			{
 				Trace.WriteLine($"Ignored invalid volume {volume} for {channel}");
@@ -36,7 +41,23 @@ namespace SteelSeriesSonarCompanion.CoreApp
 
 		public async Task SetChannelMute (object? sender, SoundChannel channel, bool mute)
 		{
+			if (IsKnownChannel(channel) == false)
+			{
+				return;
+			}
+
 			await InternalFacade.SetChannelMute(channel, mute);
+		}
+
+		private bool IsKnownChannel (SoundChannel channel)
+		{
+			if (Enum.IsDefined(channel) == true)
+			{
+				return true;
+			}
+
+			Trace.WriteLine($"Ignored unknown channel {(int)channel}");
+			return false;
 		}
 
 		public async Task RequestVolumeSetup (object? sender)

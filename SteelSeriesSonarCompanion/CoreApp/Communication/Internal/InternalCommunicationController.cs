@@ -1,29 +1,20 @@
-﻿using SteelSeriesSonarCompanion.Shared.Core;
+﻿using SteelSeriesSonarCompanion.CoreApp.Setup;
+using SteelSeriesSonarCompanion.Shared.Core;
 using System.Diagnostics;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Text;
 
 namespace SteelSeriesSonarCompanion.CoreApp.Communication.Internal
 {
     public class InternalCommunicationController
     {
-        private int SonarCommunicationPort { get; set; }
+        private int? SonarCommunicationPort { get; set; }
+        private SemaphoreSlim ConnectionLock { get; } = new(1, 1);
         private HttpClient CurrentHttpClient { get; } = CreateHttpClient();
 
-        public async Task<bool> Initialize (int sonarSetupPort)
+        public async Task<bool> Initialize ()
         {
-            int? communicationPort = await GetSonarCommunicationPort(sonarSetupPort);
-
-            if (communicationPort == null)
-            {
-                return false;
-            }
-
-            SonarCommunicationPort = communicationPort.Value;
-            Uri communicationUri = InternalCommunicationAddressProvider.GetCommunicationAddress(SonarCommunicationPort);
-            CurrentHttpClient.DefaultRequestHeaders.Host = communicationUri.Host;
-            return true;
+            return await Reconnect(null) != null;
         }
 
         private static HttpClient CreateHttpClient ()
@@ -35,114 +26,134 @@ namespace SteelSeriesSonarCompanion.CoreApp.Communication.Internal
 
         public async Task<List<ChannelConfigResponse>?> GetConfig ()
         {
-            Uri configSelectedUri = InternalCommunicationAddressProvider.GetConfigSelectedAddress(SonarCommunicationPort);
-            return await SendGetRequest<List<ChannelConfigResponse>?>(configSelectedUri);
+            return await SendRequest<List<ChannelConfigResponse>>(HttpMethod.Get, InternalCommunicationAddressProvider.GetConfigSelectedAddress);
         }
 
         public async Task<ChannelConfigResponse?> PostConfig (ChannelConfigResponse config)
         {
-			Uri configUri = InternalCommunicationAddressProvider.GetConfigAddress(SonarCommunicationPort);
             string json = JsonConverter.ConvertToJSON(config);
-			StringContent content = new(json, Encoding.UTF8, "application/json");
-            return await SendPutRequest<ChannelConfigResponse>(configUri, content);
+            return await SendRequest<ChannelConfigResponse>(HttpMethod.Put, InternalCommunicationAddressProvider.GetConfigAddress, () => new StringContent(json, Encoding.UTF8, "application/json"));
         }
 
         public async Task<VolumeSettingsResponse?> GetVolumeSettings ()
         {
-            Uri settingsUri = InternalCommunicationAddressProvider.GetVolumeSettingsUri(SonarCommunicationPort);
-            return await SendGetRequest<VolumeSettingsResponse>(settingsUri);
+            return await SendRequest<VolumeSettingsResponse>(HttpMethod.Get, InternalCommunicationAddressProvider.GetVolumeSettingsUri);
         }
 
         public async Task<List<ClassicRedirectionResponse>?> GetClassicRedirections ()
         {
-            Uri redirectionsUri = InternalCommunicationAddressProvider.GetClassicRedirectionsAddress(SonarCommunicationPort);
-            return await SendGetRequest<List<ClassicRedirectionResponse>>(redirectionsUri);
+            return await SendRequest<List<ClassicRedirectionResponse>>(HttpMethod.Get, InternalCommunicationAddressProvider.GetClassicRedirectionsAddress);
         }
 
         public async Task SetChannelVolume (string channel, float volume)
         {
-            Uri volumeUri = InternalCommunicationAddressProvider.GetClassicChannelVolumeAddress(SonarCommunicationPort, channel, volume);
-            await SendPutRequest<object>(volumeUri);
+            await SendRequest<object>(HttpMethod.Put, port => InternalCommunicationAddressProvider.GetClassicChannelVolumeAddress(port, channel, volume));
         }
 
         public async Task SetChannelMute (string channel, bool mute)
         {
-            Uri muteUri = InternalCommunicationAddressProvider.GetClassicChannelMuteAddress(SonarCommunicationPort, channel, mute);
-            await SendPutRequest<object>(muteUri);
+            await SendRequest<object>(HttpMethod.Put, port => InternalCommunicationAddressProvider.GetClassicChannelMuteAddress(port, channel, mute));
         }
 
         public async Task SetChatMix (float value)
         {
-            Uri chatMixUri = InternalCommunicationAddressProvider.GetChatMixAddress(SonarCommunicationPort, value);
-            await SendPutRequest<object>(chatMixUri);
+            await SendRequest<object>(HttpMethod.Put, port => InternalCommunicationAddressProvider.GetChatMixAddress(port, value));
         }
 
-        private async Task<int?> GetSonarCommunicationPort (int setupPort)
+        private async Task<T?> SendRequest<T> (HttpMethod method, Func<int, Uri> createUri, Func<HttpContent>? createContent = null)
         {
-            Uri setupUri = InternalCommunicationAddressProvider.GetSubAppsAddress(setupPort);
-            SonarSubAppsResponse? response = await SendGetRequest<SonarSubAppsResponse>(setupUri);
+            int? port = SonarCommunicationPort ?? await Reconnect(null);
 
-            return response?.subApps?.sonar?.metadata?.webServerAddress?.Port;
-        }
+            if (port == null)
+            {
+                return default;
+            }
 
-        private async Task<T?> SendGetRequest<T> (Uri uri)
-        {
             try
             {
-                HttpResponseMessage response = await CurrentHttpClient.GetAsync(uri);
-
-                if (response.IsSuccessStatusCode == true)
-                {
-                    string responseContent = await response.Content.ReadAsStringAsync();
-                    return JsonConverter.ConvertFromJSON<T>(responseContent);
-                }
+                return await Send<T>(method, createUri(port.Value), createContent);
+            }
+            catch (HttpRequestException e)
+            {
+                Trace.WriteLine(e);
             }
             catch (Exception e)
             {
                 Trace.WriteLine(e);
+                return default;
             }
 
-            return default;
-        }
+            int? newPort = await Reconnect(port);
 
-        private async Task<T?> SendPostRequest<T> (Uri uri, HttpContent content = null)
-        {
+            if (newPort == null || newPort == port)
+            {
+                return default;
+            }
+
             try
             {
-                HttpResponseMessage response = await CurrentHttpClient.PostAsync(uri, content);
-
-                if (response.IsSuccessStatusCode == true)
-                {
-                    string responseContent = await response.Content.ReadAsStringAsync();
-                    return JsonConverter.ConvertFromJSON<T>(responseContent);
-                }
+                return await Send<T>(method, createUri(newPort.Value), createContent);
             }
             catch (Exception e)
             {
                 Trace.WriteLine(e);
+                return default;
             }
-
-            return default;
         }
 
-        private async Task<T?> SendPutRequest<T> (Uri uri, HttpContent content = null)
+        private async Task<int?> Reconnect (int? failedPort)
+        {
+            await ConnectionLock.WaitAsync();
+
+            try
+            {
+                if (SonarCommunicationPort != failedPort)
+                {
+                    return SonarCommunicationPort;
+                }
+
+                SonarCommunicationPort = await ResolveSonarCommunicationPort();
+                return SonarCommunicationPort;
+            }
+            finally
+            {
+                ConnectionLock.Release();
+            }
+        }
+
+        private async Task<int?> ResolveSonarCommunicationPort ()
         {
             try
             {
-                HttpResponseMessage response = await CurrentHttpClient.PutAsync(uri, content);
-
-                if (response.IsSuccessStatusCode == true)
+                if (SonarSetupLoader.TryGetSonarSetupPort(out int setupPort) == false)
                 {
-                    string responseContent = await response.Content.ReadAsStringAsync();
-                    return JsonConverter.ConvertFromJSON<T>(responseContent);
+                    return null;
                 }
+
+                Uri setupUri = InternalCommunicationAddressProvider.GetSubAppsAddress(setupPort);
+                SonarSubAppsResponse? response = await Send<SonarSubAppsResponse>(HttpMethod.Get, setupUri, null);
+                return response?.subApps?.sonar?.metadata?.webServerAddress?.Port;
             }
             catch (Exception e)
             {
-                Trace.WriteLine(e);
+                Trace.WriteLine($"Failed to resolve SteelSeries Sonar port: {e}");
+                return null;
+            }
+        }
+
+        private async Task<T?> Send<T> (HttpMethod method, Uri uri, Func<HttpContent>? createContent)
+        {
+            using HttpRequestMessage request = new(method, uri);
+            request.Content = createContent?.Invoke();
+            using HttpResponseMessage response = await CurrentHttpClient.SendAsync(request);
+
+            if (response.IsSuccessStatusCode == false)
+            {
+                return default;
             }
 
-            return default;
+            string responseContent = await response.Content.ReadAsStringAsync();
+            return JsonConverter.ConvertFromJSON<T>(responseContent);
         }
     }
 }

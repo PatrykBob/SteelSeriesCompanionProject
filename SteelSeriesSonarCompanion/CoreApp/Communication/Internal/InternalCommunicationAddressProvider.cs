@@ -16,11 +16,6 @@ namespace SteelSeriesSonarCompanion.CoreApp.Communication.Internal
 		private const string CONFIG_SELECTED_ENDPOINT_FORMAT = "{0}:{1}/configs/selected";
 		private const string CLASSIC_REDIRECTIONS_ENDPOINT_FORMAT = "{0}:{1}/classicRedirections";
 
-		public static Uri GetCommunicationAddress (int port)
-		{
-			return new Uri($"{LOCALHOST_ADDRESS}:{port}");
-		}
-
 		public static Uri GetSubAppsAddress (int port)
 		{
 			return new Uri(string.Format(SUB_APPS_ENDPOINT_FORMAT, SECURE_LOCALHOST_ADDRESS, port));

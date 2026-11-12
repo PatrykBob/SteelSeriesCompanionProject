@@ -1,10 +1,8 @@
 ﻿using SteelSeriesSonarCompanion.CoreApp.Communication.Internal;
 using SteelSeriesSonarCompanion.CoreApp.Extension;
-using SteelSeriesSonarCompanion.CoreApp.Setup;
 using SteelSeriesSonarCompanion.CoreApp.Tray;
 using SteelSeriesSonarCompanion.Shared.Core;
 using SteelSeriesSonarCompanion.Shared.ExtensionCore.Extension;
-using System.Diagnostics;
 
 namespace SteelSeriesSonarCompanion.CoreApp
 {
@@ -17,7 +15,7 @@ namespace SteelSeriesSonarCompanion.CoreApp
 		private TrayController Tray { get; set; } = new();
 
 		private const string SONAR_CONNECTION_FAILED_MESSAGE =
-			"Could not connect to SteelSeries Sonar. Make sure SteelSeries GG is running, then restart the companion.";
+			"Could not connect to SteelSeries Sonar. Make sure SteelSeries GG is running; the companion will connect automatically.";
 
 		public async Task<List<VolumeData>> GetVolumeSettings ()
 		{
@@ -42,7 +40,7 @@ namespace SteelSeriesSonarCompanion.CoreApp
 
 		public async void Initialize ()
 		{
-			bool isConnectedToSonar = await TryConnectToSonar();
+			bool isConnectedToSonar = await InternalFacade.Initialize();
 
 			ExtensionController.Initialize(this);
 			List<SteelSeriesCompanionExtensionMenuItem> extensionMenuItemCollection = ExtensionController.GetExtensionToolMenuItemCollection();
@@ -51,24 +49,6 @@ namespace SteelSeriesSonarCompanion.CoreApp
 			if (isConnectedToSonar == false)
 			{
 				Tray.ShowWarning(SONAR_CONNECTION_FAILED_MESSAGE);
-			}
-		}
-
-		private async Task<bool> TryConnectToSonar ()
-		{
-			try
-			{
-				if (SonarSetupLoader.TryGetSonarSetupPort(out int setupPort) == false)
-				{
-					return false;
-				}
-
-				return await InternalFacade.Initialize(setupPort);
-			}
-			catch (Exception e)
-			{
-				Trace.WriteLine($"Failed to connect to SteelSeries Sonar: {e}");
-				return false;
 			}
 		}
 

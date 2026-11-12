@@ -1,3 +1,4 @@
+using System.Windows;
 using SteelSeriesCompanionUIExtension;
 using SteelSeriesSonarCompanion.Shared.ExtensionCore.Extension;
 
@@ -15,12 +16,37 @@ namespace SteelSeriesSonarCompanion.Extension.UI
 
 		private void ShowUI ()
 		{
-			if (CompanionCore != null)
+			if (CompanionCore == null)
 			{
-				ExtensionWindow = new();
-				ExtensionWindow.Initialize(CompanionCore);
-				ExtensionWindow.Show();
+				return;
 			}
+
+			if (ExtensionWindow != null)
+			{
+				FocusWindow(ExtensionWindow);
+				return;
+			}
+
+			ExtensionWindow = new();
+			ExtensionWindow.Closed += OnExtensionWindowClosed;
+			ExtensionWindow.Initialize(CompanionCore);
+			ExtensionWindow.Show();
+		}
+
+		private void FocusWindow (Window window)
+		{
+			if (window.WindowState == WindowState.Minimized)
+			{
+				window.WindowState = WindowState.Normal;
+			}
+
+			window.Activate();
+		}
+
+		private void OnExtensionWindowClosed (object? sender, EventArgs e)
+		{
+			ExtensionWindow!.Closed -= OnExtensionWindowClosed;
+			ExtensionWindow = null;
 		}
 	}
 }

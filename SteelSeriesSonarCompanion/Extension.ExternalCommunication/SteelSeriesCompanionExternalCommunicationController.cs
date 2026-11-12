@@ -166,18 +166,7 @@ namespace SteelSeriesSonarCompanion.Extension.ExternalCommunication
 
 				Client = client;
 				Writer = writer;
-
-				while (token.IsCancellationRequested == false)
-				{
-					string? message = await reader.ReadLineAsync(token);
-
-					if (message == null)
-					{
-						break;
-					}
-
-					ExecuteMessage(message);
-				}
+				await RunMessageLoop(reader, token);
 			}
 			catch (IOException e)
 			{
@@ -190,6 +179,21 @@ namespace SteelSeriesSonarCompanion.Extension.ExternalCommunication
 					Writer = null;
 					Client = null;
 				}
+			}
+		}
+
+		private async Task RunMessageLoop (StreamReader reader, CancellationToken token)
+		{
+			while (token.IsCancellationRequested == false)
+			{
+				string? message = await reader.ReadLineAsync(token);
+
+				if (message == null)
+				{
+					break;
+				}
+
+				ExecuteMessage(message);
 			}
 		}
 

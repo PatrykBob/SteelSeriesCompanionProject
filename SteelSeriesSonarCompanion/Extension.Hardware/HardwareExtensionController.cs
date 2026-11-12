@@ -16,7 +16,7 @@ namespace SteelSeriesSonarCompanion.Extension.Hardware
 		private const int BAUD_RATE = 9600;
 		private const int READ_TIMEOUT_MS = 500;
 		private const int MAX_ANALOG_VALUE = 1023;
-		private const int RANGE = 1;
+		private const int RANGE = 4;
 
 		private static readonly Regex LinePattern = new(@"^(\d+)A(\d+)B(\d+)C$", RegexOptions.Compiled);
 
@@ -115,8 +115,9 @@ namespace SteelSeriesSonarCompanion.Extension.Hardware
 		{
 			volume = Math.Clamp(volume, 0, MAX_ANALOG_VALUE);
 			int previousVolume = VolumeMap[channel];
+			bool reachedLimit = (volume == 0 || volume == MAX_ANALOG_VALUE) && volume != previousVolume;
 
-			if (Math.Abs(volume - previousVolume) > RANGE)
+			if (Math.Abs(volume - previousVolume) > RANGE || reachedLimit == true)
 			{
 				VolumeMap[channel] = volume;
 				Trace.WriteLine($"Channel {channel} volume changed from {previousVolume} to {volume}");

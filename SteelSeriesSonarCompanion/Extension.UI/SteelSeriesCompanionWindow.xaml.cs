@@ -7,6 +7,7 @@ namespace SteelSeriesCompanionUIExtension
 	public partial class SteelSeriesCompanionWindow : Window
 	{
 		private ISteelSeriesCompanionCore? CompanionCore { get; set; }
+		private bool IsApplyingVolumeSettings { get; set; }
 
 		public SteelSeriesCompanionWindow ()
 		{
@@ -26,6 +27,20 @@ namespace SteelSeriesCompanionUIExtension
 		}
 
 		private void InitializeVolumeSliders (List<VolumeData> volumeSettings)
+		{
+			IsApplyingVolumeSettings = true;
+
+			try
+			{
+				ApplyVolumeSettings(volumeSettings);
+			}
+			finally
+			{
+				IsApplyingVolumeSettings = false;
+			}
+		}
+
+		private void ApplyVolumeSettings (List<VolumeData> volumeSettings)
 		{
 			foreach (VolumeData volumeData in volumeSettings)
 			{
@@ -85,6 +100,11 @@ namespace SteelSeriesCompanionUIExtension
 
 		private void SetChannelVolume (SoundChannel channel, RoutedPropertyChangedEventArgs<double> volumeArgs)
 		{
+			if (IsApplyingVolumeSettings == true)
+			{
+				return;
+			}
+
 			SetChannelVolume(channel, (float)volumeArgs.NewValue);
 		}
 

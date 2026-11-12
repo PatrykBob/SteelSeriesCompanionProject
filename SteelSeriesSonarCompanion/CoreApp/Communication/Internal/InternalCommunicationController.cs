@@ -9,26 +9,28 @@ namespace SteelSeriesSonarCompanion.CoreApp.Communication.Internal
     public class InternalCommunicationController
     {
         private int SonarCommunicationPort { get; set; }
-        private HttpClient CurrentHttpClient { get; set; }
+        private HttpClient CurrentHttpClient { get; } = CreateHttpClient();
 
-        public async Task Initialize (int sonarSetupPort)
+        public async Task<bool> Initialize (int sonarSetupPort)
         {
-            CacheHttpClient();
-            await CacheCommunicationPort();
+            int? communicationPort = await GetSonarCommunicationPort(sonarSetupPort);
 
-            void CacheHttpClient ()
+            if (communicationPort == null)
             {
-                HttpClientHandler handler = new HttpClientHandler();
-                handler.ServerCertificateCustomValidationCallback = (_, _, _, _) => true;
-                CurrentHttpClient = new HttpClient(handler);
+                return false;
             }
 
-            async Task CacheCommunicationPort ()
-            {
-                SonarCommunicationPort = await GetSonarCommunicationPort(sonarSetupPort);
-                Uri communicationUri = InternalCommunicationAddressProvider.GetCommunicationAddress(SonarCommunicationPort);
-                CurrentHttpClient.DefaultRequestHeaders.Host = communicationUri.Host;
-            }
+            SonarCommunicationPort = communicationPort.Value;
+            Uri communicationUri = InternalCommunicationAddressProvider.GetCommunicationAddress(SonarCommunicationPort);
+            CurrentHttpClient.DefaultRequestHeaders.Host = communicationUri.Host;
+            return true;
+        }
+
+        private static HttpClient CreateHttpClient ()
+        {
+            HttpClientHandler handler = new();
+            handler.ServerCertificateCustomValidationCallback = (_, _, _, _) => true;
+            return new HttpClient(handler);
         }
 
         public async Task<List<ChannelConfigResponse>?> GetConfig ()
@@ -69,17 +71,12 @@ namespace SteelSeriesSonarCompanion.CoreApp.Communication.Internal
             await SendPutRequest<object>(chatMixUri);
         }
 
-        private async Task<int> GetSonarCommunicationPort (int setupPort)
+        private async Task<int?> GetSonarCommunicationPort (int setupPort)
         {
             Uri setupUri = InternalCommunicationAddressProvider.GetSubAppsAddress(setupPort);
             SonarSubAppsResponse? response = await SendGetRequest<SonarSubAppsResponse>(setupUri);
 
-            if (response != null)
-            {
-                return response.subApps.sonar.metadata.webServerAddress.Port;
-            }
-
-            return default;
+            return response?.subApps?.sonar?.metadata?.webServerAddress?.Port;
         }
 
         private async Task<T?> SendGetRequest<T> (Uri uri)

@@ -15,9 +15,10 @@ namespace SteelSeriesSonarCompanion.Extension.ExternalCommunication
 	{
 		private TcpClient? Client { get; set; }
 		private TcpListener? Listener { get; set; }
+		private UdpClient? DiscoveryClient { get; set; }
+		private CancellationTokenSource? ServerCancellation { get; set; }
 		private IPEndPoint? LocalEndPoint { get; set; }
 
-		private StreamReader? Reader { get; set; }
 		private StreamWriter? Writer { get; set; }
 
 		public override void Initialize (ISteelSeriesCompanionCore companionCore)
@@ -41,46 +42,136 @@ namespace SteelSeriesSonarCompanion.Extension.ExternalCommunication
 		{
 			VolumeSetupEvent volumeSetupEvent = new(volumeDataCollection);
 			string json = ExternalCommunicationEventConverter.ConvertToJson(volumeSetupEvent);
-			Writer?.WriteLine(json);
+
+			try
+			{
+				Writer?.WriteLine(json);
+			}
+			catch (Exception e) when (e is IOException or ObjectDisposedException)
+			{
+				Trace.WriteLine($"Failed to send volume setup: {e.Message}");
+			}
 		}
 
 		private void RestartCommunicationServer ()
 		{
-			Client?.Dispose();
-			Listener?.Dispose();
+			StopCommunicationServer();
 
-			Listener = new(IPAddress.Any, 0);
-			Listener!.Start();
+			ServerCancellation = new CancellationTokenSource();
+			CancellationToken token = ServerCancellation.Token;
 
-			CacheLocalEndpoint();
-			_ = StartListeningLoop();
-			_ = RespondToServerRequest();
+			try
+			{
+				Listener = new(IPAddress.Any, 0);
+				Listener.Start();
+				CacheLocalEndpoint();
+				DiscoveryClient = new UdpClient(ExternalCommunicationConstProvider.BROADCAST_PORT);
+			}
+			catch (Exception e)
+			{
+				Trace.WriteLine($"Failed to start communication server: {e}");
+				StopCommunicationServer();
+				return;
+			}
+
+			_ = RunListeningLoop(Listener, token);
+			_ = RunDiscoveryLoop(DiscoveryClient, token);
 		}
 
-		private async Task StartListeningLoop ()
+		private void StopCommunicationServer ()
 		{
-			while (true)
+			ServerCancellation?.Cancel();
+			ServerCancellation?.Dispose();
+			ServerCancellation = null;
+
+			Writer = null;
+			Client?.Dispose();
+			Client = null;
+
+			Listener?.Dispose();
+			Listener = null;
+
+			DiscoveryClient?.Dispose();
+			DiscoveryClient = null;
+		}
+
+		private async Task RunListeningLoop (TcpListener listener, CancellationToken token)
+		{
+			while (token.IsCancellationRequested == false)
 			{
-				await CacheNetworkStreams(Listener!);
-
-				while (Reader != null)
+				try
 				{
-					string? message = await Reader.ReadLineAsync();
-
-					if (message != null)
-					{
-						BaseExternalCommunicationCommand? command = ExternalCommunicationCommandConverter.ConvertFromJson(message);
-
-						if (command != null)
-						{
-							command.ExecuteCommand(this, CompanionCore!);
-						}
-						else
-						{
-							Trace.WriteLine($"Invalid command: {message}");
-						}
-					}
+					using TcpClient client = await listener.AcceptTcpClientAsync(token);
+					await HandleClient(client, token);
 				}
+				catch (Exception) when (token.IsCancellationRequested)
+				{
+					break;
+				}
+				catch (Exception e)
+				{
+					Trace.WriteLine($"Communication error: {e}");
+				}
+			}
+		}
+
+		private async Task HandleClient (TcpClient client, CancellationToken token)
+		{
+			NetworkStream stream = client.GetStream();
+			using StreamReader reader = new(stream);
+
+			Client = client;
+			Writer = new StreamWriter(stream)
+			{
+				AutoFlush = true
+			};
+
+			try
+			{
+				while (token.IsCancellationRequested == false)
+				{
+					string? message = await reader.ReadLineAsync(token);
+
+					if (message == null)
+					{
+						break;
+					}
+
+					ExecuteMessage(message);
+				}
+			}
+			catch (IOException e)
+			{
+				Trace.WriteLine($"Client connection lost: {e.Message}");
+			}
+			finally
+			{
+				if (Client == client)
+				{
+					Writer = null;
+					Client = null;
+				}
+			}
+		}
+
+		private void ExecuteMessage (string message)
+		{
+			try
+			{
+				BaseExternalCommunicationCommand? command = ExternalCommunicationCommandConverter.ConvertFromJson(message);
+
+				if (command != null)
+				{
+					command.ExecuteCommand(this, CompanionCore!);
+				}
+				else
+				{
+					Trace.WriteLine($"Invalid command: {message}");
+				}
+			}
+			catch (Exception e)
+			{
+				Trace.WriteLine($"Failed to execute command '{message}': {e.Message}");
 			}
 		}
 
@@ -92,31 +183,28 @@ namespace SteelSeriesSonarCompanion.Extension.ExternalCommunication
 			}
 		}
 
-		private async Task CacheNetworkStreams (TcpListener listener)
+		private async Task RunDiscoveryLoop (UdpClient udpClient, CancellationToken token)
 		{
-			TcpClient client = await listener.AcceptTcpClientAsync();
-			NetworkStream stream = client.GetStream();
-
-			Reader = new StreamReader(stream);
-			Writer = new StreamWriter(stream)
+			while (token.IsCancellationRequested == false)
 			{
-				AutoFlush = true
-			};
-		}
-
-		private async Task RespondToServerRequest ()
-		{
-			UdpClient udpClient = new(ExternalCommunicationConstProvider.BROADCAST_PORT);
-
-			while (true)
-			{
-				UdpReceiveResult result = await udpClient.ReceiveAsync();
-				string message = Encoding.UTF8.GetString(result.Buffer);
-
-				if (message == ExternalCommunicationConstProvider.SERVER_SEARCH_REQUEST)
+				try
 				{
-					byte[] response = Encoding.UTF8.GetBytes(LocalEndPoint!.ToString());
-					await udpClient.SendAsync(response, response.Length, result.RemoteEndPoint);
+					UdpReceiveResult result = await udpClient.ReceiveAsync(token);
+					string message = Encoding.UTF8.GetString(result.Buffer);
+
+					if (message == ExternalCommunicationConstProvider.SERVER_SEARCH_REQUEST && LocalEndPoint != null)
+					{
+						byte[] response = Encoding.UTF8.GetBytes(LocalEndPoint.ToString());
+						await udpClient.SendAsync(response, result.RemoteEndPoint, token);
+					}
+				}
+				catch (Exception) when (token.IsCancellationRequested)
+				{
+					break;
+				}
+				catch (SocketException e)
+				{
+					Trace.WriteLine($"Discovery error: {e.Message}");
 				}
 			}
 		}

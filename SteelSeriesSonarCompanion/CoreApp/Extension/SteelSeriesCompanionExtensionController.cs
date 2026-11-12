@@ -1,4 +1,5 @@
 ﻿using SteelSeriesSonarCompanion.Shared.ExtensionCore.Extension;
+using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 
@@ -65,24 +66,29 @@ namespace SteelSeriesSonarCompanion.CoreApp.Extension
 
 		private void LoadExtension (FileInfo extensionFile, ISteelSeriesCompanionCore extensionCore)
 		{
-			Assembly dll;
+			Type[] exportedTypeCollection;
 
 			try
 			{
-				dll = Assembly.LoadFile(extensionFile.FullName);
+				Assembly dll = Assembly.LoadFile(extensionFile.FullName);
+				exportedTypeCollection = dll.GetExportedTypes();
 			}
 			catch (Exception e)
 			{
+				Trace.WriteLine($"Skipping '{extensionFile.Name}': {e.Message}");
 				return;
 			}
-
-			Type[] exportedTypeCollection = dll.GetExportedTypes();
 
 			for (int i = 0; i < exportedTypeCollection.Length; i++)
 			{
 				Type exportedType = exportedTypeCollection[i];
 
-				if (IsExtensionType(exportedType) == true)
+				if (IsExtensionType(exportedType) == false)
+				{
+					continue;
+				}
+
+				try
 				{
 					object? instance = Activator.CreateInstance(exportedType);
 
@@ -91,6 +97,10 @@ namespace SteelSeriesSonarCompanion.CoreApp.Extension
 						extension.Initialize(extensionCore);
 						ExtensionCollection.Add(extension);
 					}
+				}
+				catch (Exception e)
+				{
+					Trace.WriteLine($"Failed to initialize extension '{exportedType.FullName}': {e}");
 				}
 			}
 		}

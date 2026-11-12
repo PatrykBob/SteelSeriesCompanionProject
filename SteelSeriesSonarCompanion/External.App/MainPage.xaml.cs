@@ -106,19 +106,29 @@ namespace SteelSeriesSonarCompanion.External.App
 
 		private async void StartListeningLoop ()
 		{
-			StreamReader reader = new(Client.GetStream());
+			try
+			{
+				using StreamReader reader = new(Client.GetStream());
 
-				while (reader != null)
+				while (true)
 				{
 					string? message = await reader.ReadLineAsync();
 
-					if (message != null)
+					if (message == null)
 					{
-						BaseExternalCommunicationEvent? externalEvent = ExternalCommunicationEventConverter.ConvertEventFromJson(message);
-						NotifyOnExternalEvent(externalEvent);
+						break;
 					}
+
+					BaseExternalCommunicationEvent? externalEvent = ExternalCommunicationEventConverter.ConvertEventFromJson(message);
+					NotifyOnExternalEvent(externalEvent);
 				}
 			}
+			catch (Exception e) when (e is IOException or ObjectDisposedException)
+			{
+			}
+
+			MainThread.BeginInvokeOnMainThread(() => ConnectionLabel.Text = "Disconnected");
+		}
 
 		private void NotifyOnExternalEvent (BaseExternalCommunicationEvent? externalEvent)
 		{

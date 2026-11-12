@@ -7,9 +7,9 @@ namespace SteelSeriesSonarCompanion.CoreApp.Communication.Internal
 		private InternalCommunicationController CommunicationController { get; set; } = new();
 		private AudioSourceController AudioController { get; set; } = new();
 
-		public async Task Initialize (int sonarSetupPort)
+		public async Task<bool> Initialize (int sonarSetupPort)
 		{
-			await CommunicationController.Initialize(sonarSetupPort);
+			return await CommunicationController.Initialize(sonarSetupPort);
 		}
 
 		public async Task<List<ChannelConfigResponse>> GetConfig ()

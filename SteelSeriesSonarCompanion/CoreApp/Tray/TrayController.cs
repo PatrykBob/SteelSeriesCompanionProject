@@ -8,13 +8,21 @@ namespace SteelSeriesSonarCompanion.CoreApp.Tray
 		private NotifyIcon TrayIcon { get; set; } = new();
 
 		private const string ICON_NAME = "icon.ico";
+		private const string TRAY_TITLE = "SteelSeries Sonar Companion";
+		private const int BALLOON_TIMEOUT_MS = 5000;
 
 		public void Initialize (List<SteelSeriesCompanionExtensionMenuItem> extensionMenuItemCollection)
 		{
 			TrayIcon.ContextMenuStrip = GenerateContextMenu(extensionMenuItemCollection);
 			string path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ICON_NAME);
-			TrayIcon.Icon = new Icon(path);
+			TrayIcon.Icon = File.Exists(path) ? new Icon(path) : SystemIcons.Application;
+			TrayIcon.Text = TRAY_TITLE;
 			TrayIcon.Visible = true;
+		}
+
+		public void ShowWarning (string message)
+		{
+			TrayIcon.ShowBalloonTip(BALLOON_TIMEOUT_MS, TRAY_TITLE, message, ToolTipIcon.Warning);
 		}
 
 		public void Dispose ()

@@ -55,9 +55,7 @@ namespace SteelSeriesSonarCompanion.Extension.ExternalCommunication
 		private void ForgetPairedDevices ()
 		{
 			DeviceStore.Clear();
-			Writer = null;
-			Client?.Dispose();
-			Client = null;
+			DisconnectClient();
 			CompanionCore!.ShowNotification("All paired devices forgotten.");
 		}
 
@@ -117,15 +115,20 @@ namespace SteelSeriesSonarCompanion.Extension.ExternalCommunication
 			ServerCancellation?.Dispose();
 			ServerCancellation = null;
 
-			Writer = null;
-			Client?.Dispose();
-			Client = null;
+			DisconnectClient();
 
 			Listener?.Dispose();
 			Listener = null;
 
 			DiscoveryClient?.Dispose();
 			DiscoveryClient = null;
+		}
+
+		private void DisconnectClient ()
+		{
+			Writer = null;
+			Client?.Dispose();
+			Client = null;
 		}
 
 		private async Task RunListeningLoop (TcpListener listener, CancellationToken token)

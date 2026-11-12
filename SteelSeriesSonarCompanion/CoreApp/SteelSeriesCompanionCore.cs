@@ -1,4 +1,5 @@
-﻿using SteelSeriesSonarCompanion.CoreApp.Communication.Internal;
+﻿using System.Diagnostics;
+using SteelSeriesSonarCompanion.CoreApp.Communication.Internal;
 using SteelSeriesSonarCompanion.CoreApp.Extension;
 using SteelSeriesSonarCompanion.CoreApp.Tray;
 using SteelSeriesSonarCompanion.Shared.Core;
@@ -24,7 +25,13 @@ namespace SteelSeriesSonarCompanion.CoreApp
 
 		public async Task SetChannelVolume (object? sender, SoundChannel channel, float volume)
 		{
-			await InternalFacade.SetChannelVolume(channel, volume);
+			if (float.IsFinite(volume) == false)
+			{
+				Trace.WriteLine($"Ignored invalid volume {volume} for {channel}");
+				return;
+			}
+
+			await InternalFacade.SetChannelVolume(channel, Math.Clamp(volume, 0f, 1f));
 		}
 
 		public async Task SetChannelMute (object? sender, SoundChannel channel, bool mute)

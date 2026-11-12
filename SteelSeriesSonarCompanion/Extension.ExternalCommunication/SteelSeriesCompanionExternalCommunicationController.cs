@@ -50,6 +50,8 @@ namespace SteelSeriesSonarCompanion.Extension.ExternalCommunication
 		public override void Dispose ()
 		{
 			CompanionCore!.VolumeSetupChanged -= OnVolumeSetupChanged;
+			CompanionCore.ChannelVolumeChanged -= OnChannelVolumeChanged;
+			CompanionCore.ChannelMuteChanged -= OnChannelMuteChanged;
 			StopCommunicationServer();
 		}
 
@@ -74,6 +76,28 @@ namespace SteelSeriesSonarCompanion.Extension.ExternalCommunication
 		private void AttachToEvents ()
 		{
 			CompanionCore!.VolumeSetupChanged += OnVolumeSetupChanged;
+			CompanionCore.ChannelVolumeChanged += OnChannelVolumeChanged;
+			CompanionCore.ChannelMuteChanged += OnChannelMuteChanged;
+		}
+
+		private void OnChannelVolumeChanged (object? sender, ChannelVolumeChangedEventArgs e)
+		{
+			if (sender == this)
+			{
+				return;
+			}
+
+			SendEvent(new ChannelVolumeEvent(e.Channel, e.Volume));
+		}
+
+		private void OnChannelMuteChanged (object? sender, ChannelMuteChangedEventArgs e)
+		{
+			if (sender == this)
+			{
+				return;
+			}
+
+			SendEvent(new ChannelMuteEvent(e.Channel, e.Mute));
 		}
 
 		private void OnVolumeSetupChanged (object? sender, List<VolumeData> volumeDataCollection)

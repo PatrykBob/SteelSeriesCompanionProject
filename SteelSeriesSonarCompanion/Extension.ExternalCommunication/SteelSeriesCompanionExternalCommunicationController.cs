@@ -20,6 +20,7 @@ namespace SteelSeriesSonarCompanion.Extension.ExternalCommunication
 		private IPEndPoint? LocalEndPoint { get; set; }
 
 		private StreamWriter? Writer { get; set; }
+		private object WriterLock { get; } = new();
 
 		private PairedDeviceStore DeviceStore { get; set; } = new();
 		private DateTime? PairingDeadline { get; set; }
@@ -77,16 +78,23 @@ namespace SteelSeriesSonarCompanion.Extension.ExternalCommunication
 
 		private void OnVolumeSetupChanged (object? sender, List<VolumeData> volumeDataCollection)
 		{
-			VolumeSetupEvent volumeSetupEvent = new(volumeDataCollection);
-			string json = ExternalCommunicationEventConverter.ConvertToJson(volumeSetupEvent);
+			SendEvent(new VolumeSetupEvent(volumeDataCollection));
+		}
 
-			try
+		private void SendEvent (BaseExternalCommunicationEvent externalEvent)
+		{
+			string json = ExternalCommunicationEventConverter.ConvertToJson(externalEvent);
+
+			lock (WriterLock)
 			{
-				Writer?.WriteLine(json);
-			}
-			catch (Exception e) when (e is IOException or ObjectDisposedException)
-			{
-				Trace.WriteLine($"Failed to send volume setup: {e.Message}");
+				try
+				{
+					Writer?.WriteLine(json);
+				}
+				catch (Exception e) when (e is IOException or ObjectDisposedException)
+				{
+					Trace.WriteLine($"Failed to send {externalEvent.EventName}: {e.Message}");
+				}
 			}
 		}
 

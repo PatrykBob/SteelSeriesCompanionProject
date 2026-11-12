@@ -20,7 +20,7 @@ namespace SteelSeriesSonarCompanion.External.App
 
 		private const string SERVER_SEARCH_REQUEST = "DISCOVER_SERVER";
 		private const string TOKEN_PREFERENCE_KEY = "PairingToken";
-		private const string NOT_PAIRED_MESSAGE = "Not paired - click Remote App > Pair New Device on the PC, then restart the app";
+		private const string NOT_PAIRED_MESSAGE = "Not paired - click Remote App > Pair New Device on the PC, then tap Pair with PC in the menu";
 
 		public MainPage ()
 		{

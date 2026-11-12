@@ -12,4 +12,8 @@
         ContentTemplate="{DataTemplate local:MainPage}"
         Route="MainPage" />
 
+    <MenuItem
+        Text="Pair with PC"
+        Clicked="OnPairClicked" />
+
 </Shell>

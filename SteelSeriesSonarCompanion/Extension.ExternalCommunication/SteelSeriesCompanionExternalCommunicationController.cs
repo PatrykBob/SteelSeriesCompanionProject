@@ -195,20 +195,7 @@ namespace SteelSeriesSonarCompanion.Extension.ExternalCommunication
 
 		private async Task<bool> Authenticate (StreamReader reader, StreamWriter writer, CancellationToken token)
 		{
-			using CancellationTokenSource timeout = CancellationTokenSource.CreateLinkedTokenSource(token);
-			timeout.CancelAfter(AUTHENTICATION_TIMEOUT);
-
-			AuthenticateCommand? command = null;
-
-			try
-			{
-				string? message = await reader.ReadLineAsync(timeout.Token);
-				command = message == null ? null : ExternalCommunicationCommandConverter.ConvertFromJson(message) as AuthenticateCommand;
-			}
-			catch (Exception e) when (token.IsCancellationRequested == false)
-			{
-				Trace.WriteLine($"Authentication failed: {e.Message}");
-			}
+			AuthenticateCommand? command = await ReadAuthenticateCommand(reader, token);
 
 			if (command == null)
 			{
@@ -217,22 +204,50 @@ namespace SteelSeriesSonarCompanion.Extension.ExternalCommunication
 
 			if (DeviceStore.Contains(command.token) == true)
 			{
-				await writer.WriteLineAsync(ExternalCommunicationEventConverter.ConvertToJson(new AuthenticatedEvent(null)));
+				await SendAuthenticated(writer, null);
 				return true;
 			}
 
 			if (IsPairingModeActive() == true)
 			{
-				string deviceName = TrimDeviceName(command.deviceName);
-				string newToken = DeviceStore.Add(deviceName);
-				PairingDeadline = null;
-				await writer.WriteLineAsync(ExternalCommunicationEventConverter.ConvertToJson(new AuthenticatedEvent(newToken)));
-				CompanionCore!.ShowNotification($"Paired: {deviceName}");
+				await PairDevice(command, writer);
 				return true;
 			}
 
 			Trace.WriteLine($"Rejected unpaired device '{TrimDeviceName(command.deviceName)}'");
 			return false;
+		}
+
+		private async Task<AuthenticateCommand?> ReadAuthenticateCommand (StreamReader reader, CancellationToken token)
+		{
+			using CancellationTokenSource timeout = CancellationTokenSource.CreateLinkedTokenSource(token);
+			timeout.CancelAfter(AUTHENTICATION_TIMEOUT);
+
+			try
+			{
+				string? message = await reader.ReadLineAsync(timeout.Token);
+				return message == null ? null : ExternalCommunicationCommandConverter.ConvertFromJson(message) as AuthenticateCommand;
+			}
+			catch (Exception e) when (token.IsCancellationRequested == false)
+			{
+				Trace.WriteLine($"Authentication failed: {e.Message}");
+				return null;
+			}
+		}
+
+		private async Task PairDevice (AuthenticateCommand command, StreamWriter writer)
+		{
+			string deviceName = TrimDeviceName(command.deviceName);
+			string newToken = DeviceStore.Add(deviceName);
+			PairingDeadline = null;
+			await SendAuthenticated(writer, newToken);
+			CompanionCore!.ShowNotification($"Paired: {deviceName}");
+		}
+
+		private async Task SendAuthenticated (StreamWriter writer, string? newToken)
+		{
+			string json = ExternalCommunicationEventConverter.ConvertToJson(new AuthenticatedEvent(newToken));
+			await writer.WriteLineAsync(json);
 		}
 
 		private string TrimDeviceName (string? deviceName)

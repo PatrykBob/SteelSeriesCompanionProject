@@ -11,10 +11,10 @@ namespace SteelSeriesSonarCompanion.CoreApp.Extension
 
 		private const string EXTENSION_FOLDER_NAME = "Extension";
 		private const string EXTENSION_POSTFIX = ".dll";
+		private const string EXTENSION_SEARCH_PATTERN = "*" + EXTENSION_POSTFIX;
 
 		public void Initialize (ISteelSeriesCompanionCore extensionCore)
 		{
-			SetupAssemblyResolve();
 			LoadExtensions(extensionCore);
 		}
 
@@ -47,22 +47,6 @@ namespace SteelSeriesSonarCompanion.CoreApp.Extension
 			ExtensionCollection.Clear();
 		}
 
-		private void SetupAssemblyResolve ()
-		{
-			AppDomain.CurrentDomain.AssemblyResolve += (sender, args) =>
-			{
-				string assemblyName = new AssemblyName(args.Name).Name + EXTENSION_POSTFIX;
-				string assemblyPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, EXTENSION_FOLDER_NAME, assemblyName);
-
-				if (File.Exists(assemblyPath))
-				{
-					return Assembly.LoadFrom(assemblyPath);
-				}
-
-				return null;
-			};
-		}
-
 		private void LoadExtensions (ISteelSeriesCompanionCore extensionCore)
 		{
 			string path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, EXTENSION_FOLDER_NAME);
@@ -73,7 +57,7 @@ namespace SteelSeriesSonarCompanion.CoreApp.Extension
 				extensionDirectory.Create();
 			}
 
-			FileInfo[] fileInfoCollection = extensionDirectory.GetFiles();
+			FileInfo[] fileInfoCollection = extensionDirectory.GetFiles(EXTENSION_SEARCH_PATTERN);
 
 			for (int i = 0; i < fileInfoCollection.Length; i++)
 			{
@@ -87,7 +71,8 @@ namespace SteelSeriesSonarCompanion.CoreApp.Extension
 
 			try
 			{
-				Assembly dll = Assembly.LoadFile(extensionFile.FullName);
+				ExtensionLoadContext loadContext = new(extensionFile.FullName);
+				Assembly dll = loadContext.LoadFromAssemblyPath(extensionFile.FullName);
 				exportedTypeCollection = dll.GetExportedTypes();
 			}
 			catch (Exception e)

@@ -23,11 +23,13 @@ namespace SteelSeriesSonarCompanion.External.App
 
 		private static readonly TimeSpan VOLUME_SEND_INTERVAL = TimeSpan.FromMilliseconds(50);
 		private static readonly TimeSpan DISCOVERY_TIMEOUT = TimeSpan.FromSeconds(3);
+		private static readonly TimeSpan RECONNECT_DELAY = TimeSpan.FromSeconds(5);
 
 		private const string SERVER_SEARCH_REQUEST = "DISCOVER_SERVER";
 		private const string TOKEN_PREFERENCE_KEY = "PairingToken";
 		private const string NOT_PAIRED_MESSAGE = "Not paired - click Remote App > Pair New Device on the PC, then tap Pair with PC in the menu";
 		private const string SERVER_NOT_FOUND_MESSAGE = "PC not found - make sure the companion is running on the same network";
+		private const string RECONNECTING_MESSAGE = "Disconnected - reconnecting...";
 
 		public MainPage ()
 		{
@@ -110,14 +112,15 @@ namespace SteelSeriesSonarCompanion.External.App
 
 		private async void ConnectToServer ()
 		{
+			TcpClient client = Client;
+			string failureMessage;
 			ConnectionLabel.Text = "Connecting...";
 
 			try
 			{
 				IPEndPoint endPoint = await DiscoverServer();
-				await Client.ConnectAsync(endPoint);
+				await client.ConnectAsync(endPoint);
 
-				TcpClient client = Client;
 				Writer = new StreamWriter(client.GetStream())
 				{
 					AutoFlush = true
@@ -125,15 +128,24 @@ namespace SteelSeriesSonarCompanion.External.App
 				StartListeningLoop(client);
 
 				SendCommand(new AuthenticateCommand(DeviceInfo.Name, Preferences.Get(TOKEN_PREFERENCE_KEY, null)));
+				return;
 			}
 			catch (OperationCanceledException)
 			{
-				ConnectionLabel.Text = SERVER_NOT_FOUND_MESSAGE;
+				failureMessage = SERVER_NOT_FOUND_MESSAGE;
 			}
 			catch (Exception ex)
 			{
-				ConnectionLabel.Text = $"Connection failed: {ex.Message}";
+				failureMessage = $"Connection failed: {ex.Message}";
 			}
+
+			if (client != Client)
+			{
+				return;
+			}
+
+			ConnectionLabel.Text = failureMessage;
+			ScheduleReconnect(client);
 		}
 
 		private async void StartListeningLoop (TcpClient client)
@@ -164,7 +176,24 @@ namespace SteelSeriesSonarCompanion.External.App
 				return;
 			}
 
-			ConnectionLabel.Text = IsAuthenticated == true ? "Disconnected" : NOT_PAIRED_MESSAGE;
+			if (IsAuthenticated == false)
+			{
+				ConnectionLabel.Text = NOT_PAIRED_MESSAGE;
+				return;
+			}
+
+			ConnectionLabel.Text = RECONNECTING_MESSAGE;
+			ScheduleReconnect(client);
+		}
+
+		private async void ScheduleReconnect (TcpClient client)
+		{
+			await Task.Delay(RECONNECT_DELAY);
+
+			if (client == Client)
+			{
+				Reconnect();
+			}
 		}
 
 		private void NotifyOnExternalEvent (BaseExternalCommunicationEvent? externalEvent)

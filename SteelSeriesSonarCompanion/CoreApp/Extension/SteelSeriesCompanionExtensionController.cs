@@ -5,7 +5,7 @@ using System.Reflection;
 
 namespace SteelSeriesSonarCompanion.CoreApp.Extension
 {
-	public class SteelSeriesCompanionExtensionController
+	public class SteelSeriesCompanionExtensionController : IDisposable
 	{
 		private List<BaseSteelSeriesCompanionExtension> ExtensionCollection { get; set; } = new();
 
@@ -28,6 +28,23 @@ namespace SteelSeriesSonarCompanion.CoreApp.Extension
 			}
 
 			return extensionMenuItemCollection;
+		}
+
+		public void Dispose ()
+		{
+			for (int i = 0; i < ExtensionCollection.Count; i++)
+			{
+				try
+				{
+					ExtensionCollection[i].Dispose();
+				}
+				catch (Exception e)
+				{
+					Trace.WriteLine($"Failed to dispose extension '{ExtensionCollection[i].GetType().FullName}': {e}");
+				}
+			}
+
+			ExtensionCollection.Clear();
 		}
 
 		private void SetupAssemblyResolve ()

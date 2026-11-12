@@ -1,6 +1,6 @@
 ﻿namespace SteelSeriesSonarCompanion.Shared.ExtensionCore.Extension
 {
-	public abstract class BaseSteelSeriesCompanionExtension
+	public abstract class BaseSteelSeriesCompanionExtension : IDisposable
 	{
 		protected ISteelSeriesCompanionCore? CompanionCore { get; private set; }
 
@@ -9,6 +9,10 @@
 		public virtual void Initialize (ISteelSeriesCompanionCore companionCore)
 		{
 			CompanionCore = companionCore;
+		}
+
+		public virtual void Dispose ()
+		{
 		}
 	}
 }

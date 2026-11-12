@@ -8,6 +8,7 @@ namespace SteelSeriesSonarCompanion.External.App
 		public event Action<SoundChannel, bool> OnMuteChange = delegate { };
 
 		public SoundChannel Channel { get; private set; }
+		private bool IsApplyingRemoteValue { get; set; }
 
 		public VolumeSlider (SoundChannel channel)
 		{
@@ -31,8 +32,7 @@ namespace SteelSeriesSonarCompanion.External.App
 		{
 			Dispatcher.Dispatch(() =>
 			{
-				VolumeSliderControl.Value = volume;
-				UpdateVolumeLabel();
+				ApplyRemoteValue(() => VolumeSliderControl.Value = volume);
 			});
 		}
 
@@ -40,19 +40,43 @@ namespace SteelSeriesSonarCompanion.External.App
 		{
 			Dispatcher.Dispatch(() =>
 			{
-				MuteCheckBox.IsChecked = mute;
+				ApplyRemoteValue(() => MuteCheckBox.IsChecked = mute);
 			});
+		}
+
+		private void ApplyRemoteValue (Action apply)
+		{
+			IsApplyingRemoteValue = true;
+
+			try
+			{
+				apply();
+			}
+			finally
+			{
+				IsApplyingRemoteValue = false;
+			}
 		}
 
 		private void OnVolumeSliderValueChanged (object? sender, ValueChangedEventArgs e)
 		{
-			float volume = (float)e.NewValue;
-			OnVolumeChange(Channel, volume);
 			UpdateVolumeLabel();
+
+			if (IsApplyingRemoteValue == true)
+			{
+				return;
+			}
+
+			OnVolumeChange(Channel, (float)e.NewValue);
 		}
 
 		private void OnMuteCheckBoxChanged (object? sender, CheckedChangedEventArgs e)
 		{
+			if (IsApplyingRemoteValue == true)
+			{
+				return;
+			}
+
 			bool isMuted = e.Value;
 			OnMuteChange(Channel, isMuted);
 		}

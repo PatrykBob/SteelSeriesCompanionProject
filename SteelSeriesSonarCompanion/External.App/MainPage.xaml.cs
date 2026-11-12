@@ -34,7 +34,7 @@ namespace SteelSeriesSonarCompanion.External.App
 			InitializeComponent();
 			SpawnVolumeSliders();
 			AttachToEvents();
-			Task.Run(ConnectToServer);
+			ConnectToServer();
 		}
 
 		private void SpawnVolumeSliders ()
@@ -121,7 +121,7 @@ namespace SteelSeriesSonarCompanion.External.App
 				{
 					AutoFlush = true
 				};
-				Task.Run(() => StartListeningLoop(client));
+				StartListeningLoop(client);
 
 				SendCommand(new AuthenticateCommand(DeviceInfo.Name, Preferences.Get(TOKEN_PREFERENCE_KEY, null)));
 			}
@@ -159,8 +159,7 @@ namespace SteelSeriesSonarCompanion.External.App
 				return;
 			}
 
-			string disconnectedText = IsAuthenticated == true ? "Disconnected" : NOT_PAIRED_MESSAGE;
-			MainThread.BeginInvokeOnMainThread(() => ConnectionLabel.Text = disconnectedText);
+			ConnectionLabel.Text = IsAuthenticated == true ? "Disconnected" : NOT_PAIRED_MESSAGE;
 		}
 
 		private void NotifyOnExternalEvent (BaseExternalCommunicationEvent? externalEvent)
@@ -191,7 +190,7 @@ namespace SteelSeriesSonarCompanion.External.App
 			}
 
 			IsAuthenticated = true;
-			MainThread.BeginInvokeOnMainThread(() => ConnectionLabel.Text = "Connected");
+			ConnectionLabel.Text = "Connected";
 			SendCommand(new RequestVolumeSetupCommand());
 		}
 

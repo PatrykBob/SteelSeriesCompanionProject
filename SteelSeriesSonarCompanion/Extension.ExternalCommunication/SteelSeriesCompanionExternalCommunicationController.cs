@@ -46,6 +46,12 @@ namespace SteelSeriesSonarCompanion.Extension.ExternalCommunication
 			return menuItem;
 		}
 
+		public override void Dispose ()
+		{
+			CompanionCore!.VolumeSetupChanged -= OnVolumeSetupChanged;
+			StopCommunicationServer();
+		}
+
 		private void StartPairingMode ()
 		{
 			PairingDeadline = DateTime.UtcNow + PAIRING_WINDOW;

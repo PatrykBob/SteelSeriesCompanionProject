@@ -88,6 +88,7 @@ namespace SteelSeriesSonarCompanion.CoreApp
 		public void Dispose ()
 		{
 			ExtensionController.Dispose();
+			InternalFacade.Dispose();
 			Tray.Dispose();
 		}
 	}

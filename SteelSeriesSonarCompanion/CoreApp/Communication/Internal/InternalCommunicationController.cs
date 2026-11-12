@@ -6,7 +6,7 @@ using System.Text;
 
 namespace SteelSeriesSonarCompanion.CoreApp.Communication.Internal
 {
-    public class InternalCommunicationController
+    public class InternalCommunicationController : IDisposable
     {
         private int? SonarCommunicationPort { get; set; }
         private SemaphoreSlim ConnectionLock { get; } = new(1, 1);
@@ -15,6 +15,12 @@ namespace SteelSeriesSonarCompanion.CoreApp.Communication.Internal
         public async Task<bool> Initialize ()
         {
             return await Reconnect(null) != null;
+        }
+
+        public void Dispose ()
+        {
+            CurrentHttpClient.Dispose();
+            ConnectionLock.Dispose();
         }
 
         private static HttpClient CreateHttpClient ()

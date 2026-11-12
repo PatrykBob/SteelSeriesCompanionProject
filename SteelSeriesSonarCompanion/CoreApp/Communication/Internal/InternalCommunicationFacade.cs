@@ -2,7 +2,7 @@
 
 namespace SteelSeriesSonarCompanion.CoreApp.Communication.Internal
 {
-	public class InternalCommunicationFacade
+	public class InternalCommunicationFacade : IDisposable
 	{
 		private const string MASTER_REDIRECTION_ID = "game";
 
@@ -12,6 +12,11 @@ namespace SteelSeriesSonarCompanion.CoreApp.Communication.Internal
 		public async Task<bool> Initialize ()
 		{
 			return await CommunicationController.Initialize();
+		}
+
+		public void Dispose ()
+		{
+			CommunicationController.Dispose();
 		}
 
 		public async Task<List<ChannelConfigResponse>> GetConfig ()

@@ -33,7 +33,7 @@ namespace SteelSeriesSonarCompanion.CoreApp.Communication.Internal
 
 		public static Uri GetClassicChannelMuteAddress (int port, string channel, bool mute)
 		{
-			return new Uri(string.Format(PUT_CLASSIC_MUTE_ENDPOINT_FORMAT, LOCALHOST_ADDRESS, port, channel, mute));
+			return new Uri(string.Format(PUT_CLASSIC_MUTE_ENDPOINT_FORMAT, LOCALHOST_ADDRESS, port, channel, mute.ToString().ToLowerInvariant()));
 		}
 
 		public static Uri GetChatMixAddress (int port, float value)

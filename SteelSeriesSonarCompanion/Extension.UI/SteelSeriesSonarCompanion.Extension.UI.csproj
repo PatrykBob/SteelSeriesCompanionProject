@@ -8,7 +8,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Shared.ExtensionCore\SteelSeriesSonarCompanion.Shared.ExtensionCore.csproj" />
+    <ProjectReference Include="..\Shared.ExtensionCore\SteelSeriesSonarCompanion.Shared.ExtensionCore.csproj">
+      <Private>false</Private>
+    </ProjectReference>
   </ItemGroup>
 
 </Project>

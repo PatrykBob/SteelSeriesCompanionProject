@@ -11,7 +11,7 @@
       <Private></Private>
     </ProjectReference>
     <ProjectReference Include="..\Shared.ExtensionCore\SteelSeriesSonarCompanion.Shared.ExtensionCore.csproj">
-      <Private></Private>
+      <Private>false</Private>
     </ProjectReference>
   </ItemGroup>
 

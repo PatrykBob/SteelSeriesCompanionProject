@@ -12,7 +12,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Shared.ExtensionCore\SteelSeriesSonarCompanion.Shared.ExtensionCore.csproj" />
+    <ProjectReference Include="..\Shared.ExtensionCore\SteelSeriesSonarCompanion.Shared.ExtensionCore.csproj">
+      <Private>false</Private>
+    </ProjectReference>
   </ItemGroup>
 
   <!-- HACK: The plain lib/ copy of System.IO.Ports is a stub that throws PlatformNotSupportedException, so embed runtimes/win instead -->

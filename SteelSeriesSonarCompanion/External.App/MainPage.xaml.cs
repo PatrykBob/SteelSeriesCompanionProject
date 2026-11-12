@@ -19,6 +19,10 @@ namespace SteelSeriesSonarCompanion.External.App
 		private List<VolumeSlider> VolumeSliderCollection { get; } = new();
 
 		private bool IsAuthenticated { get; set; }
+		private Dictionary<SoundChannel, float> PendingVolumeMap { get; } = new();
+		private HashSet<SoundChannel> ThrottledChannels { get; } = new();
+
+		private static readonly TimeSpan VOLUME_SEND_INTERVAL = TimeSpan.FromMilliseconds(50);
 
 		private const string SERVER_SEARCH_REQUEST = "DISCOVER_SERVER";
 		private const string TOKEN_PREFERENCE_KEY = "PairingToken";
@@ -191,9 +195,22 @@ namespace SteelSeriesSonarCompanion.External.App
 			SendCommand(new RequestVolumeSetupCommand());
 		}
 
-		private void OnVolumeChanged (SoundChannel channel, float volume)
+		private async void OnVolumeChanged (SoundChannel channel, float volume)
 		{
-			SendCommand(new SetChannelVolumeCommand(channel, volume));
+			PendingVolumeMap[channel] = volume;
+
+			if (ThrottledChannels.Add(channel) == false)
+			{
+				return;
+			}
+
+			while (PendingVolumeMap.Remove(channel, out float pendingVolume) == true)
+			{
+				SendCommand(new SetChannelVolumeCommand(channel, pendingVolume));
+				await Task.Delay(VOLUME_SEND_INTERVAL);
+			}
+
+			ThrottledChannels.Remove(channel);
 		}
 
 		private void OnMuteChanged (SoundChannel channel, bool isMuted)

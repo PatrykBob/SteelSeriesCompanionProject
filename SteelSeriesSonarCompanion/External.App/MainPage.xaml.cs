@@ -86,6 +86,14 @@ namespace SteelSeriesSonarCompanion.External.App
 			ServerIPAddress = response;
 		}
 
+		public void Reconnect ()
+		{
+			IsAuthenticated = false;
+			Client.Dispose();
+			Client = new TcpClient();
+			ConnectToServer();
+		}
+
 		private async void ConnectToServer ()
 		{
 			ConnectionLabel.Text = "Connecting...";
@@ -97,7 +105,8 @@ namespace SteelSeriesSonarCompanion.External.App
 				IPEndPoint endPoint = IPEndPoint.Parse(ServerIPAddress);
 				await Client.ConnectAsync(endPoint);
 
-				Task.Run(StartListeningLoop);
+				TcpClient client = Client;
+				Task.Run(() => StartListeningLoop(client));
 
 				SendCommand(new AuthenticateCommand(DeviceInfo.Name, Preferences.Get(TOKEN_PREFERENCE_KEY, null)));
 			}
@@ -107,11 +116,11 @@ namespace SteelSeriesSonarCompanion.External.App
 			}
 		}
 
-		private async void StartListeningLoop ()
+		private async void StartListeningLoop (TcpClient client)
 		{
 			try
 			{
-				using StreamReader reader = new(Client.GetStream());
+				using StreamReader reader = new(client.GetStream());
 
 				while (true)
 				{
@@ -128,6 +137,11 @@ namespace SteelSeriesSonarCompanion.External.App
 			}
 			catch (Exception e) when (e is IOException or ObjectDisposedException)
 			{
+			}
+
+			if (client != Client)
+			{
+				return;
 			}
 
 			string disconnectedText = IsAuthenticated == true ? "Disconnected" : NOT_PAIRED_MESSAGE;

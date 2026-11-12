@@ -52,7 +52,8 @@ namespace SteelSeriesSonarCompanion.CoreApp.Communication.Internal
 			else
 			{
 				string channelName = ConvertSoundChannel(channel);
-				await CommunicationController.SetChannelVolume(channelName, volume);
+				float convertedVolume = ConvertVolumeToLinearGain(volume);
+				await CommunicationController.SetChannelVolume(channelName, convertedVolume);
 			}
 		}
 
@@ -103,7 +104,18 @@ namespace SteelSeriesSonarCompanion.CoreApp.Communication.Internal
 
 		private VolumeData ConvertToVolumeData (SoundChannel channel, VolumeSettingsResponse.VolumeResponse response)
 		{
-			return new VolumeData(channel, response.classic.volume, response.classic.muted);
+			float volume = ConvertLinearGainToVolume(response.classic.volume);
+			return new VolumeData(channel, volume, response.classic.muted);
+		}
+
+		private float ConvertLinearGainToVolume (float gain)
+		{
+			return (float)Math.Sqrt(gain);
+		}
+
+		private float ConvertVolumeToLinearGain (float volume)
+		{
+			return (float)Math.Pow(volume, 2);
 		}
 	}
 }

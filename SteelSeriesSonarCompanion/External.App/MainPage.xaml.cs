@@ -1,4 +1,5 @@
-﻿using SteelSeriesSonarCompanion.Extension.ExternalCommunicationShared.Command;
+﻿using SteelSeriesSonarCompanion.Extension.ExternalCommunicationShared;
+using SteelSeriesSonarCompanion.Extension.ExternalCommunicationShared.Command;
 using SteelSeriesSonarCompanion.Extension.ExternalCommunicationShared.Event;
 using SteelSeriesSonarCompanion.Shared.Core;
 using System.Net;
@@ -25,8 +26,10 @@ namespace SteelSeriesSonarCompanion.External.App
 		private static readonly TimeSpan DISCOVERY_TIMEOUT = TimeSpan.FromSeconds(3);
 		private static readonly TimeSpan RECONNECT_DELAY = TimeSpan.FromSeconds(5);
 
-		private const string SERVER_SEARCH_REQUEST = "DISCOVER_SERVER";
 		private const string TOKEN_PREFERENCE_KEY = "PairingToken";
+		private const string CONNECTING_MESSAGE = "Connecting...";
+		private const string CONNECTED_MESSAGE = "Connected";
+		private const string CONNECTION_FAILED_MESSAGE_FORMAT = "Connection failed: {0}";
 		private const string NOT_PAIRED_MESSAGE = "Not paired - click Remote App > Pair New Device on the PC, then tap Pair with PC in the menu";
 		private const string SERVER_NOT_FOUND_MESSAGE = "PC not found - make sure the companion is running on the same network";
 		private const string RECONNECTING_MESSAGE = "Disconnected - reconnecting...";
@@ -92,8 +95,8 @@ namespace SteelSeriesSonarCompanion.External.App
 			{
 				EnableBroadcast = true
 			};
-			IPEndPoint broadcastEndPoint = new(IPAddress.Broadcast, 8888);
-			byte[] request = Encoding.UTF8.GetBytes(SERVER_SEARCH_REQUEST);
+			IPEndPoint broadcastEndPoint = new(IPAddress.Broadcast, ExternalCommunicationConstProvider.BROADCAST_PORT);
+			byte[] request = Encoding.UTF8.GetBytes(ExternalCommunicationConstProvider.SERVER_SEARCH_REQUEST);
 			await udpClient.SendAsync(request, request.Length, broadcastEndPoint);
 
 			using CancellationTokenSource timeout = new(DISCOVERY_TIMEOUT);
@@ -114,7 +117,7 @@ namespace SteelSeriesSonarCompanion.External.App
 		{
 			TcpClient client = Client;
 			string failureMessage;
-			ConnectionLabel.Text = "Connecting...";
+			ConnectionLabel.Text = CONNECTING_MESSAGE;
 
 			try
 			{
@@ -136,7 +139,7 @@ namespace SteelSeriesSonarCompanion.External.App
 			}
 			catch (Exception ex)
 			{
-				failureMessage = $"Connection failed: {ex.Message}";
+				failureMessage = string.Format(CONNECTION_FAILED_MESSAGE_FORMAT, ex.Message);
 			}
 
 			if (client != Client)
@@ -224,7 +227,7 @@ namespace SteelSeriesSonarCompanion.External.App
 			}
 
 			IsAuthenticated = true;
-			ConnectionLabel.Text = "Connected";
+			ConnectionLabel.Text = CONNECTED_MESSAGE;
 			SendCommand(new RequestVolumeSetupCommand());
 		}
 

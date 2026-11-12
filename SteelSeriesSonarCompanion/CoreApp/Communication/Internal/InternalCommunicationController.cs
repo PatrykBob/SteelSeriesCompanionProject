@@ -53,6 +53,12 @@ namespace SteelSeriesSonarCompanion.CoreApp.Communication.Internal
             return await SendGetRequest<VolumeSettingsResponse>(settingsUri);
         }
 
+        public async Task<List<ClassicRedirectionResponse>?> GetClassicRedirections ()
+        {
+            Uri redirectionsUri = InternalCommunicationAddressProvider.GetClassicRedirectionsAddress(SonarCommunicationPort);
+            return await SendGetRequest<List<ClassicRedirectionResponse>>(redirectionsUri);
+        }
+
         public async Task SetChannelVolume (string channel, float volume)
         {
             Uri volumeUri = InternalCommunicationAddressProvider.GetClassicChannelVolumeAddress(SonarCommunicationPort, channel, volume);

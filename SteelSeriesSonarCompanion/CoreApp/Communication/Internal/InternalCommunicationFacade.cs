@@ -4,6 +4,8 @@ namespace SteelSeriesSonarCompanion.CoreApp.Communication.Internal
 {
 	public class InternalCommunicationFacade
 	{
+		private const string MASTER_REDIRECTION_ID = "game";
+
 		private InternalCommunicationController CommunicationController { get; set; } = new();
 		private AudioSourceController AudioController { get; set; } = new();
 
@@ -24,7 +26,7 @@ namespace SteelSeriesSonarCompanion.CoreApp.Communication.Internal
 
 		public async Task<List<VolumeData>> GetVolumeSettings ()
 		{
-			List<VolumeData> volumeDataCollection = [GetMasterVolumeData()];
+			List<VolumeData> volumeDataCollection = [await GetMasterVolumeData()];
 			VolumeSettingsResponse? volumeSettings = await CommunicationController.GetVolumeSettings();
 
 			if (volumeSettings != null)
@@ -35,19 +37,26 @@ namespace SteelSeriesSonarCompanion.CoreApp.Communication.Internal
 			return volumeDataCollection;
 		}
 
-		public VolumeData GetMasterVolumeData ()
+		private async Task<VolumeData> GetMasterVolumeData ()
 		{
-			float? volume = AudioController.GetMasterVolume();
-			bool? mute = AudioController.GetMasterMute();
+			string? deviceId = await GetMasterDeviceId();
+			float? volume = AudioController.GetVolume(deviceId);
+			bool? mute = AudioController.GetMute(deviceId);
 
 			return new VolumeData(SoundChannel.MASTER, volume ??= 0.0f, mute ??= false);
+		}
+
+		private async Task<string?> GetMasterDeviceId ()
+		{
+			List<ClassicRedirectionResponse>? redirections = await CommunicationController.GetClassicRedirections();
+			return redirections?.FirstOrDefault(redirection => redirection.id == MASTER_REDIRECTION_ID)?.deviceId;
 		}
 
 		public async Task SetChannelVolume (SoundChannel channel, float volume)
 		{
 			if (channel == SoundChannel.MASTER)
 			{
-				AudioController.SetMasterVolume(volume);
+				AudioController.SetVolume(await GetMasterDeviceId(), volume);
 			}
 			else
 			{
@@ -61,7 +70,7 @@ namespace SteelSeriesSonarCompanion.CoreApp.Communication.Internal
 		{
 			if (channel == SoundChannel.MASTER)
 			{
-				AudioController.SetMasterMute(mute);
+				AudioController.SetMute(await GetMasterDeviceId(), mute);
 			}
 			else
 			{

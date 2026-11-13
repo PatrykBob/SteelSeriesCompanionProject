@@ -1,6 +1,6 @@
 <Project>
   <PropertyGroup>
-    <CompanionExtensionDir>$(MSBuildThisFileDirectory)CoreApp\bin\$(Configuration)\net8.0-windows\Extension\</CompanionExtensionDir>
+    <CompanionExtensionDir>$(MSBuildThisFileDirectory)CoreApp\bin\$(Configuration)\net10.0-windows\Extension\</CompanionExtensionDir>
   </PropertyGroup>
 
   <Target Name="CopyToCompanionExtensionFolder"

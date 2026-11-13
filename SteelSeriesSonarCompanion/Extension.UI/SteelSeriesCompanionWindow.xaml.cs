@@ -23,12 +23,14 @@ namespace SteelSeriesCompanionUIExtension
 		{
 			CompanionCore = companionCore;
 			CompanionCore.ChannelVolumeChanged += OnChannelVolumeChanged;
+			CompanionCore.ChannelMuteChanged += OnChannelMuteChanged;
 			InitializeVolumeSliders();
 		}
 
 		protected override void OnClosed (EventArgs e)
 		{
 			CompanionCore!.ChannelVolumeChanged -= OnChannelVolumeChanged;
+			CompanionCore!.ChannelMuteChanged -= OnChannelMuteChanged;
 			base.OnClosed(e);
 		}
 
@@ -42,6 +44,16 @@ namespace SteelSeriesCompanionUIExtension
 			Dispatcher.BeginInvoke(() => SetSliderVolume(e.Channel, e.Volume));
 		}
 
+		private void OnChannelMuteChanged (object? sender, ChannelMuteChangedEventArgs e)
+		{
+			if (sender == this)
+			{
+				return;
+			}
+
+			Dispatcher.BeginInvoke(() => SetMuteCheckBox(e.Channel, e.Mute));
+		}
+
 		private async void InitializeVolumeSliders ()
 		{
 			List<VolumeData> volumeSettings = await CompanionCore!.GetVolumeSettings();
@@ -53,7 +65,42 @@ namespace SteelSeriesCompanionUIExtension
 			foreach (VolumeData volumeData in volumeSettings)
 			{
 				SetSliderVolume(volumeData.Channel, volumeData.Volume);
+				SetMuteCheckBox(volumeData.Channel, volumeData.Mute);
 			}
+		}
+
+		private void SetMuteCheckBox (SoundChannel channel, bool mute)
+		{
+			CheckBox? checkBox = GetMuteCheckBox(channel);
+
+			if (checkBox != null)
+			{
+				checkBox.IsChecked = mute;
+			}
+		}
+
+		private CheckBox? GetMuteCheckBox (SoundChannel channel)
+		{
+			return channel switch
+			{
+				SoundChannel.MASTER => MasterMuteCheckBox,
+				SoundChannel.GAME => GameMuteCheckBox,
+				SoundChannel.CHAT => ChatMuteCheckBox,
+				SoundChannel.MEDIA => MediaMuteCheckBox,
+				SoundChannel.AUX => AuxMuteCheckBox,
+				SoundChannel.MIC => MicrophoneMuteCheckBox,
+				_ => null,
+			};
+		}
+
+		private async void MuteCheckBoxClick (object sender, RoutedEventArgs e)
+		{
+			if (CompanionCore == null || sender is not CheckBox { Tag: SoundChannel channel } checkBox)
+			{
+				return;
+			}
+
+			await CompanionCore.SetChannelMute(this, channel, checkBox.IsChecked == true);
 		}
 
 		private void SetSliderVolume (SoundChannel channel, float volume)

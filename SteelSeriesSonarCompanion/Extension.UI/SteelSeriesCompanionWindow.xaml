@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SteelSeriesCompanionUIExtension"
+        xmlns:core="clr-namespace:SteelSeriesSonarCompanion.Shared.Core;assembly=SteelSeriesSonarCompanion.Shared.Core"
         mc:Ignorable="d"
         Title="SteelSeries Companion" Height="450" Width="800">
     <Grid>
@@ -13,5 +14,11 @@
         <Slider x:Name="MediaVolumeSlider" HorizontalAlignment="Left" Margin="360,50,0,0" VerticalAlignment="Top" Width="20" Orientation="Vertical" Height="324" ValueChanged="MediaVolumeSliderChange" Maximum="1"/>
         <Slider x:Name="AuxVolumeSlider" HorizontalAlignment="Left" Margin="460,50,0,0" VerticalAlignment="Top" Width="20" Orientation="Vertical" Height="324" ValueChanged="AuxVolumeSliderChange" Maximum="1"/>
         <Slider x:Name="MicrophoneVolumeSlider" HorizontalAlignment="Left" Margin="560,50,0,0" VerticalAlignment="Top" Width="20" Orientation="Vertical" Height="324" ValueChanged="MicrophoneVolumeSliderChange" Maximum="1"/>
+        <CheckBox x:Name="MasterMuteCheckBox" Content="Mute" HorizontalAlignment="Left" Margin="45,385,0,0" VerticalAlignment="Top" Tag="{x:Static core:SoundChannel.MASTER}" Click="MuteCheckBoxClick"/>
+        <CheckBox x:Name="GameMuteCheckBox" Content="Mute" HorizontalAlignment="Left" Margin="145,385,0,0" VerticalAlignment="Top" Tag="{x:Static core:SoundChannel.GAME}" Click="MuteCheckBoxClick"/>
+        <CheckBox x:Name="ChatMuteCheckBox" Content="Mute" HorizontalAlignment="Left" Margin="245,385,0,0" VerticalAlignment="Top" Tag="{x:Static core:SoundChannel.CHAT}" Click="MuteCheckBoxClick"/>
+        <CheckBox x:Name="MediaMuteCheckBox" Content="Mute" HorizontalAlignment="Left" Margin="345,385,0,0" VerticalAlignment="Top" Tag="{x:Static core:SoundChannel.MEDIA}" Click="MuteCheckBoxClick"/>
+        <CheckBox x:Name="AuxMuteCheckBox" Content="Mute" HorizontalAlignment="Left" Margin="445,385,0,0" VerticalAlignment="Top" Tag="{x:Static core:SoundChannel.AUX}" Click="MuteCheckBoxClick"/>
+        <CheckBox x:Name="MicrophoneMuteCheckBox" Content="Mute" HorizontalAlignment="Left" Margin="545,385,0,0" VerticalAlignment="Top" Tag="{x:Static core:SoundChannel.MIC}" Click="MuteCheckBoxClick"/>
     </Grid>
 </Window>

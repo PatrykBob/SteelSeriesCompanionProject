@@ -1,4 +1,5 @@
 using System.Net.Sockets;
+using System.Threading.Channels;
 
 namespace SteelSeriesSonarCompanion.Extension.ExternalCommunication
 {
@@ -6,6 +7,9 @@ namespace SteelSeriesSonarCompanion.Extension.ExternalCommunication
 	{
 		public TcpClient Client { get; }
 		public StreamWriter Writer { get; }
+		private Channel<string> OutgoingMessageChannel { get; } = Channel.CreateBounded<string>(OUTGOING_QUEUE_CAPACITY);
+
+		private const int OUTGOING_QUEUE_CAPACITY = 256;
 
 		public RemoteClientConnection (TcpClient client)
 		{
@@ -16,8 +20,22 @@ namespace SteelSeriesSonarCompanion.Extension.ExternalCommunication
 			};
 		}
 
+		public bool TryQueueMessage (string message)
+		{
+			return OutgoingMessageChannel.Writer.TryWrite(message);
+		}
+
+		public async Task RunSendLoop (CancellationToken token)
+		{
+			await foreach (string message in OutgoingMessageChannel.Reader.ReadAllAsync(token))
+			{
+				await Writer.WriteLineAsync(message);
+			}
+		}
+
 		public void Dispose ()
 		{
+			OutgoingMessageChannel.Writer.TryComplete();
 			Client.Dispose();
 		}
 	}

@@ -109,13 +109,10 @@ namespace SteelSeriesSonarCompanion.Extension.ExternalCommunication
 						continue;
 					}
 
-					try
+					if (connection.TryQueueMessage(json) == false)
 					{
-						connection.Writer.WriteLine(json);
-					}
-					catch (Exception e) when (e is IOException or ObjectDisposedException)
-					{
-						Trace.WriteLine($"Failed to send {externalEvent.EventName}: {e.Message}");
+						Trace.WriteLine($"Remote app is not reading events, closing connection (dropped {externalEvent.EventName})");
+						connection.Client.Close();
 					}
 				}
 			}
@@ -209,6 +206,7 @@ namespace SteelSeriesSonarCompanion.Extension.ExternalCommunication
 				}
 
 				AddConnection(connection);
+				_ = RunSendLoop(connection, token);
 				await RunMessageLoop(connection, reader, token);
 			}
 			catch (Exception e)
@@ -218,6 +216,19 @@ namespace SteelSeriesSonarCompanion.Extension.ExternalCommunication
 			finally
 			{
 				RemoveConnection(connection);
+			}
+		}
+
+		private async Task RunSendLoop (RemoteClientConnection connection, CancellationToken token)
+		{
+			try
+			{
+				await connection.RunSendLoop(token);
+			}
+			catch (Exception e) when (e is IOException or ObjectDisposedException or OperationCanceledException)
+			{
+				Trace.WriteLine($"Stopped sending to remote app: {e.Message}");
+				connection.Client.Close();
 			}
 		}
 

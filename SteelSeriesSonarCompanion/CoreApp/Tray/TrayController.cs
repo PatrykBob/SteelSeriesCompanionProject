@@ -1,4 +1,5 @@
-﻿using SteelSeriesSonarCompanion.Shared.ExtensionCore.Extension;
+﻿using SteelSeriesSonarCompanion.CoreApp.Startup;
+using SteelSeriesSonarCompanion.Shared.ExtensionCore.Extension;
 using System.IO;
 
 namespace SteelSeriesSonarCompanion.CoreApp.Tray
@@ -7,8 +8,11 @@ namespace SteelSeriesSonarCompanion.CoreApp.Tray
 	{
 		private NotifyIcon TrayIcon { get; set; } = new();
 		private List<(string Message, ToolTipIcon Icon)> PendingBalloonCollection { get; set; } = new();
+		private StartupRegistration StartupRegistration { get; set; } = new();
 
 		private const string ICON_NAME = "icon.ico";
+		private const string START_WITH_WINDOWS_TEXT = "Start with Windows";
+		private const string START_WITH_WINDOWS_FAILED_MESSAGE = "Could not change the Start with Windows setting.";
 		private const string TRAY_TITLE = "SteelSeries Sonar Companion";
 		private const int BALLOON_TIMEOUT_MS = 5000;
 
@@ -64,9 +68,19 @@ namespace SteelSeriesSonarCompanion.CoreApp.Tray
 				contextMenu.Items.Add(ConvertToToolStripMenuItem(extensionMenuItemCollection[i]));
 			}
 
+			AddStartWithWindowsItem();
 			AddExitItem();
 
 			return contextMenu;
+
+			void AddStartWithWindowsItem ()
+			{
+				contextMenu.Items.Add(new ToolStripSeparator());
+				ToolStripMenuItem startWithWindowsItem = new(START_WITH_WINDOWS_TEXT);
+				startWithWindowsItem.Checked = StartupRegistration.IsEnabled();
+				startWithWindowsItem.Click += (_, _) => ToggleStartWithWindows(startWithWindowsItem);
+				contextMenu.Items.Add(startWithWindowsItem);
+			}
 
 			void AddExitItem ()
 			{
@@ -78,6 +92,16 @@ namespace SteelSeriesSonarCompanion.CoreApp.Tray
 			{
 				System.Windows.Application.Current.Shutdown();
 			}
+		}
+
+		private void ToggleStartWithWindows (ToolStripMenuItem menuItem)
+		{
+			if (StartupRegistration.TrySetEnabled(menuItem.Checked == false) == false)
+			{
+				ShowWarning(START_WITH_WINDOWS_FAILED_MESSAGE);
+			}
+
+			menuItem.Checked = StartupRegistration.IsEnabled();
 		}
 
 		private ToolStripMenuItem ConvertToToolStripMenuItem (SteelSeriesCompanionExtensionMenuItem extensionMenuItem)

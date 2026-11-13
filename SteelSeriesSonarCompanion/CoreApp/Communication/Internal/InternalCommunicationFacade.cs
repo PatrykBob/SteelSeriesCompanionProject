@@ -11,6 +11,12 @@ namespace SteelSeriesSonarCompanion.CoreApp.Communication.Internal
 		private AudioSourceController AudioController { get; set; } = new();
 		private string? CachedMasterDeviceId { get; set; }
 
+		public event Action<float, bool> MasterVolumeChangedExternally
+		{
+			add => AudioController.ExternalVolumeChanged += value;
+			remove => AudioController.ExternalVolumeChanged -= value;
+		}
+
 		public async Task<bool> Initialize ()
 		{
 			return await CommunicationController.Initialize();

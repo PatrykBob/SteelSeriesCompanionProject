@@ -18,6 +18,9 @@ namespace SteelSeriesSonarCompanion.CoreApp
 		private TrayController Tray { get; set; } = new();
 		private Dictionary<SoundChannel, float> ConfirmedVolumeMap { get; } = new();
 		private Dictionary<SoundChannel, bool> ConfirmedMuteMap { get; } = new();
+		private SynchronizationContext? UiContext { get; set; }
+
+		private const float VOLUME_CHANGE_TOLERANCE = 0.001f;
 
 		private const string SONAR_CONNECTION_FAILED_MESSAGE =
 			"Could not connect to SteelSeries Sonar. Make sure SteelSeries GG is running; the companion will connect automatically.";
@@ -137,6 +140,8 @@ namespace SteelSeriesSonarCompanion.CoreApp
 
 		public async void Initialize ()
 		{
+			UiContext = SynchronizationContext.Current;
+			InternalFacade.MasterVolumeChangedExternally += OnMasterVolumeChangedExternally;
 			bool isConnectedToSonar = await InternalFacade.Initialize();
 
 			ExtensionController.Initialize(this);
@@ -148,10 +153,33 @@ namespace SteelSeriesSonarCompanion.CoreApp
 			{
 				Tray.ShowWarning(SONAR_CONNECTION_FAILED_MESSAGE);
 			}
+
+			await GetVolumeSettings();
+		}
+
+		private void OnMasterVolumeChangedExternally (float volume, bool mute)
+		{
+			UiContext?.Post(_ => ApplyExternalChange(SoundChannel.MASTER, volume, mute), null);
+		}
+
+		private void ApplyExternalChange (SoundChannel channel, float volume, bool mute)
+		{
+			if (ConfirmedVolumeMap.TryGetValue(channel, out float confirmedVolume) == false || Math.Abs(confirmedVolume - volume) > VOLUME_CHANGE_TOLERANCE)
+			{
+				ConfirmedVolumeMap[channel] = volume;
+				ChannelVolumeChanged.Invoke(this, new ChannelVolumeChangedEventArgs(channel, volume));
+			}
+
+			if (ConfirmedMuteMap.TryGetValue(channel, out bool confirmedMute) == false || confirmedMute != mute)
+			{
+				ConfirmedMuteMap[channel] = mute;
+				ChannelMuteChanged.Invoke(this, new ChannelMuteChangedEventArgs(channel, mute));
+			}
 		}
 
 		public void Dispose ()
 		{
+			InternalFacade.MasterVolumeChangedExternally -= OnMasterVolumeChangedExternally;
 			ExtensionController.Dispose();
 			InternalFacade.Dispose();
 			Tray.Dispose();

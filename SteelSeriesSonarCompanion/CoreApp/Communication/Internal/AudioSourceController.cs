@@ -7,6 +7,9 @@ namespace SteelSeriesSonarCompanion.CoreApp.Communication.Internal
 	{
 		private MMDeviceEnumerator Enumerator { get; set; } = new();
 		private MMDevice? CachedDevice { get; set; }
+		private Guid OwnNotificationGuid { get; } = Guid.NewGuid();
+
+		public event Action<float, bool> ExternalVolumeChanged = delegate { };
 
 		public bool TrySetVolume (string? deviceId, float volume)
 		{
@@ -48,6 +51,11 @@ namespace SteelSeriesSonarCompanion.CoreApp.Communication.Internal
 
 		public void ReleaseCachedDevice ()
 		{
+			if (CachedDevice != null)
+			{
+				CachedDevice.AudioEndpointVolume.OnVolumeNotification -= OnVolumeNotification;
+			}
+
 			CachedDevice?.Dispose();
 			CachedDevice = null;
 		}
@@ -58,9 +66,21 @@ namespace SteelSeriesSonarCompanion.CoreApp.Communication.Internal
 			{
 				ReleaseCachedDevice();
 				CachedDevice = Enumerator.GetDevice(deviceId);
+				CachedDevice.AudioEndpointVolume.NotificationGuid = OwnNotificationGuid;
+				CachedDevice.AudioEndpointVolume.OnVolumeNotification += OnVolumeNotification;
 			}
 
 			return CachedDevice;
+		}
+
+		private void OnVolumeNotification (AudioVolumeNotificationData data)
+		{
+			if (data.EventContext == OwnNotificationGuid)
+			{
+				return;
+			}
+
+			ExternalVolumeChanged.Invoke(data.MasterVolume, data.Muted);
 		}
 
 		public void Dispose ()

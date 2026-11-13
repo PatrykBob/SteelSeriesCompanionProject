@@ -1,5 +1,8 @@
-﻿namespace SteelSeriesSonarCompanion.Shared.Core
+﻿using Newtonsoft.Json.Converters;
+
+namespace SteelSeriesSonarCompanion.Shared.Core
 {
+	[Newtonsoft.Json.JsonConverter(typeof(StringEnumConverter))]
 	public enum SoundChannel
 	{
 		MASTER,

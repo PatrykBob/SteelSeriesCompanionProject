@@ -125,6 +125,7 @@ namespace SteelSeriesSonarCompanion.External.App
 			{
 				IPEndPoint endPoint = await DiscoverServer();
 				await client.ConnectAsync(endPoint);
+				TcpKeepAliveConfigurator.Enable(client.Client);
 
 				Writer = new StreamWriter(client.GetStream())
 				{

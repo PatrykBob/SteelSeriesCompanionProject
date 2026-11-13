@@ -176,6 +176,7 @@ namespace SteelSeriesSonarCompanion.Extension.ExternalCommunication
 				try
 				{
 					using TcpClient client = await listener.AcceptTcpClientAsync(token);
+					TcpKeepAliveConfigurator.Enable(client.Client);
 					await HandleClient(client, token);
 				}
 				catch (Exception) when (token.IsCancellationRequested)

@@ -138,6 +138,7 @@ namespace SteelSeriesSonarCompanion.Extension.ExternalCommunication
 			catch (Exception e)
 			{
 				Trace.WriteLine($"Failed to start communication server: {e}");
+				CompanionCore!.ShowNotification($"Could not start the remote app server (port {ExternalCommunicationConstProvider.BROADCAST_PORT} may be in use). Remote apps can't connect.");
 				StopCommunicationServer();
 				return;
 			}

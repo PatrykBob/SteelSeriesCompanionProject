@@ -19,6 +19,8 @@ namespace SteelSeriesSonarCompanion.CoreApp
 
 		private const string SONAR_CONNECTION_FAILED_MESSAGE =
 			"Could not connect to SteelSeries Sonar. Make sure SteelSeries GG is running; the companion will connect automatically.";
+		private const string AUDIO_DEVICE_REFRESHED_MESSAGE = "Audio device refreshed.";
+		private const string REFRESH_AUDIO_DEVICE_MENU_TEXT = "Refresh Audio Device";
 
 		public async Task<List<VolumeData>> GetVolumeSettings ()
 		{
@@ -71,6 +73,13 @@ namespace SteelSeriesSonarCompanion.CoreApp
 			VolumeSetupChanged.Invoke(sender, volumeDataCollection);
 		}
 
+		public async Task RefreshAudioDevice (object? sender)
+		{
+			InternalFacade.ResetMasterDevice();
+			await RequestVolumeSetup(sender);
+			ShowNotification(AUDIO_DEVICE_REFRESHED_MESSAGE);
+		}
+
 		public void ShowNotification (string message)
 		{
 			Tray.ShowInfo(message);
@@ -82,6 +91,7 @@ namespace SteelSeriesSonarCompanion.CoreApp
 
 			ExtensionController.Initialize(this);
 			List<SteelSeriesCompanionExtensionMenuItem> extensionMenuItemCollection = ExtensionController.GetExtensionToolMenuItemCollection();
+			extensionMenuItemCollection.Add(new SteelSeriesCompanionExtensionMenuItem(REFRESH_AUDIO_DEVICE_MENU_TEXT, () => _ = RefreshAudioDevice(this)));
 			Tray.Initialize(extensionMenuItemCollection);
 
 			if (isConnectedToSonar == false)

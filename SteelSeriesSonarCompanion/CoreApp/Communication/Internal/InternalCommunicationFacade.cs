@@ -9,6 +9,7 @@ namespace SteelSeriesSonarCompanion.CoreApp.Communication.Internal
 
 		private InternalCommunicationController CommunicationController { get; set; } = new();
 		private AudioSourceController AudioController { get; set; } = new();
+		private string? CachedMasterDeviceId { get; set; }
 
 		public async Task<bool> Initialize ()
 		{
@@ -55,8 +56,20 @@ namespace SteelSeriesSonarCompanion.CoreApp.Communication.Internal
 
 		private async Task<string?> GetMasterDeviceId ()
 		{
+			if (CachedMasterDeviceId != null)
+			{
+				return CachedMasterDeviceId;
+			}
+
 			List<ClassicRedirectionResponse>? redirections = await CommunicationController.GetClassicRedirections();
-			return redirections?.FirstOrDefault(redirection => redirection.id == MASTER_REDIRECTION_ID)?.deviceId;
+			CachedMasterDeviceId = redirections?.FirstOrDefault(redirection => redirection.id == MASTER_REDIRECTION_ID)?.deviceId;
+			return CachedMasterDeviceId;
+		}
+
+		public void ResetMasterDevice ()
+		{
+			CachedMasterDeviceId = null;
+			AudioController.ReleaseCachedDevice();
 		}
 
 		public async Task SetChannelVolume (SoundChannel channel, float volume)

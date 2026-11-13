@@ -13,14 +13,13 @@ namespace SteelSeriesSonarCompanion.Extension.ExternalCommunication
 {
 	public class SteelSeriesCompanionExternalCommunicationController : BaseSteelSeriesCompanionExtension
 	{
-		private TcpClient? Client { get; set; }
 		private TcpListener? Listener { get; set; }
 		private UdpClient? DiscoveryClient { get; set; }
 		private CancellationTokenSource? ServerCancellation { get; set; }
 		private int? ListenerPort { get; set; }
 
-		private StreamWriter? Writer { get; set; }
-		private object WriterLock { get; } = new();
+		private List<RemoteClientConnection> Connections { get; } = new();
+		private object ConnectionsLock { get; } = new();
 
 		private PairedDeviceStore DeviceStore { get; set; } = new();
 		private DateTime? PairingDeadline { get; set; }
@@ -64,7 +63,7 @@ namespace SteelSeriesSonarCompanion.Extension.ExternalCommunication
 		private void ForgetPairedDevices ()
 		{
 			DeviceStore.Clear();
-			DisconnectClient();
+			DisconnectClients();
 			CompanionCore!.ShowNotification("All paired devices forgotten.");
 		}
 
@@ -82,22 +81,12 @@ namespace SteelSeriesSonarCompanion.Extension.ExternalCommunication
 
 		private void OnChannelVolumeChanged (object? sender, ChannelVolumeChangedEventArgs e)
 		{
-			if (sender == this)
-			{
-				return;
-			}
-
-			SendEvent(new ChannelVolumeEvent(e.Channel, e.Volume));
+			SendEvent(new ChannelVolumeEvent(e.Channel, e.Volume), sender as RemoteClientConnection);
 		}
 
 		private void OnChannelMuteChanged (object? sender, ChannelMuteChangedEventArgs e)
 		{
-			if (sender == this)
-			{
-				return;
-			}
-
-			SendEvent(new ChannelMuteEvent(e.Channel, e.Mute));
+			SendEvent(new ChannelMuteEvent(e.Channel, e.Mute), sender as RemoteClientConnection);
 		}
 
 		private void OnVolumeSetupChanged (object? sender, List<VolumeData> volumeDataCollection)
@@ -105,19 +94,27 @@ namespace SteelSeriesSonarCompanion.Extension.ExternalCommunication
 			SendEvent(new VolumeSetupEvent(volumeDataCollection));
 		}
 
-		private void SendEvent (BaseExternalCommunicationEvent externalEvent)
+		private void SendEvent (BaseExternalCommunicationEvent externalEvent, RemoteClientConnection? excludedConnection = null)
 		{
 			string json = ExternalCommunicationEventConverter.ConvertToJson(externalEvent);
 
-			lock (WriterLock)
+			lock (ConnectionsLock)
 			{
-				try
+				foreach (RemoteClientConnection connection in Connections)
 				{
-					Writer?.WriteLine(json);
-				}
-				catch (Exception e) when (e is IOException or ObjectDisposedException)
-				{
-					Trace.WriteLine($"Failed to send {externalEvent.EventName}: {e.Message}");
+					if (connection == excludedConnection)
+					{
+						continue;
+					}
+
+					try
+					{
+						connection.Writer.WriteLine(json);
+					}
+					catch (Exception e) when (e is IOException or ObjectDisposedException)
+					{
+						Trace.WriteLine($"Failed to send {externalEvent.EventName}: {e.Message}");
+					}
 				}
 			}
 		}
@@ -153,7 +150,7 @@ namespace SteelSeriesSonarCompanion.Extension.ExternalCommunication
 			ServerCancellation?.Dispose();
 			ServerCancellation = null;
 
-			DisconnectClient();
+			DisconnectClients();
 
 			Listener?.Dispose();
 			Listener = null;
@@ -162,11 +159,17 @@ namespace SteelSeriesSonarCompanion.Extension.ExternalCommunication
 			DiscoveryClient = null;
 		}
 
-		private void DisconnectClient ()
+		private void DisconnectClients ()
 		{
-			Writer = null;
-			Client?.Dispose();
-			Client = null;
+			lock (ConnectionsLock)
+			{
+				foreach (RemoteClientConnection connection in Connections)
+				{
+					connection.Dispose();
+				}
+
+				Connections.Clear();
+			}
 		}
 
 		private async Task RunListeningLoop (TcpListener listener, CancellationToken token)
@@ -175,9 +178,9 @@ namespace SteelSeriesSonarCompanion.Extension.ExternalCommunication
 			{
 				try
 				{
-					using TcpClient client = await listener.AcceptTcpClientAsync(token);
+					TcpClient client = await listener.AcceptTcpClientAsync(token);
 					TcpKeepAliveConfigurator.Enable(client.Client);
-					await HandleClient(client, token);
+					_ = HandleClient(client, token);
 				}
 				catch (Exception) when (token.IsCancellationRequested)
 				{
@@ -192,39 +195,46 @@ namespace SteelSeriesSonarCompanion.Extension.ExternalCommunication
 
 		private async Task HandleClient (TcpClient client, CancellationToken token)
 		{
-			NetworkStream stream = client.GetStream();
-			using StreamReader reader = new(stream);
-			StreamWriter writer = new(stream)
-			{
-				AutoFlush = true
-			};
+			using RemoteClientConnection connection = new(client);
+			using StreamReader reader = new(client.GetStream());
 
 			try
 			{
-				if (await Authenticate(reader, writer, token) == false)
+				if (await Authenticate(reader, connection.Writer, token) == false)
 				{
 					return;
 				}
 
-				Client = client;
-				Writer = writer;
-				await RunMessageLoop(reader, token);
+				AddConnection(connection);
+				await RunMessageLoop(connection, reader, token);
 			}
-			catch (IOException e)
+			catch (Exception e)
 			{
-				Trace.WriteLine($"Client connection lost: {e.Message}");
+				Trace.WriteLine($"Client connection closed: {e.Message}");
 			}
 			finally
 			{
-				if (Client == client)
-				{
-					Writer = null;
-					Client = null;
-				}
+				RemoveConnection(connection);
 			}
 		}
 
-		private async Task RunMessageLoop (StreamReader reader, CancellationToken token)
+		private void AddConnection (RemoteClientConnection connection)
+		{
+			lock (ConnectionsLock)
+			{
+				Connections.Add(connection);
+			}
+		}
+
+		private void RemoveConnection (RemoteClientConnection connection)
+		{
+			lock (ConnectionsLock)
+			{
+				Connections.Remove(connection);
+			}
+		}
+
+		private async Task RunMessageLoop (RemoteClientConnection connection, StreamReader reader, CancellationToken token)
 		{
 			while (token.IsCancellationRequested == false)
 			{
@@ -235,7 +245,7 @@ namespace SteelSeriesSonarCompanion.Extension.ExternalCommunication
 					break;
 				}
 
-				ExecuteMessage(message);
+				ExecuteMessage(connection, message);
 			}
 		}
 
@@ -307,7 +317,7 @@ namespace SteelSeriesSonarCompanion.Extension.ExternalCommunication
 			return deviceName.Length > MAX_DEVICE_NAME_LENGTH ? deviceName[..MAX_DEVICE_NAME_LENGTH] : deviceName;
 		}
 
-		private void ExecuteMessage (string message)
+		private void ExecuteMessage (RemoteClientConnection connection, string message)
 		{
 			try
 			{
@@ -320,7 +330,7 @@ namespace SteelSeriesSonarCompanion.Extension.ExternalCommunication
 
 				if (command != null)
 				{
-					command.ExecuteCommand(this, CompanionCore!);
+					command.ExecuteCommand(connection, CompanionCore!);
 				}
 				else
 				{

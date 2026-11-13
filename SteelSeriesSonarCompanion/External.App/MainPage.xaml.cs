@@ -2,6 +2,7 @@
 using SteelSeriesSonarCompanion.Extension.ExternalCommunicationShared.Command;
 using SteelSeriesSonarCompanion.Extension.ExternalCommunicationShared.Event;
 using SteelSeriesSonarCompanion.Shared.Core;
+using System.Globalization;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -101,7 +102,8 @@ namespace SteelSeriesSonarCompanion.External.App
 
 			using CancellationTokenSource timeout = new(DISCOVERY_TIMEOUT);
 			UdpReceiveResult result = await udpClient.ReceiveAsync(timeout.Token);
-			return IPEndPoint.Parse(Encoding.UTF8.GetString(result.Buffer));
+			int port = int.Parse(Encoding.UTF8.GetString(result.Buffer), CultureInfo.InvariantCulture);
+			return new IPEndPoint(result.RemoteEndPoint.Address, port);
 		}
 
 		public void Reconnect ()

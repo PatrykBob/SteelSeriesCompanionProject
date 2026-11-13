@@ -17,7 +17,7 @@ namespace SteelSeriesSonarCompanion.Extension.ExternalCommunication
 		private TcpListener? Listener { get; set; }
 		private UdpClient? DiscoveryClient { get; set; }
 		private CancellationTokenSource? ServerCancellation { get; set; }
-		private IPEndPoint? LocalEndPoint { get; set; }
+		private int? ListenerPort { get; set; }
 
 		private StreamWriter? Writer { get; set; }
 		private object WriterLock { get; } = new();
@@ -133,7 +133,7 @@ namespace SteelSeriesSonarCompanion.Extension.ExternalCommunication
 			{
 				Listener = new(IPAddress.Any, 0);
 				Listener.Start();
-				CacheLocalEndpoint();
+				CacheListenerPort();
 				DiscoveryClient = new UdpClient(ExternalCommunicationConstProvider.BROADCAST_PORT);
 			}
 			catch (Exception e)
@@ -332,11 +332,11 @@ namespace SteelSeriesSonarCompanion.Extension.ExternalCommunication
 			}
 		}
 
-		private void CacheLocalEndpoint ()
+		private void CacheListenerPort ()
 		{
 			if (Listener!.LocalEndpoint is IPEndPoint ipEndPoint)
 			{
-				LocalEndPoint = GetLocalIPAddress(ipEndPoint.Port);
+				ListenerPort = ipEndPoint.Port;
 			}
 		}
 
@@ -349,9 +349,9 @@ namespace SteelSeriesSonarCompanion.Extension.ExternalCommunication
 					UdpReceiveResult result = await udpClient.ReceiveAsync(token);
 					string message = Encoding.UTF8.GetString(result.Buffer);
 
-					if (message == ExternalCommunicationConstProvider.SERVER_SEARCH_REQUEST && LocalEndPoint != null)
+					if (message == ExternalCommunicationConstProvider.SERVER_SEARCH_REQUEST && ListenerPort != null)
 					{
-						byte[] response = Encoding.UTF8.GetBytes(LocalEndPoint.ToString());
+						byte[] response = Encoding.UTF8.GetBytes(ListenerPort.Value.ToString(CultureInfo.InvariantCulture));
 						await udpClient.SendAsync(response, result.RemoteEndPoint, token);
 					}
 				}
@@ -364,21 +364,6 @@ namespace SteelSeriesSonarCompanion.Extension.ExternalCommunication
 					Trace.WriteLine($"Discovery error: {e.Message}");
 				}
 			}
-		}
-
-		private IPEndPoint GetLocalIPAddress (int port)
-		{
-			IPHostEntry host = Dns.GetHostEntry(Dns.GetHostName());
-
-			foreach (IPAddress ip in host.AddressList)
-			{
-				if (ip.AddressFamily == AddressFamily.InterNetwork)
-				{
-					return new IPEndPoint(ip, port);
-				}
-			}
-
-			throw new Exception("No network adapters with an IPv4 address in the system!");
 		}
 	}
 }

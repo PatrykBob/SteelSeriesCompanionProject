@@ -1,4 +1,5 @@
-﻿using SteelSeriesSonarCompanion.Shared.Core;
+﻿using System.Diagnostics;
+using SteelSeriesSonarCompanion.Shared.Core;
 
 namespace SteelSeriesSonarCompanion.CoreApp.Communication.Internal
 {
@@ -104,22 +105,36 @@ namespace SteelSeriesSonarCompanion.CoreApp.Communication.Internal
 
 		private List<VolumeData> ConvertToVolumeDataCollection (VolumeSettingsResponse volumeSettings)
 		{
-			List<VolumeData> volumeDataCollection =
-			[
-				ConvertToVolumeData(SoundChannel.GAME, volumeSettings.devices.game),
-				ConvertToVolumeData(SoundChannel.CHAT, volumeSettings.devices.chatRender),
-				ConvertToVolumeData(SoundChannel.MEDIA, volumeSettings.devices.media),
-				ConvertToVolumeData(SoundChannel.AUX, volumeSettings.devices.aux),
-				ConvertToVolumeData(SoundChannel.MIC, volumeSettings.devices.chatCapture),
-			];
+			List<VolumeData> volumeDataCollection = [];
+			VolumeSettingsResponse.DevicesResponse? devices = volumeSettings.devices;
+
+			if (devices == null)
+			{
+				Trace.WriteLine("Sonar returned no device volume data");
+				return volumeDataCollection;
+			}
+
+			AddVolumeData(volumeDataCollection, SoundChannel.GAME, devices.game);
+			AddVolumeData(volumeDataCollection, SoundChannel.CHAT, devices.chatRender);
+			AddVolumeData(volumeDataCollection, SoundChannel.MEDIA, devices.media);
+			AddVolumeData(volumeDataCollection, SoundChannel.AUX, devices.aux);
+			AddVolumeData(volumeDataCollection, SoundChannel.MIC, devices.chatCapture);
 
 			return volumeDataCollection;
 		}
 
-		private VolumeData ConvertToVolumeData (SoundChannel channel, VolumeSettingsResponse.VolumeResponse response)
+		private void AddVolumeData (List<VolumeData> volumeDataCollection, SoundChannel channel, VolumeSettingsResponse.VolumeResponse? response)
 		{
-			float volume = ConvertLinearGainToVolume(response.classic.volume);
-			return new VolumeData(channel, volume, response.classic.muted);
+			VolumeSettingsResponse.ClassicVolumeResponse? classic = response?.classic;
+
+			if (classic == null)
+			{
+				Trace.WriteLine($"Sonar returned no volume data for {channel}");
+				return;
+			}
+
+			float volume = ConvertLinearGainToVolume(classic.volume);
+			volumeDataCollection.Add(new VolumeData(channel, volume, classic.muted));
 		}
 
 		private float ConvertLinearGainToVolume (float gain)

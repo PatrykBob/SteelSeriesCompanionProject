@@ -72,31 +72,27 @@ namespace SteelSeriesSonarCompanion.CoreApp.Communication.Internal
 			AudioController.ReleaseCachedDevice();
 		}
 
-		public async Task SetChannelVolume (SoundChannel channel, float volume)
+		public async Task<bool> TrySetChannelVolume (SoundChannel channel, float volume)
 		{
 			if (channel == SoundChannel.MASTER)
 			{
-				AudioController.SetVolume(await GetMasterDeviceId(), volume);
+				return AudioController.TrySetVolume(await GetMasterDeviceId(), volume);
 			}
-			else
-			{
-				string channelName = ConvertSoundChannel(channel);
-				float convertedVolume = ConvertVolumeToLinearGain(volume);
-				await CommunicationController.SetChannelVolume(channelName, convertedVolume);
-			}
+
+			string channelName = ConvertSoundChannel(channel);
+			float convertedVolume = ConvertVolumeToLinearGain(volume);
+			return await CommunicationController.TrySetChannelVolume(channelName, convertedVolume);
 		}
 
-		public async Task SetChannelMute (SoundChannel channel, bool mute)
+		public async Task<bool> TrySetChannelMute (SoundChannel channel, bool mute)
 		{
 			if (channel == SoundChannel.MASTER)
 			{
-				AudioController.SetMute(await GetMasterDeviceId(), mute);
+				return AudioController.TrySetMute(await GetMasterDeviceId(), mute);
 			}
-			else
-			{
-				string channelName = ConvertSoundChannel(channel);
-				await CommunicationController.SetChannelMute(channelName, mute);
-			}
+
+			string channelName = ConvertSoundChannel(channel);
+			return await CommunicationController.TrySetChannelMute(channelName, mute);
 		}
 
 		private string ConvertSoundChannel (SoundChannel channel)

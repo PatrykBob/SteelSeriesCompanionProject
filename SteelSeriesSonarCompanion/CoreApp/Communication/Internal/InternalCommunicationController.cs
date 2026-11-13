@@ -46,47 +46,47 @@ namespace SteelSeriesSonarCompanion.CoreApp.Communication.Internal
 
         public async Task<List<ChannelConfigResponse>?> GetConfig ()
         {
-            return await SendRequest<List<ChannelConfigResponse>>(HttpMethod.Get, InternalCommunicationAddressProvider.GetConfigSelectedAddress);
+            return (await SendRequest<List<ChannelConfigResponse>>(HttpMethod.Get, InternalCommunicationAddressProvider.GetConfigSelectedAddress)).Value;
         }
 
         public async Task<ChannelConfigResponse?> PostConfig (ChannelConfigResponse config)
         {
             string json = JsonConverter.ConvertToJSON(config);
-            return await SendRequest<ChannelConfigResponse>(HttpMethod.Put, InternalCommunicationAddressProvider.GetConfigAddress, () => new StringContent(json, Encoding.UTF8, "application/json"));
+            return (await SendRequest<ChannelConfigResponse>(HttpMethod.Put, InternalCommunicationAddressProvider.GetConfigAddress, () => new StringContent(json, Encoding.UTF8, "application/json"))).Value;
         }
 
         public async Task<VolumeSettingsResponse?> GetVolumeSettings ()
         {
-            return await SendRequest<VolumeSettingsResponse>(HttpMethod.Get, InternalCommunicationAddressProvider.GetVolumeSettingsUri);
+            return (await SendRequest<VolumeSettingsResponse>(HttpMethod.Get, InternalCommunicationAddressProvider.GetVolumeSettingsUri)).Value;
         }
 
         public async Task<List<ClassicRedirectionResponse>?> GetClassicRedirections ()
         {
-            return await SendRequest<List<ClassicRedirectionResponse>>(HttpMethod.Get, InternalCommunicationAddressProvider.GetClassicRedirectionsAddress);
+            return (await SendRequest<List<ClassicRedirectionResponse>>(HttpMethod.Get, InternalCommunicationAddressProvider.GetClassicRedirectionsAddress)).Value;
         }
 
-        public async Task SetChannelVolume (string channel, float volume)
+        public async Task<bool> TrySetChannelVolume (string channel, float volume)
         {
-            await SendRequest<object>(HttpMethod.Put, port => InternalCommunicationAddressProvider.GetClassicChannelVolumeAddress(port, channel, volume));
+            return (await SendRequest<object>(HttpMethod.Put, port => InternalCommunicationAddressProvider.GetClassicChannelVolumeAddress(port, channel, volume))).IsSuccess;
         }
 
-        public async Task SetChannelMute (string channel, bool mute)
+        public async Task<bool> TrySetChannelMute (string channel, bool mute)
         {
-            await SendRequest<object>(HttpMethod.Put, port => InternalCommunicationAddressProvider.GetClassicChannelMuteAddress(port, channel, mute));
+            return (await SendRequest<object>(HttpMethod.Put, port => InternalCommunicationAddressProvider.GetClassicChannelMuteAddress(port, channel, mute))).IsSuccess;
         }
 
-        public async Task SetChatMix (float value)
+        public async Task<bool> TrySetChatMix (float value)
         {
-            await SendRequest<object>(HttpMethod.Put, port => InternalCommunicationAddressProvider.GetChatMixAddress(port, value));
+            return (await SendRequest<object>(HttpMethod.Put, port => InternalCommunicationAddressProvider.GetChatMixAddress(port, value))).IsSuccess;
         }
 
-        private async Task<T?> SendRequest<T> (HttpMethod method, Func<int, Uri> createUri, Func<HttpContent>? createContent = null)
+        private async Task<(bool IsSuccess, T? Value)> SendRequest<T> (HttpMethod method, Func<int, Uri> createUri, Func<HttpContent>? createContent = null)
         {
             int? port = SonarCommunicationPort ?? await Reconnect(null);
 
             if (port == null)
             {
-                return default;
+                return (false, default);
             }
 
             try
@@ -100,14 +100,14 @@ namespace SteelSeriesSonarCompanion.CoreApp.Communication.Internal
             catch (Exception e)
             {
                 Trace.WriteLine(e);
-                return default;
+                return (false, default);
             }
 
             int? newPort = await Reconnect(port);
 
             if (newPort == null || newPort == port)
             {
-                return default;
+                return (false, default);
             }
 
             try
@@ -117,7 +117,7 @@ namespace SteelSeriesSonarCompanion.CoreApp.Communication.Internal
             catch (Exception e)
             {
                 Trace.WriteLine(e);
-                return default;
+                return (false, default);
             }
         }
 
@@ -151,7 +151,7 @@ namespace SteelSeriesSonarCompanion.CoreApp.Communication.Internal
                 }
 
                 Uri setupUri = InternalCommunicationAddressProvider.GetSubAppsAddress(setupPort);
-                SonarSubAppsResponse? response = await Send<SonarSubAppsResponse>(HttpMethod.Get, setupUri, null);
+                SonarSubAppsResponse? response = (await Send<SonarSubAppsResponse>(HttpMethod.Get, setupUri, null)).Value;
                 return response?.subApps?.sonar?.metadata?.webServerAddress?.Port;
             }
             catch (Exception e)
@@ -161,7 +161,7 @@ namespace SteelSeriesSonarCompanion.CoreApp.Communication.Internal
             }
         }
 
-        private async Task<T?> Send<T> (HttpMethod method, Uri uri, Func<HttpContent>? createContent)
+        private async Task<(bool IsSuccess, T? Value)> Send<T> (HttpMethod method, Uri uri, Func<HttpContent>? createContent)
         {
             using HttpRequestMessage request = new(method, uri);
             request.Content = createContent?.Invoke();
@@ -169,11 +169,11 @@ namespace SteelSeriesSonarCompanion.CoreApp.Communication.Internal
 
             if (response.IsSuccessStatusCode == false)
             {
-                return default;
+                return (false, default);
             }
 
             string responseContent = await response.Content.ReadAsStringAsync();
-            return JsonConverter.ConvertFromJSON<T>(responseContent);
+            return (true, JsonConverter.ConvertFromJSON<T>(responseContent));
         }
     }
 }

@@ -8,9 +8,9 @@ namespace SteelSeriesSonarCompanion.CoreApp.Communication.Internal
 		private MMDeviceEnumerator Enumerator { get; set; } = new();
 		private MMDevice? CachedDevice { get; set; }
 
-		public void SetVolume (string? deviceId, float volume)
+		public bool TrySetVolume (string? deviceId, float volume)
 		{
-			UseEndpointVolume(deviceId, endpointVolume => endpointVolume.MasterVolumeLevelScalar = volume);
+			return UseEndpointVolume(deviceId, endpointVolume => endpointVolume.MasterVolumeLevelScalar = volume) != null;
 		}
 
 		public float? GetVolume (string? deviceId)
@@ -18,9 +18,9 @@ namespace SteelSeriesSonarCompanion.CoreApp.Communication.Internal
 			return UseEndpointVolume(deviceId, endpointVolume => endpointVolume.MasterVolumeLevelScalar);
 		}
 
-		public void SetMute (string? deviceId, bool mute)
+		public bool TrySetMute (string? deviceId, bool mute)
 		{
-			UseEndpointVolume(deviceId, endpointVolume => endpointVolume.Mute = mute);
+			return UseEndpointVolume(deviceId, endpointVolume => endpointVolume.Mute = mute) != null;
 		}
 
 		public bool? GetMute (string? deviceId)

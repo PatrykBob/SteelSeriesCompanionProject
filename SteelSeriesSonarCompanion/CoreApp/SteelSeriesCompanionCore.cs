@@ -41,7 +41,7 @@ namespace SteelSeriesSonarCompanion.CoreApp
 			}
 
 			float clampedVolume = Math.Clamp(volume, 0f, 1f);
-			await InternalFacade.SetChannelVolume(channel, clampedVolume);
+			await InternalFacade.TrySetChannelVolume(channel, clampedVolume);
 			ChannelVolumeChanged.Invoke(sender, new ChannelVolumeChangedEventArgs(channel, clampedVolume));
 		}
 
@@ -52,7 +52,7 @@ namespace SteelSeriesSonarCompanion.CoreApp
 				return;
 			}
 
-			await InternalFacade.SetChannelMute(channel, mute);
+			await InternalFacade.TrySetChannelMute(channel, mute);
 			ChannelMuteChanged.Invoke(sender, new ChannelMuteChangedEventArgs(channel, mute));
 		}
 

@@ -55,11 +55,13 @@ namespace SteelSeriesSonarCompanion.CoreApp
 
 			float clampedVolume = Math.Clamp(volume, 0f, 1f);
 
-			if (await InternalFacade.TrySetChannelVolume(channel, clampedVolume) == true)
+			if (await InternalFacade.TrySetChannelVolume(channel, clampedVolume) == false)
 			{
-				ConfirmedVolumeMap[channel] = clampedVolume;
+				RestoreConfirmedVolume(channel);
+				return;
 			}
 
+			ConfirmedVolumeMap[channel] = clampedVolume;
 			ChannelVolumeChanged.Invoke(sender, new ChannelVolumeChangedEventArgs(channel, clampedVolume));
 		}
 
@@ -70,12 +72,38 @@ namespace SteelSeriesSonarCompanion.CoreApp
 				return;
 			}
 
-			if (await InternalFacade.TrySetChannelMute(channel, mute) == true)
+			if (await InternalFacade.TrySetChannelMute(channel, mute) == false)
 			{
-				ConfirmedMuteMap[channel] = mute;
+				RestoreConfirmedMute(channel);
+				return;
 			}
 
+			ConfirmedMuteMap[channel] = mute;
 			ChannelMuteChanged.Invoke(sender, new ChannelMuteChangedEventArgs(channel, mute));
+		}
+
+		private void RestoreConfirmedVolume (SoundChannel channel)
+		{
+			if (ConfirmedVolumeMap.TryGetValue(channel, out float volume) == false)
+			{
+				Trace.WriteLine($"Failed to set {channel} volume, no confirmed volume to restore");
+				return;
+			}
+
+			Trace.WriteLine($"Failed to set {channel} volume, restoring {volume}");
+			ChannelVolumeChanged.Invoke(this, new ChannelVolumeChangedEventArgs(channel, volume));
+		}
+
+		private void RestoreConfirmedMute (SoundChannel channel)
+		{
+			if (ConfirmedMuteMap.TryGetValue(channel, out bool mute) == false)
+			{
+				Trace.WriteLine($"Failed to set {channel} mute, no confirmed mute to restore");
+				return;
+			}
+
+			Trace.WriteLine($"Failed to set {channel} mute, restoring {mute}");
+			ChannelMuteChanged.Invoke(this, new ChannelMuteChangedEventArgs(channel, mute));
 		}
 
 		private bool IsKnownChannel (SoundChannel channel)

@@ -152,6 +152,11 @@ namespace SteelSeriesSonarCompanion.External.App
 			Reconnect();
 		}
 
+		public void RefreshAudioDevice ()
+		{
+			SendCommand(new RefreshAudioDeviceCommand());
+		}
+
 		public void Reconnect ()
 		{
 			IsAuthenticated = false;

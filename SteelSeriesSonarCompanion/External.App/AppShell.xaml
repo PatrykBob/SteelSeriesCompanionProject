@@ -16,4 +16,8 @@
         Text="Pair with PC"
         Clicked="OnPairClicked" />
 
+    <MenuItem
+        Text="Refresh Audio Device"
+        Clicked="OnRefreshAudioDeviceClicked" />
+
 </Shell>

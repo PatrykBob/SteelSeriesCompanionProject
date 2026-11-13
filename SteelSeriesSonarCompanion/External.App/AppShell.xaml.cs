@@ -16,5 +16,15 @@
 				mainPage.StartPairing();
 			}
 		}
+
+		private void OnRefreshAudioDeviceClicked (object? sender, EventArgs e)
+		{
+			FlyoutIsPresented = false;
+
+			if (CurrentPage is MainPage mainPage)
+			{
+				mainPage.RefreshAudioDevice();
+			}
+		}
 	}
 }

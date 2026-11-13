@@ -1,4 +1,5 @@
 ﻿using SteelSeriesSonarCompanion.CoreApp;
+using SteelSeriesSonarCompanion.CoreApp.Logging;
 using System.Diagnostics;
 using System.Threading;
 using System.Windows;
@@ -30,6 +31,14 @@ namespace SteelSeriesSonarCompanion
 				return;
 			}
 
+			FileTraceListener? fileTraceListener = FileTraceListener.TryCreate();
+
+			if (fileTraceListener != null)
+			{
+				Trace.Listeners.Add(fileTraceListener);
+			}
+
+			Trace.WriteLine("Companion started");
 			DispatcherUnhandledException += OnDispatcherUnhandledException;
 			CompanionCore.Initialize();
 		}

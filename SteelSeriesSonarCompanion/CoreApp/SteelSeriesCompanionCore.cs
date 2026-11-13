@@ -16,6 +16,8 @@ namespace SteelSeriesSonarCompanion.CoreApp
 		private InternalCommunicationFacade InternalFacade { get; set; } = new();
 		private SteelSeriesCompanionExtensionController ExtensionController { get; set; } = new();
 		private TrayController Tray { get; set; } = new();
+		private Dictionary<SoundChannel, float> ConfirmedVolumeMap { get; } = new();
+		private Dictionary<SoundChannel, bool> ConfirmedMuteMap { get; } = new();
 
 		private const string SONAR_CONNECTION_FAILED_MESSAGE =
 			"Could not connect to SteelSeries Sonar. Make sure SteelSeries GG is running; the companion will connect automatically.";
@@ -24,7 +26,18 @@ namespace SteelSeriesSonarCompanion.CoreApp
 
 		public async Task<List<VolumeData>> GetVolumeSettings ()
 		{
-			return await InternalFacade.GetVolumeSettings();
+			List<VolumeData> volumeSettings = await InternalFacade.GetVolumeSettings();
+			StoreConfirmedVolumeSettings(volumeSettings);
+			return volumeSettings;
+		}
+
+		private void StoreConfirmedVolumeSettings (List<VolumeData> volumeSettings)
+		{
+			foreach (VolumeData volumeData in volumeSettings)
+			{
+				ConfirmedVolumeMap[volumeData.Channel] = volumeData.Volume;
+				ConfirmedMuteMap[volumeData.Channel] = volumeData.Mute;
+			}
 		}
 
 		public async Task SetChannelVolume (object? sender, SoundChannel channel, float volume)
@@ -41,7 +54,12 @@ namespace SteelSeriesSonarCompanion.CoreApp
 			}
 
 			float clampedVolume = Math.Clamp(volume, 0f, 1f);
-			await InternalFacade.TrySetChannelVolume(channel, clampedVolume);
+
+			if (await InternalFacade.TrySetChannelVolume(channel, clampedVolume) == true)
+			{
+				ConfirmedVolumeMap[channel] = clampedVolume;
+			}
+
 			ChannelVolumeChanged.Invoke(sender, new ChannelVolumeChangedEventArgs(channel, clampedVolume));
 		}
 
@@ -52,7 +70,11 @@ namespace SteelSeriesSonarCompanion.CoreApp
 				return;
 			}
 
-			await InternalFacade.TrySetChannelMute(channel, mute);
+			if (await InternalFacade.TrySetChannelMute(channel, mute) == true)
+			{
+				ConfirmedMuteMap[channel] = mute;
+			}
+
 			ChannelMuteChanged.Invoke(sender, new ChannelMuteChangedEventArgs(channel, mute));
 		}
 
@@ -69,7 +91,7 @@ namespace SteelSeriesSonarCompanion.CoreApp
 
 		public async Task RequestVolumeSetup (object? sender)
 		{
-			List<VolumeData> volumeDataCollection = await InternalFacade.GetVolumeSettings();
+			List<VolumeData> volumeDataCollection = await GetVolumeSettings();
 			VolumeSetupChanged.Invoke(sender, volumeDataCollection);
 		}
 

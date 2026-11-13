@@ -6,6 +6,7 @@ namespace SteelSeriesSonarCompanion.CoreApp.Tray
 	public class TrayController : IDisposable
 	{
 		private NotifyIcon TrayIcon { get; set; } = new();
+		private List<(string Message, ToolTipIcon Icon)> PendingBalloonCollection { get; set; } = new();
 
 		private const string ICON_NAME = "icon.ico";
 		private const string TRAY_TITLE = "SteelSeries Sonar Companion";
@@ -18,16 +19,34 @@ namespace SteelSeriesSonarCompanion.CoreApp.Tray
 			TrayIcon.Icon = File.Exists(path) ? new Icon(path) : SystemIcons.Application;
 			TrayIcon.Text = TRAY_TITLE;
 			TrayIcon.Visible = true;
+
+			for (int i = 0; i < PendingBalloonCollection.Count; i++)
+			{
+				TrayIcon.ShowBalloonTip(BALLOON_TIMEOUT_MS, TRAY_TITLE, PendingBalloonCollection[i].Message, PendingBalloonCollection[i].Icon);
+			}
+
+			PendingBalloonCollection.Clear();
 		}
 
 		public void ShowWarning (string message)
 		{
-			TrayIcon.ShowBalloonTip(BALLOON_TIMEOUT_MS, TRAY_TITLE, message, ToolTipIcon.Warning);
+			ShowBalloon(message, ToolTipIcon.Warning);
 		}
 
 		public void ShowInfo (string message)
 		{
-			TrayIcon.ShowBalloonTip(BALLOON_TIMEOUT_MS, TRAY_TITLE, message, ToolTipIcon.Info);
+			ShowBalloon(message, ToolTipIcon.Info);
+		}
+
+		private void ShowBalloon (string message, ToolTipIcon icon)
+		{
+			if (TrayIcon.Visible == false)
+			{
+				PendingBalloonCollection.Add((message, icon));
+				return;
+			}
+
+			TrayIcon.ShowBalloonTip(BALLOON_TIMEOUT_MS, TRAY_TITLE, message, icon);
 		}
 
 		public void Dispose ()

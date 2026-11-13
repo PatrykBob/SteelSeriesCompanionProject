@@ -14,6 +14,8 @@ namespace SteelSeriesSonarCompanion.CoreApp.Communication.Internal
         private SemaphoreSlim ConnectionLock { get; } = new(1, 1);
         private HttpClient CurrentHttpClient { get; } = CreateHttpClient();
 
+        private const int REQUEST_TIMEOUT_SECONDS = 5;
+
         public async Task<bool> Initialize ()
         {
             return await Reconnect(null) != null;
@@ -29,7 +31,7 @@ namespace SteelSeriesSonarCompanion.CoreApp.Communication.Internal
         {
             HttpClientHandler handler = new();
             handler.ServerCertificateCustomValidationCallback = IsTrustedCertificate;
-            return new HttpClient(handler);
+            return new HttpClient(handler) { Timeout = TimeSpan.FromSeconds(REQUEST_TIMEOUT_SECONDS) };
         }
 
         private static bool IsTrustedCertificate (HttpRequestMessage request, X509Certificate2? certificate, X509Chain? chain, SslPolicyErrors errors)

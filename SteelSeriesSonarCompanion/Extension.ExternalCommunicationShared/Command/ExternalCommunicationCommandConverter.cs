@@ -20,6 +20,7 @@ namespace SteelSeriesSonarCompanion.Extension.ExternalCommunicationShared.Comman
 					SetChannelMuteCommand.COMMAND_NAME => JsonConverter.ConvertFromJSON<SetChannelMuteCommand>(json),
 					SetChannelVolumeCommand.COMMAND_NAME => JsonConverter.ConvertFromJSON<SetChannelVolumeCommand>(json),
 					RequestVolumeSetupCommand.COMMAND_NAME => JsonConverter.ConvertFromJSON<RequestVolumeSetupCommand>(json),
+					RefreshAudioDeviceCommand.COMMAND_NAME => JsonConverter.ConvertFromJSON<RefreshAudioDeviceCommand>(json),
 					AuthenticateCommand.COMMAND_NAME => JsonConverter.ConvertFromJSON<AuthenticateCommand>(json),
 					_ => null,
 				};

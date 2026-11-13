@@ -1,5 +1,4 @@
 ﻿using SteelSeriesSonarCompanion.Shared.Core;
-using SteelSeriesSonarCompanion.Shared.ExtensionCore.Extension;
 
 namespace SteelSeriesSonarCompanion.Extension.ExternalCommunicationShared.Command
 {
@@ -9,11 +8,5 @@ namespace SteelSeriesSonarCompanion.Extension.ExternalCommunicationShared.Comman
 		public bool mute = mute;
 
 		public const string COMMAND_NAME = "SetMute";
-
-		public override void ExecuteCommand (object? sender, ISteelSeriesCompanionCore core)
-		{
-			base.ExecuteCommand(sender, core);
-			core.SetChannelMute(sender, channel, mute);
-		}
 	}
 }

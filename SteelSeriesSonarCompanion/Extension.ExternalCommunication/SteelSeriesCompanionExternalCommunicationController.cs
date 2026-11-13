@@ -344,7 +344,7 @@ namespace SteelSeriesSonarCompanion.Extension.ExternalCommunication
 
 				if (command != null)
 				{
-					command.ExecuteCommand(connection, CompanionCore!);
+					ExecuteCommand(connection, command);
 				}
 				else
 				{
@@ -354,6 +354,28 @@ namespace SteelSeriesSonarCompanion.Extension.ExternalCommunication
 			catch (Exception e)
 			{
 				Trace.WriteLine($"Failed to execute command '{message}': {e.Message}");
+			}
+		}
+
+		private void ExecuteCommand (RemoteClientConnection connection, BaseExternalCommunicationCommand command)
+		{
+			switch (command)
+			{
+				case SetChannelVolumeCommand volumeCommand:
+					CompanionCore!.SetChannelVolume(connection, volumeCommand.channel, volumeCommand.volume);
+					break;
+				case SetChannelMuteCommand muteCommand:
+					CompanionCore!.SetChannelMute(connection, muteCommand.channel, muteCommand.mute);
+					break;
+				case RequestVolumeSetupCommand:
+					CompanionCore!.RequestVolumeSetup(connection);
+					break;
+				case RefreshAudioDeviceCommand:
+					CompanionCore!.RefreshAudioDevice(connection);
+					break;
+				default:
+					Trace.WriteLine($"Unhandled command: {command.CommandName}");
+					break;
 			}
 		}
 

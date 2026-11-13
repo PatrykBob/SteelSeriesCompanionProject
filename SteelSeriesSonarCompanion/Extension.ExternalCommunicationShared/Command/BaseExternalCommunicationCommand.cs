@@ -1,6 +1,4 @@
-﻿using SteelSeriesSonarCompanion.Shared.ExtensionCore.Extension;
-
-namespace SteelSeriesSonarCompanion.Extension.ExternalCommunicationShared.Command
+﻿namespace SteelSeriesSonarCompanion.Extension.ExternalCommunicationShared.Command
 {
 	public class BaseExternalCommunicationCommand
 	{
@@ -9,11 +7,6 @@ namespace SteelSeriesSonarCompanion.Extension.ExternalCommunicationShared.Comman
 		public BaseExternalCommunicationCommand (string commandName)
 		{
 			CommandName = commandName;
-		}
-
-		public virtual void ExecuteCommand (object? sender, ISteelSeriesCompanionCore core)
-		{
-
 		}
 	}
 }

@@ -22,6 +22,7 @@ namespace SteelSeriesCompanionUIExtension
 		public void Initialize (ISteelSeriesCompanionCore companionCore)
 		{
 			CompanionCore = companionCore;
+			CompanionCore.VolumeSetupChanged += OnVolumeSetupChanged;
 			CompanionCore.ChannelVolumeChanged += OnChannelVolumeChanged;
 			CompanionCore.ChannelMuteChanged += OnChannelMuteChanged;
 			InitializeVolumeSliders();
@@ -29,9 +30,15 @@ namespace SteelSeriesCompanionUIExtension
 
 		protected override void OnClosed (EventArgs e)
 		{
+			CompanionCore!.VolumeSetupChanged -= OnVolumeSetupChanged;
 			CompanionCore!.ChannelVolumeChanged -= OnChannelVolumeChanged;
 			CompanionCore!.ChannelMuteChanged -= OnChannelMuteChanged;
 			base.OnClosed(e);
+		}
+
+		private void OnVolumeSetupChanged (object? sender, List<VolumeData> volumeSettings)
+		{
+			Dispatcher.BeginInvoke(() => InitializeVolumeSliders(volumeSettings));
 		}
 
 		private void OnChannelVolumeChanged (object? sender, ChannelVolumeChangedEventArgs e)

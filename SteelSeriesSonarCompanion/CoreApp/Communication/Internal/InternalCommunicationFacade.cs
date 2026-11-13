@@ -18,6 +18,7 @@ namespace SteelSeriesSonarCompanion.CoreApp.Communication.Internal
 		public void Dispose ()
 		{
 			CommunicationController.Dispose();
+			AudioController.Dispose();
 		}
 
 		public async Task<List<ChannelConfigResponse>?> GetConfig ()

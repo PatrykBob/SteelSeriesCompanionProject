@@ -3,8 +3,11 @@ using System.Runtime.InteropServices;
 
 namespace SteelSeriesSonarCompanion.CoreApp.Communication.Internal
 {
-	public class AudioSourceController
+	public class AudioSourceController : IDisposable
 	{
+		private MMDeviceEnumerator Enumerator { get; set; } = new();
+		private MMDevice? CachedDevice { get; set; }
+
 		public void SetVolume (string? deviceId, float volume)
 		{
 			UseEndpointVolume(deviceId, endpointVolume => endpointVolume.MasterVolumeLevelScalar = volume);
@@ -32,17 +35,38 @@ namespace SteelSeriesSonarCompanion.CoreApp.Communication.Internal
 				return null;
 			}
 
-			using MMDeviceEnumerator enumerator = new();
-
 			try
 			{
-				using MMDevice device = enumerator.GetDevice(deviceId);
-				return action(device.AudioEndpointVolume);
+				return action(GetDevice(deviceId).AudioEndpointVolume);
 			}
 			catch (COMException)
 			{
+				ReleaseCachedDevice();
 				return null;
 			}
+		}
+
+		public void ReleaseCachedDevice ()
+		{
+			CachedDevice?.Dispose();
+			CachedDevice = null;
+		}
+
+		private MMDevice GetDevice (string deviceId)
+		{
+			if (CachedDevice == null || CachedDevice.ID != deviceId)
+			{
+				ReleaseCachedDevice();
+				CachedDevice = Enumerator.GetDevice(deviceId);
+			}
+
+			return CachedDevice;
+		}
+
+		public void Dispose ()
+		{
+			ReleaseCachedDevice();
+			Enumerator.Dispose();
 		}
 	}
 }

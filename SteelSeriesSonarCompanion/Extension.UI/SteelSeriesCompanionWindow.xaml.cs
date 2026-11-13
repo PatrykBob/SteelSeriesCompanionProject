@@ -9,6 +9,10 @@ namespace SteelSeriesCompanionUIExtension
 	{
 		private ISteelSeriesCompanionCore? CompanionCore { get; set; }
 		private bool IsApplyingVolumeSettings { get; set; }
+		private Dictionary<SoundChannel, float> PendingVolumeMap { get; } = new();
+		private HashSet<SoundChannel> ThrottledChannels { get; } = new();
+
+		private static readonly TimeSpan VOLUME_SEND_INTERVAL = TimeSpan.FromMilliseconds(50);
 
 		public SteelSeriesCompanionWindow ()
 		{
@@ -127,11 +131,31 @@ namespace SteelSeriesCompanionUIExtension
 			SetChannelVolume(channel, (float)volumeArgs.NewValue);
 		}
 
-		private void SetChannelVolume (SoundChannel channel, float volume)
+		private async void SetChannelVolume (SoundChannel channel, float volume)
 		{
-			if (CompanionCore != null)
+			if (CompanionCore == null)
 			{
-				CompanionCore.SetChannelVolume(this, channel, volume);
+				return;
+			}
+
+			PendingVolumeMap[channel] = volume;
+
+			if (ThrottledChannels.Add(channel) == false)
+			{
+				return;
+			}
+
+			try
+			{
+				while (PendingVolumeMap.Remove(channel, out float pendingVolume) == true)
+				{
+					await CompanionCore.SetChannelVolume(this, channel, pendingVolume);
+					await Task.Delay(VOLUME_SEND_INTERVAL);
+				}
+			}
+			finally
+			{
+				ThrottledChannels.Remove(channel);
 			}
 		}
 	}

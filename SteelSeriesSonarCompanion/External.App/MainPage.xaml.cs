@@ -2,7 +2,6 @@
 using SteelSeriesSonarCompanion.Extension.ExternalCommunicationShared.Command;
 using SteelSeriesSonarCompanion.Extension.ExternalCommunicationShared.Event;
 using SteelSeriesSonarCompanion.Shared.Core;
-using System.Globalization;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -20,6 +19,8 @@ namespace SteelSeriesSonarCompanion.External.App
 		private List<VolumeSlider> VolumeSliderCollection { get; } = new();
 
 		private bool IsAuthenticated { get; set; }
+		private bool IsPairingRequested { get; set; }
+		private string? ConnectingServerId { get; set; }
 		private Dictionary<SoundChannel, float> PendingVolumeMap { get; } = new();
 		private HashSet<SoundChannel> ThrottledChannels { get; } = new();
 
@@ -28,12 +29,14 @@ namespace SteelSeriesSonarCompanion.External.App
 		private static readonly TimeSpan RECONNECT_DELAY = TimeSpan.FromSeconds(5);
 
 		private const string TOKEN_PREFERENCE_KEY = "PairingToken";
+		private const string SERVER_ID_PREFERENCE_KEY = "PairedServerId";
 		private const string CONNECTING_MESSAGE = "Connecting...";
 		private const string CONNECTED_MESSAGE = "Connected";
 		private const string CONNECTION_FAILED_MESSAGE_FORMAT = "Connection failed: {0}";
 		private const string NOT_PAIRED_MESSAGE = "Not paired - click Remote App > Pair New Device on the PC, then tap Pair with PC in the menu";
 		private const string SERVER_NOT_FOUND_MESSAGE = "PC not found - make sure the companion is running on the same network";
 		private const string RECONNECTING_MESSAGE = "Disconnected - reconnecting...";
+		private const string WAITING_FOR_PAIRING_MESSAGE = "Waiting for pairing - click Remote App > Pair New Device on the PC";
 
 		public MainPage ()
 		{
@@ -101,9 +104,52 @@ namespace SteelSeriesSonarCompanion.External.App
 			await udpClient.SendAsync(request, request.Length, broadcastEndPoint);
 
 			using CancellationTokenSource timeout = new(DISCOVERY_TIMEOUT);
-			UdpReceiveResult result = await udpClient.ReceiveAsync(timeout.Token);
-			int port = int.Parse(Encoding.UTF8.GetString(result.Buffer), CultureInfo.InvariantCulture);
-			return new IPEndPoint(result.RemoteEndPoint.Address, port);
+
+			while (true)
+			{
+				UdpReceiveResult result = await udpClient.ReceiveAsync(timeout.Token);
+				DiscoveryResponse? response = ParseDiscoveryResponse(result.Buffer);
+
+				if (response != null && IsWantedServer(response) == true)
+				{
+					ConnectingServerId = response.ServerId;
+					return new IPEndPoint(result.RemoteEndPoint.Address, response.Port);
+				}
+			}
+		}
+
+		private DiscoveryResponse? ParseDiscoveryResponse (byte[] buffer)
+		{
+			try
+			{
+				return JsonConverter.ConvertFromJSON<DiscoveryResponse>(Encoding.UTF8.GetString(buffer));
+			}
+			catch (Exception)
+			{
+				return null;
+			}
+		}
+
+		private bool IsWantedServer (DiscoveryResponse response)
+		{
+			if (IsWaitingForPairing() == true)
+			{
+				return response.IsPairing == true;
+			}
+
+			string? pairedServerId = Preferences.Get(SERVER_ID_PREFERENCE_KEY, null);
+			return pairedServerId == null || response.ServerId == pairedServerId;
+		}
+
+		private bool IsWaitingForPairing ()
+		{
+			return IsPairingRequested == true || Preferences.Get(TOKEN_PREFERENCE_KEY, null) == null;
+		}
+
+		public void StartPairing ()
+		{
+			IsPairingRequested = true;
+			Reconnect();
 		}
 
 		public void Reconnect ()
@@ -138,7 +184,7 @@ namespace SteelSeriesSonarCompanion.External.App
 			}
 			catch (OperationCanceledException)
 			{
-				failureMessage = SERVER_NOT_FOUND_MESSAGE;
+				failureMessage = IsWaitingForPairing() == true ? WAITING_FOR_PAIRING_MESSAGE : SERVER_NOT_FOUND_MESSAGE;
 			}
 			catch (Exception ex)
 			{
@@ -228,6 +274,13 @@ namespace SteelSeriesSonarCompanion.External.App
 			{
 				Preferences.Set(TOKEN_PREFERENCE_KEY, authenticatedEvent.NewToken);
 			}
+
+			if (ConnectingServerId != null)
+			{
+				Preferences.Set(SERVER_ID_PREFERENCE_KEY, ConnectingServerId);
+			}
+
+			IsPairingRequested = false;
 
 			IsAuthenticated = true;
 			ConnectionLabel.Text = CONNECTED_MESSAGE;

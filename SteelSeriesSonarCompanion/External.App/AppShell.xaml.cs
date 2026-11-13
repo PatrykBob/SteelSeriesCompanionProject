@@ -13,7 +13,7 @@
 
 			if (CurrentPage is MainPage mainPage)
 			{
-				mainPage.Reconnect();
+				mainPage.StartPairing();
 			}
 		}
 	}

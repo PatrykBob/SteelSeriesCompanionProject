@@ -22,6 +22,7 @@ namespace SteelSeriesSonarCompanion.Extension.ExternalCommunication
 		private object ConnectionsLock { get; } = new();
 
 		private PairedDeviceStore DeviceStore { get; set; } = new();
+		private ServerIdentityStore Identity { get; set; } = new();
 		private DateTime? PairingDeadline { get; set; }
 
 		private static readonly TimeSpan PAIRING_WINDOW = TimeSpan.FromSeconds(60);
@@ -33,6 +34,7 @@ namespace SteelSeriesSonarCompanion.Extension.ExternalCommunication
 		{
 			base.Initialize(companionCore);
 			DeviceStore.Load();
+			Identity.Load();
 			AttachToEvents();
 			RestartCommunicationServer();
 		}
@@ -362,7 +364,13 @@ namespace SteelSeriesSonarCompanion.Extension.ExternalCommunication
 
 					if (message == ExternalCommunicationConstProvider.SERVER_SEARCH_REQUEST && ListenerPort != null)
 					{
-						byte[] response = Encoding.UTF8.GetBytes(ListenerPort.Value.ToString(CultureInfo.InvariantCulture));
+						DiscoveryResponse discoveryResponse = new()
+						{
+							ServerId = Identity.ServerId,
+							Port = ListenerPort.Value,
+							IsPairing = IsPairingModeActive()
+						};
+						byte[] response = Encoding.UTF8.GetBytes(JsonConverter.ConvertToJSON(discoveryResponse));
 						await udpClient.SendAsync(response, result.RemoteEndPoint, token);
 					}
 				}

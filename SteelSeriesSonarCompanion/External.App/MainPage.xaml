@@ -4,14 +4,11 @@
              x:Class="SteelSeriesSonarCompanion.External.App.MainPage">
     <Grid
         RowDefinitions="*, Auto">
-        <Grid 
-            x:Name="SliderRoot"
-            Padding="30,0"
-            Grid.Row="0"
-            ColumnSpacing="30"
-            ColumnDefinitions="*,*,*,*,*"/>
+        <ContentView
+            x:Name="PanelRoot"
+            Grid.Row="0"/>
         <HorizontalStackLayout
-            Grid.Row="2"
+            Grid.Row="1"
             Padding="20"
             Spacing="20">
             <Label

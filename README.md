@@ -31,7 +31,14 @@ The project was created in .NET, and its architecture allows for simple extensio
 - Tray item Show UI opens a window with a volume slider and mute checkbox for every channel.
 
 ### Remote app (External.App)
-- .NET MAUI app (Android and Windows) with a volume slider and mute toggle for every channel.
+- .NET MAUI app (Android and Windows) built from panels you arrange yourself.
+- Edit Layout (menu) turns on edit mode:
+  - Split any panel with a vertical or horizontal divider, change its type or remove it.
+  - Drag dividers to resize panels.
+- Separate layouts for portrait and landscape, saved on the device.
+- Volume Mixer panel: a volume slider and mute toggle for each channel.
+  - Its settings choose which channels it shows and in what order.
+  - Sliders can be vertical or horizontal, and the mute buttons can be hidden.
 - Finds the PC on the LAN, pairs with it from the menu (Pair with PC) and remembers the pairing.
 - Sliders stay in sync with changes made on the PC or other devices.
 

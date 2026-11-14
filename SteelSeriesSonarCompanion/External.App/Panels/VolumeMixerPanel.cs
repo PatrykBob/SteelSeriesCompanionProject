@@ -23,6 +23,22 @@ namespace SteelSeriesSonarCompanion.External.App.Panels
 			AttachToEvents();
 		}
 
+		public override bool HasSettings => true;
+
+		public override async Task<bool> TryEditSettings (Page hostPage)
+		{
+			VolumeMixerSettings? newSettings = await VolumeMixerSettingsPage.Show(hostPage, GetSettings<VolumeMixerSettings>());
+
+			if (newSettings == null)
+			{
+				return false;
+			}
+
+			SaveSettings(newSettings);
+			RespawnVolumeSliders();
+			return true;
+		}
+
 		public override void DetachFromEvents ()
 		{
 			Connection.VolumeSetupChanged -= OnVolumeSetupChanged;
@@ -39,6 +55,20 @@ namespace SteelSeriesSonarCompanion.External.App.Panels
 				SliderRoot.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Star));
 				SpawnVolumeSlider(channelCollection[i], i);
 			}
+		}
+
+		private void RespawnVolumeSliders ()
+		{
+			for (int i = 0; i < VolumeSliderCollection.Count; i++)
+			{
+				VolumeSliderCollection[i].OnVolumeChange -= OnVolumeChanged;
+				VolumeSliderCollection[i].OnMuteChange -= OnMuteChanged;
+			}
+
+			VolumeSliderCollection.Clear();
+			SliderRoot.Clear();
+			SliderRoot.ColumnDefinitions.Clear();
+			SpawnVolumeSliders();
 		}
 
 		private void SpawnVolumeSlider (SoundChannel channel, int column)

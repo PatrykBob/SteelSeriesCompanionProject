@@ -13,7 +13,6 @@ namespace SteelSeriesSonarCompanion.External.App.Layout
 		private LayoutNode? Root { get; set; }
 		private List<BasePanel> PanelCollection { get; } = new();
 
-		private const double PANEL_SPACING = 8;
 		private const string CHANGE_TYPE_TITLE = "Panel type";
 		private const string CANCEL_TEXT = "Cancel";
 		private const string REMOVE_TITLE = "Remove panel";
@@ -53,27 +52,68 @@ namespace SteelSeriesSonarCompanion.External.App.Layout
 			Grid grid = new();
 			bool isLeftToRight = splitNode.Axis == SplitAxis.LEFT_TO_RIGHT;
 
+			GridLength dividerLength = new(IsEditMode == true ? LayoutDivider.EDIT_SIZE : LayoutDivider.NORMAL_SIZE);
+			List<LayoutDivider> dividerCollection = new();
+
 			for (int i = 0; i < splitNode.ChildCollection!.Count; i++)
 			{
+				if (i > 0)
+				{
+					LayoutDivider divider = new(grid, splitNode, i - 1, IsEditMode);
+					divider.DragCompleted += OnDividerDragCompleted;
+					AddToSplitGrid(grid, divider, dividerLength, i * 2 - 1, isLeftToRight);
+					dividerCollection.Add(divider);
+				}
+
 				LayoutNode child = splitNode.ChildCollection[i];
-				GridLength length = new(child.Weight, GridUnitType.Star);
-				View childView = CreateView(child);
+				AddToSplitGrid(grid, CreateView(child), new GridLength(child.Weight, GridUnitType.Star), i * 2, isLeftToRight);
+			}
+
+			AddDividerHandles(grid, dividerCollection, isLeftToRight);
+			return grid;
+		}
+
+		private void AddDividerHandles (Grid grid, List<LayoutDivider> dividerCollection, bool isLeftToRight)
+		{
+			for (int i = 0; i < dividerCollection.Count; i++)
+			{
+				BoxView? handle = dividerCollection[i].Handle;
+
+				if (handle == null)
+				{
+					continue;
+				}
+
+				int index = i * 2 + 1;
 
 				if (isLeftToRight == true)
 				{
-					grid.ColumnDefinitions.Add(new ColumnDefinition(length));
-					grid.Add(childView, i, 0);
+					grid.Add(handle, index, 0);
 				}
 				else
 				{
-					grid.RowDefinitions.Add(new RowDefinition(length));
-					grid.Add(childView, 0, i);
+					grid.Add(handle, 0, index);
 				}
 			}
+		}
 
-			grid.ColumnSpacing = PANEL_SPACING;
-			grid.RowSpacing = PANEL_SPACING;
-			return grid;
+		private void AddToSplitGrid (Grid grid, View view, GridLength length, int index, bool isLeftToRight)
+		{
+			if (isLeftToRight == true)
+			{
+				grid.ColumnDefinitions.Add(new ColumnDefinition(length));
+				grid.Add(view, index, 0);
+			}
+			else
+			{
+				grid.RowDefinitions.Add(new RowDefinition(length));
+				grid.Add(view, 0, index);
+			}
+		}
+
+		private void OnDividerDragCompleted ()
+		{
+			LayoutEdited();
 		}
 
 		private View CreatePanelView (LayoutNode panelNode)

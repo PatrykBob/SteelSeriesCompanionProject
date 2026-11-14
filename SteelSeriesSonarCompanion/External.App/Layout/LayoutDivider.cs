@@ -24,6 +24,7 @@ namespace SteelSeriesSonarCompanion.External.App.Layout
 		private const double HANDLE_THICKNESS = 4;
 		private const double DRAG_HANDLE_THICKNESS = 6;
 		private const string HANDLE_COLOR = "#ac99ea";
+		private const string DRAG_HANDLE_COLOR = "#FF9800";
 
 		public LayoutDivider (Grid splitGrid, LayoutNode splitNode, int childIndex, bool isEditMode)
 		{
@@ -129,6 +130,7 @@ namespace SteelSeriesSonarCompanion.External.App.Layout
 
 			if (Handle != null)
 			{
+				Handle.Color = Color.FromArgb(DRAG_HANDLE_COLOR);
 				SetHandleThickness(Handle, DRAG_HANDLE_THICKNESS);
 			}
 		}
@@ -181,6 +183,7 @@ namespace SteelSeriesSonarCompanion.External.App.Layout
 
 			Handle.TranslationX = 0;
 			Handle.TranslationY = 0;
+			Handle.Color = Color.FromArgb(HANDLE_COLOR);
 			SetHandleThickness(Handle, HANDLE_THICKNESS);
 		}
 

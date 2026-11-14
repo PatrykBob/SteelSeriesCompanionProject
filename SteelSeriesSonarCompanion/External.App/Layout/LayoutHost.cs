@@ -11,7 +11,7 @@ namespace SteelSeriesSonarCompanion.External.App.Layout
 		private PanelRegistry PanelRegistry { get; }
 		private Page HostPage { get; }
 		private LayoutNode? Root { get; set; }
-		private List<BasePanel> PanelCollection { get; } = new();
+		private Dictionary<LayoutNode, PanelCell> PanelCellCollection { get; } = new();
 
 		private const string CHANGE_TYPE_TITLE = "Panel type";
 		private const string CANCEL_TEXT = "Cancel";
@@ -28,8 +28,10 @@ namespace SteelSeriesSonarCompanion.External.App.Layout
 		public void Show (LayoutNode root)
 		{
 			Root = root;
-			DetachPanels();
-			Content = CreateView(root);
+			HashSet<LayoutNode> shownNodeCollection = new();
+			View rootView = CreateView(root, shownNodeCollection);
+			DiscardHiddenCells(shownNodeCollection);
+			Content = rootView;
 		}
 
 		public void SetEditMode (bool isEditMode)
@@ -42,12 +44,12 @@ namespace SteelSeriesSonarCompanion.External.App.Layout
 			}
 		}
 
-		private View CreateView (LayoutNode node)
+		private View CreateView (LayoutNode node, HashSet<LayoutNode> shownNodeCollection)
 		{
-			return node.IsSplit == true ? CreateSplitView(node) : CreatePanelView(node);
+			return node.IsSplit == true ? CreateSplitView(node, shownNodeCollection) : CreatePanelView(node, shownNodeCollection);
 		}
 
-		private View CreateSplitView (LayoutNode splitNode)
+		private View CreateSplitView (LayoutNode splitNode, HashSet<LayoutNode> shownNodeCollection)
 		{
 			Grid grid = new();
 			bool isLeftToRight = splitNode.Axis == SplitAxis.LEFT_TO_RIGHT;
@@ -66,7 +68,7 @@ namespace SteelSeriesSonarCompanion.External.App.Layout
 				}
 
 				LayoutNode child = splitNode.ChildCollection[i];
-				AddToSplitGrid(grid, CreateView(child), new GridLength(child.Weight, GridUnitType.Star), i * 2, isLeftToRight);
+				AddToSplitGrid(grid, CreateView(child, shownNodeCollection), new GridLength(child.Weight, GridUnitType.Star), i * 2, isLeftToRight);
 			}
 
 			AddDividerHandles(grid, dividerCollection, isLeftToRight);
@@ -116,29 +118,51 @@ namespace SteelSeriesSonarCompanion.External.App.Layout
 			LayoutEdited();
 		}
 
-		private View CreatePanelView (LayoutNode panelNode)
+		private View CreatePanelView (LayoutNode panelNode, HashSet<LayoutNode> shownNodeCollection)
 		{
-			BasePanel panel = PanelRegistry.CreatePanel(panelNode.PanelTypeId, panelNode.PanelSettings);
-			panel.SettingsChanged += changedPanel => OnPanelSettingsChanged(panelNode, changedPanel);
-			PanelCollection.Add(panel);
+			shownNodeCollection.Add(panelNode);
 
-			if (IsEditMode == false)
+			if (PanelCellCollection.TryGetValue(panelNode, out PanelCell? cell) == false || cell!.PanelTypeId != panelNode.PanelTypeId)
 			{
-				return panel;
+				DiscardCell(panelNode);
+				cell = CreateCell(panelNode);
+			}
+			else
+			{
+				DetachFromParent(cell);
 			}
 
-			panel.InputTransparent = true;
-			PanelEditOverlay overlay = new(GetPanelDisplayName(panelNode.PanelTypeId), panel.HasSettings);
-			overlay.SplitRequested += axis => OnSplitRequested(panelNode, axis);
-			overlay.ChangeTypeRequested += () => OnChangeTypeRequested(panelNode);
-			overlay.SettingsRequested += () => OnSettingsRequested(panel);
-			overlay.RemoveRequested += () => OnRemoveRequested(panelNode);
+			SetCellEditMode(cell);
+			return cell;
+		}
 
-			return new Grid
+		private PanelCell CreateCell (LayoutNode panelNode)
+		{
+			BasePanel panel = PanelRegistry.CreatePanel(panelNode.PanelTypeId, panelNode.PanelSettings);
+			PanelCell cell = new(panelNode, panel);
+			panel.SettingsChanged += changedPanel => OnPanelSettingsChanged(cell, changedPanel);
+			PanelCellCollection[panelNode] = cell;
+			return cell;
+		}
+
+		private void SetCellEditMode (PanelCell cell)
+		{
+			if (IsEditMode == true && cell.HasOverlay == false)
 			{
-				panel,
-				overlay
-			};
+				cell.SetOverlay(CreateOverlay(cell));
+			}
+
+			cell.SetEditMode(IsEditMode);
+		}
+
+		private PanelEditOverlay CreateOverlay (PanelCell cell)
+		{
+			PanelEditOverlay overlay = new(GetPanelDisplayName(cell.PanelTypeId), cell.Panel.HasSettings);
+			overlay.SplitRequested += axis => OnSplitRequested(cell, axis);
+			overlay.ChangeTypeRequested += () => OnChangeTypeRequested(cell);
+			overlay.SettingsRequested += () => OnSettingsRequested(cell);
+			overlay.RemoveRequested += () => OnRemoveRequested(cell);
+			return overlay;
 		}
 
 		private string GetPanelDisplayName (string panelTypeId)
@@ -146,13 +170,20 @@ namespace SteelSeriesSonarCompanion.External.App.Layout
 			return PanelRegistry.TryGetDefinition(panelTypeId, out PanelDefinition? definition) == true ? definition!.DisplayName : panelTypeId;
 		}
 
-		private void OnSplitRequested (LayoutNode panelNode, SplitAxis axis)
+		private void OnSplitRequested (PanelCell cell, SplitAxis axis)
 		{
+			LayoutNode panelNode = cell.Node;
 			LayoutEditor.SplitPanel(Root!, panelNode, axis);
+
+			if (panelNode.IsSplit == true)
+			{
+				MoveCell(cell, panelNode.ChildCollection![0]);
+			}
+
 			ApplyEdit();
 		}
 
-		private async void OnChangeTypeRequested (LayoutNode panelNode)
+		private async void OnChangeTypeRequested (PanelCell cell)
 		{
 			string[] displayNameCollection = PanelRegistry.DefinitionCollection.Select(definition => definition.DisplayName).ToArray();
 			string? chosenDisplayName = await HostPage.DisplayActionSheetAsync(CHANGE_TYPE_TITLE, CANCEL_TEXT, null, displayNameCollection);
@@ -163,16 +194,17 @@ namespace SteelSeriesSonarCompanion.External.App.Layout
 				return;
 			}
 
-			LayoutEditor.ChangePanelType(panelNode, chosenDefinition.TypeId);
+			LayoutEditor.ChangePanelType(cell.Node, chosenDefinition.TypeId);
+			DiscardCell(cell.Node);
 			ApplyEdit();
 		}
 
-		private async void OnSettingsRequested (BasePanel panel)
+		private async void OnSettingsRequested (PanelCell cell)
 		{
-			await panel.TryEditSettings(HostPage);
+			await cell.Panel.TryEditSettings(HostPage);
 		}
 
-		private async void OnRemoveRequested (LayoutNode panelNode)
+		private async void OnRemoveRequested (PanelCell cell)
 		{
 			bool isConfirmed = await HostPage.DisplayAlertAsync(REMOVE_TITLE, REMOVE_MESSAGE, REMOVE_ACCEPT_TEXT, CANCEL_TEXT);
 
@@ -181,7 +213,16 @@ namespace SteelSeriesSonarCompanion.External.App.Layout
 				return;
 			}
 
+			LayoutNode panelNode = cell.Node;
+			bool hasParent = LayoutEditor.TryFindParent(Root!, panelNode, out LayoutNode? parent);
+			LayoutNode? lastSiblingNode = hasParent == true && parent!.ChildCollection!.Count == 2 ? parent.ChildCollection.Find(child => child != panelNode) : null;
 			LayoutEditor.RemovePanel(Root!, panelNode);
+
+			if (lastSiblingNode != null && PanelCellCollection.TryGetValue(lastSiblingNode, out PanelCell? siblingCell) == true)
+			{
+				MoveCell(siblingCell!, parent!);
+			}
+
 			ApplyEdit();
 		}
 
@@ -191,20 +232,50 @@ namespace SteelSeriesSonarCompanion.External.App.Layout
 			LayoutEdited();
 		}
 
-		private void OnPanelSettingsChanged (LayoutNode panelNode, BasePanel panel)
+		private void OnPanelSettingsChanged (PanelCell cell, BasePanel panel)
 		{
-			panelNode.PanelSettings = panel.Settings;
+			cell.Node.PanelSettings = panel.Settings;
 			LayoutEdited();
 		}
 
-		private void DetachPanels ()
+		private void MoveCell (PanelCell cell, LayoutNode newNode)
 		{
-			for (int i = 0; i < PanelCollection.Count; i++)
+			PanelCellCollection.Remove(cell.Node);
+			cell.Node = newNode;
+			PanelCellCollection[newNode] = cell;
+		}
+
+		private void DiscardCell (LayoutNode panelNode)
+		{
+			if (PanelCellCollection.Remove(panelNode, out PanelCell? cell) == false)
 			{
-				PanelCollection[i].DetachFromEvents();
+				return;
 			}
 
-			PanelCollection.Clear();
+			cell!.Panel.DetachFromEvents();
+			DetachFromParent(cell);
+		}
+
+		private void DiscardHiddenCells (HashSet<LayoutNode> shownNodeCollection)
+		{
+			List<LayoutNode> hiddenNodeCollection = PanelCellCollection.Keys.Where(node => shownNodeCollection.Contains(node) == false).ToList();
+
+			for (int i = 0; i < hiddenNodeCollection.Count; i++)
+			{
+				DiscardCell(hiddenNodeCollection[i]);
+			}
+		}
+
+		private void DetachFromParent (View view)
+		{
+			if (view.Parent is Microsoft.Maui.Controls.Layout parentLayout)
+			{
+				parentLayout.Remove(view);
+			}
+			else if (view.Parent is ContentView parentContentView)
+			{
+				parentContentView.Content = null;
+			}
 		}
 	}
 }

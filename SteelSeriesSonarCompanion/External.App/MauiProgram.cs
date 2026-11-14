@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using SteelSeriesSonarCompanion.External.App.Connection;
 
 namespace SteelSeriesSonarCompanion.External.App
 {
@@ -14,6 +15,10 @@ namespace SteelSeriesSonarCompanion.External.App
 					fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
 					fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
 				});
+
+			builder.Services.AddSingleton<CompanionConnection>();
+			builder.Services.AddSingleton<AppShell>();
+			builder.Services.AddSingleton<MainPage>();
 
 #if DEBUG
 			builder.Logging.AddDebug();

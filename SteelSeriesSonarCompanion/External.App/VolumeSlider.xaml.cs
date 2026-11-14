@@ -4,8 +4,8 @@ namespace SteelSeriesSonarCompanion.External.App
 {
 	public partial class VolumeSlider : ContentView
 	{
-		public event Action<SoundChannel, float> OnVolumeChange = delegate { };
-		public event Action<SoundChannel, bool> OnMuteChange = delegate { };
+		public event Action<VolumeSlider, SoundChannel, float> OnVolumeChange = delegate { };
+		public event Action<VolumeSlider, SoundChannel, bool> OnMuteChange = delegate { };
 
 		public SoundChannel Channel { get; private set; }
 		private bool IsApplyingRemoteValue { get; set; }
@@ -67,7 +67,7 @@ namespace SteelSeriesSonarCompanion.External.App
 				return;
 			}
 
-			OnVolumeChange(Channel, (float)e.NewValue);
+			OnVolumeChange(this, Channel, (float)e.NewValue);
 		}
 
 		private void OnMuteCheckBoxChanged (object? sender, CheckedChangedEventArgs e)
@@ -78,7 +78,7 @@ namespace SteelSeriesSonarCompanion.External.App
 			}
 
 			bool isMuted = e.Value;
-			OnMuteChange(Channel, isMuted);
+			OnMuteChange(this, Channel, isMuted);
 		}
 
 		private void OnSliderSizeChange (object? sender, EventArgs e)

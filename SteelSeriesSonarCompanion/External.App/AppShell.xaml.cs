@@ -1,30 +1,27 @@
-﻿namespace SteelSeriesSonarCompanion.External.App
+﻿using SteelSeriesSonarCompanion.External.App.Connection;
+
+namespace SteelSeriesSonarCompanion.External.App
 {
 	public partial class AppShell : Shell
 	{
-		public AppShell ()
+		private CompanionConnection Connection { get; }
+
+		public AppShell (CompanionConnection connection)
 		{
 			InitializeComponent();
+			Connection = connection;
 		}
 
 		private void OnPairClicked (object? sender, EventArgs e)
 		{
 			FlyoutIsPresented = false;
-
-			if (CurrentPage is MainPage mainPage)
-			{
-				mainPage.StartPairing();
-			}
+			Connection.StartPairing();
 		}
 
 		private void OnRefreshAudioDeviceClicked (object? sender, EventArgs e)
 		{
 			FlyoutIsPresented = false;
-
-			if (CurrentPage is MainPage mainPage)
-			{
-				mainPage.RefreshAudioDevice();
-			}
+			Connection.RefreshAudioDevice();
 		}
 	}
 }

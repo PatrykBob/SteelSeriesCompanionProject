@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using SteelSeriesSonarCompanion.External.App.Connection;
+using SteelSeriesSonarCompanion.External.App.Panels;
 
 namespace SteelSeriesSonarCompanion.External.App
 {
@@ -17,6 +18,7 @@ namespace SteelSeriesSonarCompanion.External.App
 				});
 
 			builder.Services.AddSingleton<CompanionConnection>();
+			builder.Services.AddSingleton<PanelRegistry>();
 			builder.Services.AddSingleton<AppShell>();
 			builder.Services.AddSingleton<MainPage>();
 

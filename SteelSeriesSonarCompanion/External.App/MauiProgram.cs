@@ -21,7 +21,6 @@ namespace SteelSeriesSonarCompanion.External.App
 			builder.Services.AddSingleton<CompanionConnection>();
 			builder.Services.AddSingleton<PanelRegistry>();
 			builder.Services.AddSingleton<LayoutStore>();
-			builder.Services.AddSingleton<AppShell>();
 			builder.Services.AddSingleton<MainPage>();
 
 #if DEBUG

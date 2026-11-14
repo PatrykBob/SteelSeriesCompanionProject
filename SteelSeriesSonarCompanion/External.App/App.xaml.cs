@@ -1,18 +1,20 @@
-﻿namespace SteelSeriesSonarCompanion.External.App
+﻿using SteelSeriesSonarCompanion.External.App.Connection;
+
+namespace SteelSeriesSonarCompanion.External.App
 {
 	public partial class App : Application
 	{
-		private AppShell Shell { get; }
+		private CompanionConnection Connection { get; }
 
-		public App (AppShell shell)
+		public App (CompanionConnection connection)
 		{
 			InitializeComponent();
-			Shell = shell;
+			Connection = connection;
 		}
 
 		protected override Window CreateWindow (IActivationState? activationState)
 		{
-			return new Window(Shell);
+			return new Window(new AppShell(Connection));
 		}
 	}
 }

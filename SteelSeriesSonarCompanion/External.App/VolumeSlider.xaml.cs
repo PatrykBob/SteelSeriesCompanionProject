@@ -48,6 +48,11 @@ namespace SteelSeriesSonarCompanion.External.App
 			}
 		}
 
+		public void SetMuteVisible (bool isMuteVisible)
+		{
+			MuteCheckBox.IsVisible = isMuteVisible;
+		}
+
 		private void ApplyVerticalLayout ()
 		{
 			RootLayout.ColumnDefinitions.Clear();

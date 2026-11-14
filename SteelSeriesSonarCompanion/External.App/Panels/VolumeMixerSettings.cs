@@ -19,5 +19,7 @@ namespace SteelSeriesSonarCompanion.External.App.Panels
 
 		[JsonConverter(typeof(StringEnumConverter))]
 		public SliderOrientation Orientation { get; set; } = SliderOrientation.VERTICAL;
+
+		public bool IsMuteVisible { get; set; } = true;
 	}
 }

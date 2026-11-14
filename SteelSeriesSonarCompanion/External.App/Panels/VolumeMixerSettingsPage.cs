@@ -13,6 +13,7 @@ namespace SteelSeriesSonarCompanion.External.App.Panels
 		};
 		private Button SaveButton { get; }
 		private SliderOrientation SelectedOrientation { get; set; }
+		private bool IsMuteVisible { get; set; }
 
 		private const string TITLE_TEXT = "Volume Mixer settings";
 		private const string ORIENTATION_TITLE_TEXT = "Slider orientation";
@@ -20,6 +21,7 @@ namespace SteelSeriesSonarCompanion.External.App.Panels
 		private const string VERTICAL_TEXT = "Vertical";
 		private const string HORIZONTAL_TEXT = "Horizontal";
 		private const string CHANNELS_TITLE_TEXT = "Channels";
+		private const string SHOW_MUTE_TEXT = "Show mute buttons";
 		private const double SECTION_TITLE_FONT_SIZE = 16;
 		private const string SAVE_TEXT = "Save";
 		private const string CANCEL_TEXT = "Cancel";
@@ -31,6 +33,7 @@ namespace SteelSeriesSonarCompanion.External.App.Panels
 			ChannelOrder = CreateChannelOrder(currentSettings.ChannelCollection);
 			SelectedChannels = new HashSet<SoundChannel>(currentSettings.ChannelCollection);
 			SelectedOrientation = currentSettings.Orientation;
+			IsMuteVisible = currentSettings.IsMuteVisible;
 			SaveButton = CreateButton(SAVE_TEXT, OnSaveClicked);
 			Content = CreateContent();
 			RebuildRows();
@@ -129,7 +132,34 @@ namespace SteelSeriesSonarCompanion.External.App.Panels
 				{
 					CreateSectionTitle(ORIENTATION_TITLE_TEXT),
 					orientationLayout,
+					CreateMuteVisibilityLayout(),
 					CreateSectionTitle(CHANNELS_TITLE_TEXT)
+				}
+			};
+		}
+
+		private View CreateMuteVisibilityLayout ()
+		{
+			CheckBox muteVisibilityCheckBox = new()
+			{
+				IsChecked = IsMuteVisible,
+				VerticalOptions = LayoutOptions.Center
+			};
+			muteVisibilityCheckBox.CheckedChanged += (sender, e) => IsMuteVisible = e.Value;
+
+			Label muteVisibilityLabel = new()
+			{
+				Text = SHOW_MUTE_TEXT,
+				VerticalOptions = LayoutOptions.Center
+			};
+
+			return new HorizontalStackLayout
+			{
+				Spacing = 8,
+				Children =
+				{
+					muteVisibilityCheckBox,
+					muteVisibilityLabel
 				}
 			};
 		}
@@ -256,7 +286,8 @@ namespace SteelSeriesSonarCompanion.External.App.Panels
 			VolumeMixerSettings settings = new()
 			{
 				ChannelCollection = ChannelOrder.Where(SelectedChannels.Contains).ToList(),
-				Orientation = SelectedOrientation
+				Orientation = SelectedOrientation,
+				IsMuteVisible = IsMuteVisible
 			};
 
 			Close(settings);

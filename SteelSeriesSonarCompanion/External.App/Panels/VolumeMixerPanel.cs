@@ -57,7 +57,7 @@ namespace SteelSeriesSonarCompanion.External.App.Panels
 
 			for (int i = 0; i < mixerSettings.ChannelCollection.Count; i++)
 			{
-				SpawnVolumeSlider(mixerSettings.ChannelCollection[i]);
+				SpawnVolumeSlider(mixerSettings.ChannelCollection[i], mixerSettings.IsMuteVisible);
 			}
 
 			ArrangeVolumeSliders(mixerSettings.Orientation);
@@ -105,9 +105,10 @@ namespace SteelSeriesSonarCompanion.External.App.Panels
 			SpawnVolumeSliders();
 		}
 
-		private void SpawnVolumeSlider (SoundChannel channel)
+		private void SpawnVolumeSlider (SoundChannel channel, bool isMuteVisible)
 		{
 			VolumeSlider volumeSlider = new(channel);
+			volumeSlider.SetMuteVisible(isMuteVisible);
 			SliderRoot.Add(volumeSlider);
 			volumeSlider.OnVolumeChange += OnVolumeChanged;
 			volumeSlider.OnMuteChange += OnMuteChanged;

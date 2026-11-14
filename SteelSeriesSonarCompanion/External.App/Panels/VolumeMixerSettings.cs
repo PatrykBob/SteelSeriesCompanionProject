@@ -16,5 +16,8 @@ namespace SteelSeriesSonarCompanion.External.App.Panels
 			SoundChannel.AUX,
 			SoundChannel.MIC
 		};
+
+		[JsonConverter(typeof(StringEnumConverter))]
+		public SliderOrientation Orientation { get; set; } = SliderOrientation.VERTICAL;
 	}
 }

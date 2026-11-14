@@ -12,8 +12,15 @@ namespace SteelSeriesSonarCompanion.External.App.Panels
 			Spacing = 8
 		};
 		private Button SaveButton { get; }
+		private SliderOrientation SelectedOrientation { get; set; }
 
-		private const string TITLE_TEXT = "Volume Mixer channels";
+		private const string TITLE_TEXT = "Volume Mixer settings";
+		private const string ORIENTATION_TITLE_TEXT = "Slider orientation";
+		private const string ORIENTATION_GROUP_NAME = "SliderOrientation";
+		private const string VERTICAL_TEXT = "Vertical";
+		private const string HORIZONTAL_TEXT = "Horizontal";
+		private const string CHANNELS_TITLE_TEXT = "Channels";
+		private const double SECTION_TITLE_FONT_SIZE = 16;
 		private const string SAVE_TEXT = "Save";
 		private const string CANCEL_TEXT = "Cancel";
 		private const string MOVE_UP_TEXT = "▲";
@@ -23,6 +30,7 @@ namespace SteelSeriesSonarCompanion.External.App.Panels
 		{
 			ChannelOrder = CreateChannelOrder(currentSettings.ChannelCollection);
 			SelectedChannels = new HashSet<SoundChannel>(currentSettings.ChannelCollection);
+			SelectedOrientation = currentSettings.Orientation;
 			SaveButton = CreateButton(SAVE_TEXT, OnSaveClicked);
 			Content = CreateContent();
 			RebuildRows();
@@ -89,15 +97,72 @@ namespace SteelSeriesSonarCompanion.External.App.Panels
 				RowDefinitions =
 				{
 					new RowDefinition(GridLength.Auto),
+					new RowDefinition(GridLength.Auto),
 					new RowDefinition(GridLength.Star),
 					new RowDefinition(GridLength.Auto)
 				}
 			};
 
 			contentLayout.Add(titleLabel, 0, 0);
-			contentLayout.Add(new ScrollView { Content = RowLayout }, 0, 1);
-			contentLayout.Add(buttonLayout, 0, 2);
+			contentLayout.Add(CreateOptionsLayout(), 0, 1);
+			contentLayout.Add(new ScrollView { Content = RowLayout }, 0, 2);
+			contentLayout.Add(buttonLayout, 0, 3);
 			return contentLayout;
+		}
+
+		private View CreateOptionsLayout ()
+		{
+			HorizontalStackLayout orientationLayout = new()
+			{
+				Spacing = 20,
+				Children =
+				{
+					CreateOrientationRadioButton(VERTICAL_TEXT, SliderOrientation.VERTICAL),
+					CreateOrientationRadioButton(HORIZONTAL_TEXT, SliderOrientation.HORIZONTAL)
+				}
+			};
+
+			return new VerticalStackLayout
+			{
+				Spacing = 8,
+				Children =
+				{
+					CreateSectionTitle(ORIENTATION_TITLE_TEXT),
+					orientationLayout,
+					CreateSectionTitle(CHANNELS_TITLE_TEXT)
+				}
+			};
+		}
+
+		private RadioButton CreateOrientationRadioButton (string text, SliderOrientation orientation)
+		{
+			RadioButton radioButton = new()
+			{
+				Content = text,
+				GroupName = ORIENTATION_GROUP_NAME,
+				IsChecked = SelectedOrientation == orientation
+			};
+
+			radioButton.CheckedChanged += (sender, e) => OnOrientationChanged(orientation, e.Value);
+			return radioButton;
+		}
+
+		private Label CreateSectionTitle (string text)
+		{
+			return new Label
+			{
+				Text = text,
+				FontSize = SECTION_TITLE_FONT_SIZE,
+				FontAttributes = FontAttributes.Bold
+			};
+		}
+
+		private void OnOrientationChanged (SliderOrientation orientation, bool isChecked)
+		{
+			if (isChecked == true)
+			{
+				SelectedOrientation = orientation;
+			}
 		}
 
 		private void RebuildRows ()
@@ -190,7 +255,8 @@ namespace SteelSeriesSonarCompanion.External.App.Panels
 		{
 			VolumeMixerSettings settings = new()
 			{
-				ChannelCollection = ChannelOrder.Where(SelectedChannels.Contains).ToList()
+				ChannelCollection = ChannelOrder.Where(SelectedChannels.Contains).ToList(),
+				Orientation = SelectedOrientation
 			};
 
 			Close(settings);

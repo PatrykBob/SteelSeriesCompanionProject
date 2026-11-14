@@ -16,6 +16,11 @@ namespace SteelSeriesSonarCompanion.External.App.Panels
 		};
 		private List<VolumeSlider> VolumeSliderCollection { get; } = new();
 
+		private static readonly Thickness VERTICAL_PADDING = new(30, 0);
+		private static readonly Thickness HORIZONTAL_PADDING = new(16, 8);
+		private const double VERTICAL_COLUMN_SPACING = 30;
+		private const double HORIZONTAL_ROW_SPACING = 8;
+
 		public VolumeMixerPanel (CompanionConnection connection, JObject? settings) : base(connection, settings)
 		{
 			Content = SliderRoot;
@@ -48,12 +53,42 @@ namespace SteelSeriesSonarCompanion.External.App.Panels
 
 		private void SpawnVolumeSliders ()
 		{
-			List<SoundChannel> channelCollection = GetSettings<VolumeMixerSettings>().ChannelCollection;
+			VolumeMixerSettings mixerSettings = GetSettings<VolumeMixerSettings>();
 
-			for (int i = 0; i < channelCollection.Count; i++)
+			for (int i = 0; i < mixerSettings.ChannelCollection.Count; i++)
 			{
-				SliderRoot.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Star));
-				SpawnVolumeSlider(channelCollection[i], i);
+				SpawnVolumeSlider(mixerSettings.ChannelCollection[i]);
+			}
+
+			ArrangeVolumeSliders(mixerSettings.Orientation);
+		}
+
+		private void ArrangeVolumeSliders (SliderOrientation orientation)
+		{
+			bool isVertical = orientation == SliderOrientation.VERTICAL;
+			SliderRoot.ColumnDefinitions.Clear();
+			SliderRoot.RowDefinitions.Clear();
+			SliderRoot.Padding = isVertical == true ? VERTICAL_PADDING : HORIZONTAL_PADDING;
+			SliderRoot.ColumnSpacing = isVertical == true ? VERTICAL_COLUMN_SPACING : 0;
+			SliderRoot.RowSpacing = isVertical == true ? 0 : HORIZONTAL_ROW_SPACING;
+
+			for (int i = 0; i < VolumeSliderCollection.Count; i++)
+			{
+				VolumeSlider volumeSlider = VolumeSliderCollection[i];
+				volumeSlider.SetOrientation(orientation);
+
+				if (isVertical == true)
+				{
+					SliderRoot.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Star));
+					Grid.SetColumn(volumeSlider, i);
+					Grid.SetRow(volumeSlider, 0);
+				}
+				else
+				{
+					SliderRoot.RowDefinitions.Add(new RowDefinition(GridLength.Star));
+					Grid.SetColumn(volumeSlider, 0);
+					Grid.SetRow(volumeSlider, i);
+				}
 			}
 		}
 
@@ -67,14 +102,13 @@ namespace SteelSeriesSonarCompanion.External.App.Panels
 
 			VolumeSliderCollection.Clear();
 			SliderRoot.Clear();
-			SliderRoot.ColumnDefinitions.Clear();
 			SpawnVolumeSliders();
 		}
 
-		private void SpawnVolumeSlider (SoundChannel channel, int column)
+		private void SpawnVolumeSlider (SoundChannel channel)
 		{
 			VolumeSlider volumeSlider = new(channel);
-			SliderRoot.Add(volumeSlider, column);
+			SliderRoot.Add(volumeSlider);
 			volumeSlider.OnVolumeChange += OnVolumeChanged;
 			volumeSlider.OnMuteChange += OnMuteChanged;
 

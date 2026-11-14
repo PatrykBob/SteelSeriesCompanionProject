@@ -12,6 +12,7 @@ namespace SteelSeriesSonarCompanion.External.App.Layout
 		private Page HostPage { get; }
 		private LayoutNode? Root { get; set; }
 		private Dictionary<LayoutNode, PanelCell> PanelCellCollection { get; } = new();
+		private List<LayoutDivider> DividerCollection { get; } = new();
 
 		private const string CHANGE_TYPE_TITLE = "Panel type";
 		private const string CANCEL_TEXT = "Cancel";
@@ -28,6 +29,7 @@ namespace SteelSeriesSonarCompanion.External.App.Layout
 		public void Show (LayoutNode root)
 		{
 			Root = root;
+			DividerCollection.Clear();
 			HashSet<LayoutNode> shownNodeCollection = new();
 			View rootView = CreateView(root, shownNodeCollection);
 			DiscardHiddenCells(shownNodeCollection);
@@ -38,9 +40,14 @@ namespace SteelSeriesSonarCompanion.External.App.Layout
 		{
 			IsEditMode = isEditMode;
 
-			if (Root != null)
+			foreach (PanelCell cell in PanelCellCollection.Values)
 			{
-				Show(Root);
+				SetCellEditMode(cell);
+			}
+
+			for (int i = 0; i < DividerCollection.Count; i++)
+			{
+				DividerCollection[i].SetEditMode(isEditMode);
 			}
 		}
 
@@ -61,7 +68,7 @@ namespace SteelSeriesSonarCompanion.External.App.Layout
 			{
 				if (i > 0)
 				{
-					LayoutDivider divider = new(grid, splitNode, i - 1, IsEditMode);
+					LayoutDivider divider = new(grid, splitNode, i - 1);
 					divider.DragCompleted += OnDividerDragCompleted;
 					AddToSplitGrid(grid, divider, dividerLength, i * 2 - 1, isLeftToRight);
 					dividerCollection.Add(divider);
@@ -79,13 +86,8 @@ namespace SteelSeriesSonarCompanion.External.App.Layout
 		{
 			for (int i = 0; i < dividerCollection.Count; i++)
 			{
-				BoxView? handle = dividerCollection[i].Handle;
-
-				if (handle == null)
-				{
-					continue;
-				}
-
+				LayoutDivider divider = dividerCollection[i];
+				BoxView handle = divider.Handle;
 				int index = i * 2 + 1;
 
 				if (isLeftToRight == true)
@@ -96,6 +98,9 @@ namespace SteelSeriesSonarCompanion.External.App.Layout
 				{
 					grid.Add(handle, 0, index);
 				}
+
+				divider.SetEditMode(IsEditMode);
+				DividerCollection.Add(divider);
 			}
 		}
 

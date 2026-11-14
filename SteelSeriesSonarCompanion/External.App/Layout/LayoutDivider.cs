@@ -7,7 +7,7 @@ namespace SteelSeriesSonarCompanion.External.App.Layout
 		public const double NORMAL_SIZE = 8;
 		public const double EDIT_SIZE = 24;
 
-		public BoxView? Handle { get; private set; }
+		public BoxView Handle { get; }
 
 		private Grid SplitGrid { get; }
 		private LayoutNode SplitNode { get; }
@@ -26,23 +26,36 @@ namespace SteelSeriesSonarCompanion.External.App.Layout
 		private const string HANDLE_COLOR = "#ac99ea";
 		private const string DRAG_HANDLE_COLOR = "#FF9800";
 
-		public LayoutDivider (Grid splitGrid, LayoutNode splitNode, int childIndex, bool isEditMode)
+		public LayoutDivider (Grid splitGrid, LayoutNode splitNode, int childIndex)
 		{
 			SplitGrid = splitGrid;
 			SplitNode = splitNode;
 			ChildIndex = childIndex;
 			IsLeftToRight = splitNode.Axis == SplitAxis.LEFT_TO_RIGHT;
+			Handle = CreateHandle();
+			SetupDragging();
+		}
 
-			if (isEditMode == true)
+		public void SetEditMode (bool isEditMode)
+		{
+			InputTransparent = isEditMode == false;
+			Handle.IsVisible = isEditMode;
+			GridLength length = new(isEditMode == true ? EDIT_SIZE : NORMAL_SIZE);
+			int definitionIndex = ChildIndex * 2 + 1;
+
+			if (IsLeftToRight == true)
 			{
-				SetupDragging();
+				SplitGrid.ColumnDefinitions[definitionIndex].Width = length;
+			}
+			else
+			{
+				SplitGrid.RowDefinitions[definitionIndex].Height = length;
 			}
 		}
 
 		private void SetupDragging ()
 		{
 			BackgroundColor = Colors.Transparent;
-			Handle = CreateHandle();
 
 			PanGestureRecognizer panGestureRecognizer = new();
 			panGestureRecognizer.PanUpdated += OnPanUpdated;
@@ -128,16 +141,13 @@ namespace SteelSeriesSonarCompanion.External.App.Layout
 			MinDragDistance = Math.Min(0, (minWeight - StartWeightBefore) * PixelsPerWeight);
 			MaxDragDistance = Math.Max(0, (pairWeight - minWeight - StartWeightBefore) * PixelsPerWeight);
 
-			if (Handle != null)
-			{
-				Handle.Color = Color.FromArgb(DRAG_HANDLE_COLOR);
-				SetHandleThickness(Handle, DRAG_HANDLE_THICKNESS);
-			}
+			Handle.Color = Color.FromArgb(DRAG_HANDLE_COLOR);
+			SetHandleThickness(Handle, DRAG_HANDLE_THICKNESS);
 		}
 
 		private void UpdateDrag (double dragDistance)
 		{
-			if (PixelsPerWeight <= 0 || Handle == null)
+			if (PixelsPerWeight <= 0)
 			{
 				return;
 			}
@@ -175,12 +185,6 @@ namespace SteelSeriesSonarCompanion.External.App.Layout
 		{
 			PixelsPerWeight = 0;
 			CurrentDragDistance = 0;
-
-			if (Handle == null)
-			{
-				return;
-			}
-
 			Handle.TranslationX = 0;
 			Handle.TranslationY = 0;
 			Handle.Color = Color.FromArgb(HANDLE_COLOR);

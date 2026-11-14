@@ -18,6 +18,16 @@ namespace SteelSeriesSonarCompanion.External.App
 			Connection.StartPairing();
 		}
 
+		private void OnEditLayoutClicked (object? sender, EventArgs e)
+		{
+			FlyoutIsPresented = false;
+
+			if (CurrentPage is MainPage mainPage)
+			{
+				mainPage.EnterEditMode();
+			}
+		}
+
 		private void OnRefreshAudioDeviceClicked (object? sender, EventArgs e)
 		{
 			FlyoutIsPresented = false;

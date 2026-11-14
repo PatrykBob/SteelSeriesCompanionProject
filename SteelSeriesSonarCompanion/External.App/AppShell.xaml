@@ -17,6 +17,10 @@
         Clicked="OnPairClicked" />
 
     <MenuItem
+        Text="Edit Layout"
+        Clicked="OnEditLayoutClicked" />
+
+    <MenuItem
         Text="Refresh Audio Device"
         Clicked="OnRefreshAudioDeviceClicked" />
 

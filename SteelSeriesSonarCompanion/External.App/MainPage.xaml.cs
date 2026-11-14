@@ -18,10 +18,26 @@ namespace SteelSeriesSonarCompanion.External.App
 			InitializeComponent();
 			Connection = connection;
 			LayoutStore = layoutStore;
-			LayoutHost = new LayoutHost(panelRegistry);
+			LayoutHost = new LayoutHost(panelRegistry, this);
 			SetupLayoutHost();
 			AttachToEvents();
 			StartConnection();
+		}
+
+		public void EnterEditMode ()
+		{
+			SetEditMode(true);
+		}
+
+		private void SetEditMode (bool isEditMode)
+		{
+			LayoutHost.SetEditMode(isEditMode);
+			DoneEditingButton.IsVisible = isEditMode;
+		}
+
+		private void OnDoneEditingClicked (object? sender, EventArgs e)
+		{
+			SetEditMode(false);
 		}
 
 		private void SetupLayoutHost ()

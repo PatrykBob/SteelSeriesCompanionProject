@@ -7,15 +7,20 @@
         <ContentView
             x:Name="PanelRoot"
             Grid.Row="0"/>
-        <HorizontalStackLayout
+        <Grid
             Grid.Row="1"
             Padding="20"
-            Spacing="20">
+            ColumnDefinitions="*, Auto">
             <Label
                 x:Name="ConnectionLabel"
                 Text="Not connected"
-                HorizontalOptions="Center"
                 VerticalOptions="Center"/>
-        </HorizontalStackLayout>
+            <Button
+                x:Name="DoneEditingButton"
+                Grid.Column="1"
+                Text="Done"
+                IsVisible="False"
+                Clicked="OnDoneEditingClicked"/>
+        </Grid>
     </Grid>
 </ContentPage>

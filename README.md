@@ -16,6 +16,7 @@ The project was created in .NET, and its architecture allows for simple extensio
   - Turn the equalizer on or off and switch between Sonar presets.
   - Edit the filters (type, frequency, gain, Q) and the preamp, then overwrite the current preset or save as a new one. SteelSeries presets are never overwritten.
   - Import an Equalizer APO / [AutoEQ](https://autoeq.app) `ParametricEQ.txt` file (up to 10 filters), as a new preset or over the current one.
+- Media control for Windows' current media session (the one in the Windows media flyout): play/pause, next and previous track, plus title, artist and playing state, updated when they change.
 - Tray menu: extension items, Import Equalizer Preset (pick a channel, then an AutoEQ `ParametricEQ.txt` file), Refresh Audio Device, Start with Windows and Exit.
 - Runs as a single instance.
 - Problems are reported with tray notifications and written to `%AppData%\SteelSeriesSonarCompanion\companion.log`.
@@ -26,6 +27,7 @@ The project was created in .NET, and its architecture allows for simple extensio
 - Tray items: Pair New Device, Forget Paired Devices, Restart Communication Server.
 - Volume changes made on one device are sent to all other connected remote apps.
 - Equalizer changes (on/off, preset, edits, imports) are sent to every connected remote app.
+- Media changes (track, playing state) are sent to every connected remote app.
 
 ### Hardware extension
 - Controls the Game, Chat and Media volumes with three potentiometers on an Arduino (sketch in `Arduino/`).
@@ -48,6 +50,7 @@ The project was created in .NET, and its architecture allows for simple extensio
   - Equalizer on/off switch, preset picker (your presets first) and a frequency response curve.
   - Edit: change the preamp and each filter with a live preview, then save over the current preset or as a new one.
   - Import: pick an AutoEQ `ParametricEQ.txt` file and save it as a new preset or over the current one.
+- Media panel: title and artist of what is playing on the PC, with Previous, Play/Pause and Next buttons.
 - Finds the PC on the LAN, pairs with it from the menu (Pair with PC) and remembers the pairing.
 - Sliders stay in sync with changes made on the PC or other devices.
 

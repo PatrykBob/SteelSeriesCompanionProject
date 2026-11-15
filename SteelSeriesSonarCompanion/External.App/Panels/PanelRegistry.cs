@@ -19,6 +19,7 @@ namespace SteelSeriesSonarCompanion.External.App.Panels
 			Connection = connection;
 			Register(new PanelDefinition(EMPTY_PANEL_TYPE_ID, EMPTY_PANEL_DISPLAY_NAME, (panelConnection, settings) => new EmptyPanel(panelConnection, settings)));
 			Register(new PanelDefinition(VolumeMixerPanel.TYPE_ID, VolumeMixerPanel.DISPLAY_NAME, (panelConnection, settings) => new VolumeMixerPanel(panelConnection, settings)));
+			Register(new PanelDefinition(EqualizerPanel.TYPE_ID, EqualizerPanel.DISPLAY_NAME, (panelConnection, settings) => new EqualizerPanel(panelConnection, settings)));
 		}
 
 		public void Register (PanelDefinition definition)

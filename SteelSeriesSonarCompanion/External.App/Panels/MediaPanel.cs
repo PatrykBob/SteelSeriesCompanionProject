@@ -24,21 +24,21 @@ namespace SteelSeriesSonarCompanion.External.App.Panels
 		};
 		private Button PreviousButton { get; } = new()
 		{
-			Text = PREVIOUS_TEXT
+			ImageSource = PREVIOUS_ICON
 		};
 		private Button PlayPauseButton { get; } = new()
 		{
-			Text = PLAY_TEXT
+			ImageSource = PLAY_ICON
 		};
 		private Button NextButton { get; } = new()
 		{
-			Text = NEXT_TEXT
+			ImageSource = NEXT_ICON
 		};
 
-		private const string PREVIOUS_TEXT = "Previous";
-		private const string PLAY_TEXT = "Play";
-		private const string PAUSE_TEXT = "Pause";
-		private const string NEXT_TEXT = "Next";
+		private const string PREVIOUS_ICON = "media_previous.png";
+		private const string PLAY_ICON = "media_play.png";
+		private const string PAUSE_ICON = "media_pause.png";
+		private const string NEXT_ICON = "media_next.png";
 		private const string NOTHING_PLAYING_TEXT = "Nothing playing";
 		private const string UNKNOWN_TITLE_TEXT = "Unknown title";
 
@@ -100,7 +100,7 @@ namespace SteelSeriesSonarCompanion.External.App.Panels
 			}
 
 			ArtistLabel.IsVisible = string.IsNullOrWhiteSpace(ArtistLabel.Text) == false;
-			PlayPauseButton.Text = media.IsPlaying == true ? PAUSE_TEXT : PLAY_TEXT;
+			PlayPauseButton.ImageSource = media.IsPlaying == true ? PAUSE_ICON : PLAY_ICON;
 			PreviousButton.IsEnabled = media.HasSession;
 			PlayPauseButton.IsEnabled = media.HasSession;
 			NextButton.IsEnabled = media.HasSession;

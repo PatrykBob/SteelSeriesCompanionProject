@@ -12,6 +12,10 @@ The project was created in .NET, and its architecture allows for simple extensio
 - Picks up master volume changes made outside the companion (keyboard volume keys, Windows mixer) and passes them to all extensions and remote apps.
 - Finds Sonar automatically and reconnects when SteelSeries GG restarts.
 - If a change fails, every device goes back to the last confirmed value.
+- Equalizer for every Sonar channel except master (available to extensions; no UI yet):
+  - Turn the equalizer on or off and switch between Sonar presets.
+  - Edit the filters (type, frequency, gain, Q) and the preamp, then overwrite the current preset or save as a new one. SteelSeries presets are never overwritten.
+  - Import an Equalizer APO / [AutoEQ](https://autoeq.app) `ParametricEQ.txt` file (up to 10 filters), as a new preset or over the current one.
 - Tray menu: extension items, Refresh Audio Device, Start with Windows and Exit.
 - Runs as a single instance.
 - Problems are reported with tray notifications and written to `%AppData%\SteelSeriesSonarCompanion\companion.log`.
@@ -47,8 +51,8 @@ The project was created in .NET, and its architecture allows for simple extensio
 To run the application, build CoreApp and the selected extensions. Extensions are loaded from the `Extension` folder next to the CoreApp executable (e.g. `CoreApp\bin\Debug\net10.0-windows\Extension`). Building an extension copies its .dll there automatically (see `Directory.Build.targets`); close the application before building, otherwise the files are locked and the build only shows a warning. To install an extension manually, copy only its main .dll file into that folder (for ExternalCommunication, also ExternalCommunicationShared.dll). Never copy the SteelSeriesSonarCompanion.Shared.* files there, because CoreApp already provides them.
 
 ## Future plans
-- Option to enable/disable Sonar features (e.g. Equalizer)
-- Option to import equalizer settings from files
+- Equalizer controls in the UI extension and the remote app
+- Option to enable/disable other Sonar features (e.g. bass boost, noise cancellation)
 - Support for Streamer Mode
 - Chat Mix control for extensions and the remote app
 - Code improvements

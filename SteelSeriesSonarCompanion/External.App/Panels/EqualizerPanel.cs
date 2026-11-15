@@ -51,6 +51,26 @@ namespace SteelSeriesSonarCompanion.External.App.Panels
 		private const string SAVE_FAILED_TITLE = "Equalizer";
 		private const string SAVE_FAILED_MESSAGE = "The preset was not saved. The notification on the PC says why.";
 		private const string OK_TEXT = "OK";
+		private const string IMPORT_TEXT = "Import";
+		private const string IMPORT_PICKER_TITLE = "Choose an AutoEQ ParametricEQ.txt file";
+		private const string IMPORT_ACTION_TITLE = "Import equalizer preset";
+		private const string IMPORT_AS_NEW_TEXT = "Save as new preset";
+		private const string IMPORT_OVERWRITE_FORMAT = "Overwrite \"{0}\"";
+		private const string IMPORT_NAME_TITLE = "New preset";
+		private const string IMPORT_NAME_MESSAGE = "Preset name";
+		private const string IMPORT_SAVE_TEXT = "Import";
+		private const string IMPORT_FAILED_MESSAGE = "The file could not be read.";
+		private const string IMPORT_TOO_LARGE_MESSAGE = "The file is too large for an equalizer preset.";
+		private const string AUTOEQ_FILE_SUFFIX = " ParametricEQ";
+		private const string STORAGE_PERMISSION_MESSAGE = "Importing a file needs permission to read storage.";
+		private const int MAX_IMPORT_FILE_LENGTH = 65536;
+		private const int ANDROID_WITHOUT_STORAGE_PERMISSION_VERSION = 13;
+
+		private static readonly FilePickerFileType IMPORT_FILE_TYPES = new(new Dictionary<DevicePlatform, IEnumerable<string>>
+		{
+			{ DevicePlatform.Android, ["text/plain"] },
+			{ DevicePlatform.WinUI, [".txt"] }
+		});
 
 		private bool IsSavePending { get; set; }
 		private HorizontalStackLayout ButtonLayout { get; } = new()
@@ -109,6 +129,7 @@ namespace SteelSeriesSonarCompanion.External.App.Panels
 			RootLayout.Add(PresetPicker, 0, 1);
 			ResponseView.Drawable = ResponseDrawable;
 			RootLayout.Add(ResponseView, 0, 2);
+			ButtonLayout.Add(CreateButton(IMPORT_TEXT, OnImportClicked));
 			ButtonLayout.Add(CreateButton(EDIT_TEXT, OnEditClicked));
 			RootLayout.Add(ButtonLayout, 0, 3);
 			return RootLayout;
@@ -150,6 +171,112 @@ namespace SteelSeriesSonarCompanion.External.App.Panels
 
 			IsSavePending = true;
 			Connection.SaveEqualizerPreset(Channel, result.Settings, result.NewPresetName);
+		}
+
+		private async void OnImportClicked ()
+		{
+			Page? hostPage = Window?.Page;
+			EqualizerData? equalizer = CurrentEqualizer;
+
+			if (equalizer == null || hostPage == null)
+			{
+				return;
+			}
+
+			FileResult? file = await PickImportFile(hostPage);
+
+			if (file == null)
+			{
+				return;
+			}
+
+			string? text = await ReadImportFile(hostPage, file);
+
+			if (text == null)
+			{
+				return;
+			}
+
+			string overwriteText = string.Format(IMPORT_OVERWRITE_FORMAT, equalizer.Preset.Name);
+			string[] actionCollection = equalizer.Preset.IsFactoryPreset == true ? [IMPORT_AS_NEW_TEXT] : [IMPORT_AS_NEW_TEXT, overwriteText];
+			string? action = await hostPage.DisplayActionSheetAsync(IMPORT_ACTION_TITLE, CANCEL_TEXT, null, actionCollection);
+			string? newPresetName = null;
+
+			if (action == IMPORT_AS_NEW_TEXT)
+			{
+				newPresetName = await hostPage.DisplayPromptAsync(IMPORT_NAME_TITLE, IMPORT_NAME_MESSAGE, IMPORT_SAVE_TEXT, CANCEL_TEXT, initialValue: CreatePresetName(file.FileName));
+
+				if (string.IsNullOrWhiteSpace(newPresetName) == true)
+				{
+					return;
+				}
+			}
+			else if (action != overwriteText)
+			{
+				return;
+			}
+
+			IsSavePending = true;
+			Connection.ImportEqualizerPreset(equalizer.Channel, text, newPresetName?.Trim());
+		}
+
+		private async Task<FileResult?> PickImportFile (Page hostPage)
+		{
+			if (await TryGetStorageReadPermission() == false)
+			{
+				await hostPage.DisplayAlertAsync(SAVE_FAILED_TITLE, STORAGE_PERMISSION_MESSAGE, OK_TEXT);
+				return null;
+			}
+
+			try
+			{
+				return await FilePicker.Default.PickAsync(new PickOptions { PickerTitle = IMPORT_PICKER_TITLE, FileTypes = IMPORT_FILE_TYPES });
+			}
+			catch (Exception)
+			{
+				await hostPage.DisplayAlertAsync(SAVE_FAILED_TITLE, IMPORT_FAILED_MESSAGE, OK_TEXT);
+				return null;
+			}
+		}
+
+		private async Task<bool> TryGetStorageReadPermission ()
+		{
+			if (DeviceInfo.Platform != DevicePlatform.Android || DeviceInfo.Version.Major >= ANDROID_WITHOUT_STORAGE_PERMISSION_VERSION)
+			{
+				return true;
+			}
+
+			return await Permissions.RequestAsync<Permissions.StorageRead>() == PermissionStatus.Granted;
+		}
+
+		private async Task<string?> ReadImportFile (Page hostPage, FileResult file)
+		{
+			try
+			{
+				using Stream stream = await file.OpenReadAsync();
+				using StreamReader reader = new(stream);
+				char[] buffer = new char[MAX_IMPORT_FILE_LENGTH + 1];
+				int length = await reader.ReadBlockAsync(buffer, 0, buffer.Length);
+
+				if (length <= MAX_IMPORT_FILE_LENGTH)
+				{
+					return new string(buffer, 0, length);
+				}
+
+				await hostPage.DisplayAlertAsync(SAVE_FAILED_TITLE, IMPORT_TOO_LARGE_MESSAGE, OK_TEXT);
+				return null;
+			}
+			catch (Exception)
+			{
+				await hostPage.DisplayAlertAsync(SAVE_FAILED_TITLE, IMPORT_FAILED_MESSAGE, OK_TEXT);
+				return null;
+			}
+		}
+
+		private string CreatePresetName (string fileName)
+		{
+			string name = Path.GetFileNameWithoutExtension(fileName);
+			return name.EndsWith(AUTOEQ_FILE_SUFFIX, StringComparison.OrdinalIgnoreCase) == true ? name[..^AUTOEQ_FILE_SUFFIX.Length] : name;
 		}
 
 		private async void OnEqualizerSaveCompleted (SoundChannel channel, bool isSuccess)

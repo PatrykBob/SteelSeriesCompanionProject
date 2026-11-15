@@ -23,6 +23,7 @@ namespace SteelSeriesSonarCompanion.Extension.ExternalCommunicationShared.Event
 					EqualizerEvent.EVENT_NAME => JsonConverter.ConvertFromJSON<EqualizerEvent>(json),
 					EqualizerPresetsEvent.EVENT_NAME => JsonConverter.ConvertFromJSON<EqualizerPresetsEvent>(json),
 					EqualizerSaveResultEvent.EVENT_NAME => JsonConverter.ConvertFromJSON<EqualizerSaveResultEvent>(json),
+					MediaEvent.EVENT_NAME => JsonConverter.ConvertFromJSON<MediaEvent>(json),
 					ChannelMuteEvent.EVENT_NAME => JsonConverter.ConvertFromJSON<ChannelMuteEvent>(json),
 					_ => null,
 				};

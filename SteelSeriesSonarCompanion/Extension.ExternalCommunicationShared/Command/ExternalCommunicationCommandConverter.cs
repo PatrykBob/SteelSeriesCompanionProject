@@ -27,6 +27,10 @@ namespace SteelSeriesSonarCompanion.Extension.ExternalCommunicationShared.Comman
 					SelectEqualizerPresetCommand.COMMAND_NAME => JsonConverter.ConvertFromJSON<SelectEqualizerPresetCommand>(json),
 					SaveEqualizerPresetCommand.COMMAND_NAME => JsonConverter.ConvertFromJSON<SaveEqualizerPresetCommand>(json),
 					ImportEqualizerPresetCommand.COMMAND_NAME => JsonConverter.ConvertFromJSON<ImportEqualizerPresetCommand>(json),
+					RequestMediaCommand.COMMAND_NAME => JsonConverter.ConvertFromJSON<RequestMediaCommand>(json),
+					ToggleMediaPlayPauseCommand.COMMAND_NAME => JsonConverter.ConvertFromJSON<ToggleMediaPlayPauseCommand>(json),
+					SkipMediaNextCommand.COMMAND_NAME => JsonConverter.ConvertFromJSON<SkipMediaNextCommand>(json),
+					SkipMediaPreviousCommand.COMMAND_NAME => JsonConverter.ConvertFromJSON<SkipMediaPreviousCommand>(json),
 					AuthenticateCommand.COMMAND_NAME => JsonConverter.ConvertFromJSON<AuthenticateCommand>(json),
 					_ => null,
 				};

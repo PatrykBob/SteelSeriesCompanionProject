@@ -28,6 +28,8 @@ namespace SteelSeriesSonarCompanion.External.App.Panels
 		{
 			Title = PRESET_PICKER_TITLE
 		};
+		private EqualizerResponseDrawable ResponseDrawable { get; } = new();
+		private GraphicsView ResponseView { get; } = new();
 		private Grid RootLayout { get; } = new()
 		{
 			Padding = new Thickness(16, 8),
@@ -93,6 +95,8 @@ namespace SteelSeriesSonarCompanion.External.App.Panels
 
 			RootLayout.Add(headerLayout, 0, 0);
 			RootLayout.Add(PresetPicker, 0, 1);
+			ResponseView.Drawable = ResponseDrawable;
+			RootLayout.Add(ResponseView, 0, 2);
 			return RootLayout;
 		}
 
@@ -110,6 +114,7 @@ namespace SteelSeriesSonarCompanion.External.App.Panels
 			ChannelLabel.Text = string.Format(CHANNEL_TITLE_FORMAT, channel);
 			RootLayout.IsEnabled = false;
 			RefreshPresetPicker();
+			RefreshResponseView();
 
 			if (Connection.TryGetEqualizerState(channel, out EqualizerData? equalizer) == true)
 			{
@@ -158,6 +163,13 @@ namespace SteelSeriesSonarCompanion.External.App.Panels
 			EnabledSwitch.IsToggled = equalizer.Enabled;
 			IsApplyingRemoteState = false;
 			RefreshPresetPicker();
+			RefreshResponseView();
+		}
+
+		private void RefreshResponseView ()
+		{
+			ResponseDrawable.Equalizer = CurrentEqualizer;
+			ResponseView.Invalidate();
 		}
 
 		private void RefreshPresetPicker ()

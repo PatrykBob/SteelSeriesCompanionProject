@@ -16,7 +16,7 @@ The project was created in .NET, and its architecture allows for simple extensio
   - Turn the equalizer on or off and switch between Sonar presets.
   - Edit the filters (type, frequency, gain, Q) and the preamp, then overwrite the current preset or save as a new one. SteelSeries presets are never overwritten.
   - Import an Equalizer APO / [AutoEQ](https://autoeq.app) `ParametricEQ.txt` file (up to 10 filters), as a new preset or over the current one.
-- Tray menu: extension items, Refresh Audio Device, Start with Windows and Exit.
+- Tray menu: extension items, Import Equalizer Preset (pick a channel, then an AutoEQ `ParametricEQ.txt` file), Refresh Audio Device, Start with Windows and Exit.
 - Runs as a single instance.
 - Problems are reported with tray notifications and written to `%AppData%\SteelSeriesSonarCompanion\companion.log`.
 

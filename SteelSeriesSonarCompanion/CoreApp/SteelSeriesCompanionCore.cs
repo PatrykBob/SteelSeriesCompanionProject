@@ -299,6 +299,7 @@ namespace SteelSeriesSonarCompanion.CoreApp
 
 			ExtensionController.Initialize(this);
 			List<SteelSeriesCompanionExtensionMenuItem> extensionMenuItemCollection = ExtensionController.GetExtensionToolMenuItemCollection();
+			extensionMenuItemCollection.Add(new EqualizerTrayImporter(this).CreateMenuItem());
 			extensionMenuItemCollection.Add(new SteelSeriesCompanionExtensionMenuItem(REFRESH_AUDIO_DEVICE_MENU_TEXT, () => _ = RefreshAudioDevice(this)));
 			Tray.Initialize(extensionMenuItemCollection);
 

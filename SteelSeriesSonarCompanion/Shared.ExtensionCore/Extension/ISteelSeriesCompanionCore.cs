@@ -8,6 +8,7 @@ namespace SteelSeriesSonarCompanion.Shared.ExtensionCore.Extension
 		public event EventHandler<ChannelVolumeChangedEventArgs> ChannelVolumeChanged;
 		public event EventHandler<ChannelMuteChangedEventArgs> ChannelMuteChanged;
 		public event EventHandler<ChannelEqualizerChangedEventArgs> ChannelEqualizerChanged;
+		public event EventHandler<MediaChangedEventArgs> MediaChanged;
 
 		public Task<List<VolumeData>> GetVolumeSettings ();
 		public Task SetChannelVolume (object? sender, SoundChannel channel, float volume);
@@ -21,5 +22,9 @@ namespace SteelSeriesSonarCompanion.Shared.ExtensionCore.Extension
 		public Task SelectEqualizerPreset (object? sender, SoundChannel channel, string presetId);
 		public Task<bool> TrySaveEqualizerPreset (object? sender, SoundChannel channel, EqualizerSettings settings, string? newPresetName);
 		public Task<bool> TryImportEqualizerPreset (object? sender, SoundChannel channel, string parametricEqText, string? newPresetName);
+		public Task<MediaData> GetMedia ();
+		public Task<bool> TryToggleMediaPlayPause ();
+		public Task<bool> TrySkipMediaNext ();
+		public Task<bool> TrySkipMediaPrevious ();
 	}
 }

@@ -2,6 +2,7 @@
 using SteelSeriesSonarCompanion.CoreApp.Communication.Internal;
 using SteelSeriesSonarCompanion.CoreApp.Equalizer;
 using SteelSeriesSonarCompanion.CoreApp.Extension;
+using SteelSeriesSonarCompanion.CoreApp.Media;
 using SteelSeriesSonarCompanion.CoreApp.Tray;
 using SteelSeriesSonarCompanion.Shared.Core;
 using SteelSeriesSonarCompanion.Shared.ExtensionCore.Extension;
@@ -14,8 +15,11 @@ namespace SteelSeriesSonarCompanion.CoreApp
 		public event EventHandler<ChannelVolumeChangedEventArgs> ChannelVolumeChanged = delegate { };
 		public event EventHandler<ChannelMuteChangedEventArgs> ChannelMuteChanged = delegate { };
 		public event EventHandler<ChannelEqualizerChangedEventArgs> ChannelEqualizerChanged = delegate { };
+		public event EventHandler<MediaChangedEventArgs> MediaChanged = delegate { };
 
 		private InternalCommunicationFacade InternalFacade { get; set; } = new();
+		private MediaSessionController MediaSession { get; set; } = new();
+		private MediaData ConfirmedMedia { get; set; } = MediaData.NoSession;
 		private SteelSeriesCompanionExtensionController ExtensionController { get; set; } = new();
 		private TrayController Tray { get; set; } = new();
 		private Dictionary<SoundChannel, float> ConfirmedVolumeMap { get; } = new();
@@ -273,6 +277,42 @@ namespace SteelSeriesSonarCompanion.CoreApp
 			ChannelEqualizerChanged.Invoke(sender, new ChannelEqualizerChangedEventArgs(equalizer));
 		}
 
+		public async Task<MediaData> GetMedia ()
+		{
+			return await MediaSession.GetMedia();
+		}
+
+		public async Task<bool> TryToggleMediaPlayPause ()
+		{
+			return await MediaSession.TryTogglePlayPause();
+		}
+
+		public async Task<bool> TrySkipMediaNext ()
+		{
+			return await MediaSession.TrySkipNext();
+		}
+
+		public async Task<bool> TrySkipMediaPrevious ()
+		{
+			return await MediaSession.TrySkipPrevious();
+		}
+
+		private void OnMediaSessionChanged (MediaData media)
+		{
+			UiContext?.Post(_ => ApplyMediaChange(media), null);
+		}
+
+		private void ApplyMediaChange (MediaData media)
+		{
+			if (ConfirmedMedia.IsSameAs(media) == true)
+			{
+				return;
+			}
+
+			ConfirmedMedia = media;
+			MediaChanged.Invoke(this, new MediaChangedEventArgs(media));
+		}
+
 		public async Task RequestVolumeSetup (object? sender)
 		{
 			List<VolumeData> volumeDataCollection = await GetVolumeSettings();
@@ -295,6 +335,8 @@ namespace SteelSeriesSonarCompanion.CoreApp
 		{
 			UiContext = SynchronizationContext.Current;
 			InternalFacade.MasterVolumeChangedExternally += OnMasterVolumeChangedExternally;
+			MediaSession.MediaChanged += OnMediaSessionChanged;
+			await MediaSession.Initialize();
 			bool isConnectedToSonar = await InternalFacade.Initialize();
 
 			ExtensionController.Initialize(this);
@@ -334,6 +376,8 @@ namespace SteelSeriesSonarCompanion.CoreApp
 		public void Dispose ()
 		{
 			InternalFacade.MasterVolumeChangedExternally -= OnMasterVolumeChangedExternally;
+			MediaSession.MediaChanged -= OnMediaSessionChanged;
+			MediaSession.Dispose();
 			ExtensionController.Dispose();
 			InternalFacade.Dispose();
 			Tray.Dispose();

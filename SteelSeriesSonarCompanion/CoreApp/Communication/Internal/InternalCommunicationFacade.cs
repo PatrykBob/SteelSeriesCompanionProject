@@ -103,6 +103,20 @@ namespace SteelSeriesSonarCompanion.CoreApp.Communication.Internal
 			return configs?.Select(EqualizerConfigConverter.ConvertToEqualizerPreset).ToList() ?? [];
 		}
 
+		public async Task<bool> TrySetEqualizerEnabled (SoundChannel channel, bool enabled)
+		{
+			ChannelConfigResponse? config = await GetSelectedConfig(channel);
+			ChannelConfigResponse.EqualizerResponse? equalizer = config?.data?.parametricEQ;
+
+			if (config == null || equalizer == null)
+			{
+				return false;
+			}
+
+			equalizer.enabled = enabled;
+			return await CommunicationController.TryUpdateConfig(config);
+		}
+
 		private async Task<ChannelConfigResponse?> GetSelectedConfig (SoundChannel channel)
 		{
 			string virtualAudioDevice = ConvertSoundChannel(channel);

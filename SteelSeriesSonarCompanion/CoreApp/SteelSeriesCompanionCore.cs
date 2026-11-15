@@ -12,6 +12,7 @@ namespace SteelSeriesSonarCompanion.CoreApp
 		public event EventHandler<List<VolumeData>> VolumeSetupChanged = delegate { };
 		public event EventHandler<ChannelVolumeChangedEventArgs> ChannelVolumeChanged = delegate { };
 		public event EventHandler<ChannelMuteChangedEventArgs> ChannelMuteChanged = delegate { };
+		public event EventHandler<ChannelEqualizerChangedEventArgs> ChannelEqualizerChanged = delegate { };
 
 		private InternalCommunicationFacade InternalFacade { get; set; } = new();
 		private SteelSeriesCompanionExtensionController ExtensionController { get; set; } = new();
@@ -154,6 +155,35 @@ namespace SteelSeriesSonarCompanion.CoreApp
 			}
 
 			return await InternalFacade.GetEqualizerPresets(channel);
+		}
+
+		public async Task SetEqualizerEnabled (object? sender, SoundChannel channel, bool enabled)
+		{
+			if (IsEqualizerChannel(channel) == false)
+			{
+				return;
+			}
+
+			if (await InternalFacade.TrySetEqualizerEnabled(channel, enabled) == false)
+			{
+				Trace.WriteLine($"Failed to set {channel} equalizer enabled to {enabled}, restoring current state");
+				await PublishEqualizer(this, channel);
+				return;
+			}
+
+			await PublishEqualizer(sender, channel);
+		}
+
+		private async Task PublishEqualizer (object? sender, SoundChannel channel)
+		{
+			EqualizerData? equalizer = await InternalFacade.GetEqualizerData(channel);
+
+			if (equalizer == null)
+			{
+				return;
+			}
+
+			ChannelEqualizerChanged.Invoke(sender, new ChannelEqualizerChangedEventArgs(equalizer));
 		}
 
 		public async Task RequestVolumeSetup (object? sender)

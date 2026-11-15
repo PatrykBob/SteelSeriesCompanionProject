@@ -28,7 +28,6 @@ namespace SteelSeriesSonarCompanion.CoreApp.Communication.Internal
 			AudioController.Dispose();
 		}
 
-
 		public async Task<List<VolumeData>> GetVolumeSettings ()
 		{
 			List<VolumeData> volumeDataCollection = [await GetMasterVolumeData()];
@@ -90,6 +89,32 @@ namespace SteelSeriesSonarCompanion.CoreApp.Communication.Internal
 
 			string channelName = ConvertSoundChannel(channel);
 			return await CommunicationController.TrySetChannelMute(channelName, mute);
+		}
+
+		public async Task<EqualizerData?> GetEqualizerData (SoundChannel channel)
+		{
+			ChannelConfigResponse? config = await GetSelectedConfig(channel);
+			return config == null ? null : EqualizerConfigConverter.ConvertToEqualizerData(channel, config);
+		}
+
+		public async Task<List<EqualizerPreset>> GetEqualizerPresets (SoundChannel channel)
+		{
+			List<ChannelConfigResponse>? configs = await CommunicationController.GetConfigs(ConvertSoundChannel(channel));
+			return configs?.Select(EqualizerConfigConverter.ConvertToEqualizerPreset).ToList() ?? [];
+		}
+
+		private async Task<ChannelConfigResponse?> GetSelectedConfig (SoundChannel channel)
+		{
+			string virtualAudioDevice = ConvertSoundChannel(channel);
+			List<ChannelConfigResponse>? configs = await CommunicationController.GetSelectedConfigs();
+			ChannelConfigResponse? config = configs?.FirstOrDefault(config => config.virtualAudioDevice == virtualAudioDevice);
+
+			if (config == null)
+			{
+				Trace.WriteLine($"Sonar returned no selected config for {channel}");
+			}
+
+			return config;
 		}
 
 		private string ConvertSoundChannel (SoundChannel channel)

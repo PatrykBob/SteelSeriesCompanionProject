@@ -120,6 +120,42 @@ namespace SteelSeriesSonarCompanion.CoreApp
 			return false;
 		}
 
+		private bool IsEqualizerChannel (SoundChannel channel)
+		{
+			if (IsKnownChannel(channel) == false)
+			{
+				return false;
+			}
+
+			if (channel == SoundChannel.MASTER)
+			{
+				Trace.WriteLine("Ignored equalizer request for MASTER, it has no equalizer");
+				return false;
+			}
+
+			return true;
+		}
+
+		public async Task<EqualizerData?> GetEqualizer (SoundChannel channel)
+		{
+			if (IsEqualizerChannel(channel) == false)
+			{
+				return null;
+			}
+
+			return await InternalFacade.GetEqualizerData(channel);
+		}
+
+		public async Task<List<EqualizerPreset>> GetEqualizerPresets (SoundChannel channel)
+		{
+			if (IsEqualizerChannel(channel) == false)
+			{
+				return [];
+			}
+
+			return await InternalFacade.GetEqualizerPresets(channel);
+		}
+
 		public async Task RequestVolumeSetup (object? sender)
 		{
 			List<VolumeData> volumeDataCollection = await GetVolumeSettings();

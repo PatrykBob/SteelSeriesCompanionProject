@@ -14,5 +14,7 @@ namespace SteelSeriesSonarCompanion.Shared.ExtensionCore.Extension
 		public Task RequestVolumeSetup (object? sender);
 		public Task RefreshAudioDevice (object? sender);
 		public void ShowNotification (string message);
+		public Task<EqualizerData?> GetEqualizer (SoundChannel channel);
+		public Task<List<EqualizerPreset>> GetEqualizerPresets (SoundChannel channel);
 	}
 }

@@ -14,6 +14,9 @@ namespace SteelSeriesSonarCompanion.External.App.Connection
 		public event Action<List<VolumeData>> VolumeSetupChanged = delegate { };
 		public event Action<object?, SoundChannel, float> ChannelVolumeChanged = delegate { };
 		public event Action<object?, SoundChannel, bool> ChannelMuteChanged = delegate { };
+		public event Action<EqualizerData> EqualizerChanged = delegate { };
+		public event Action<SoundChannel, List<EqualizerPreset>> EqualizerPresetsReceived = delegate { };
+		public event Action<SoundChannel, bool> EqualizerSaveCompleted = delegate { };
 
 		public string Status { get; private set; } = NOT_CONNECTED_MESSAGE;
 
@@ -28,6 +31,8 @@ namespace SteelSeriesSonarCompanion.External.App.Connection
 		private Dictionary<SoundChannel, VolumeData> ChannelStateMap { get; } = new();
 		private Dictionary<SoundChannel, float> PendingVolumeMap { get; } = new();
 		private HashSet<SoundChannel> ThrottledChannels { get; } = new();
+		private Dictionary<SoundChannel, EqualizerData> EqualizerStateMap { get; } = new();
+		private HashSet<SoundChannel> WatchedEqualizerChannels { get; } = new();
 
 		private static readonly TimeSpan VOLUME_SEND_INTERVAL = TimeSpan.FromMilliseconds(50);
 		private static readonly TimeSpan DISCOVERY_TIMEOUT = TimeSpan.FromSeconds(3);
@@ -96,6 +101,42 @@ namespace SteelSeriesSonarCompanion.External.App.Connection
 			UpdateChannelState(channel, GetChannelVolume(channel), isMuted);
 			ChannelMuteChanged(source, channel, isMuted);
 			SendCommand(new SetChannelMuteCommand(channel, isMuted));
+		}
+
+		public bool TryGetEqualizerState (SoundChannel channel, out EqualizerData? equalizer)
+		{
+			return EqualizerStateMap.TryGetValue(channel, out equalizer);
+		}
+
+		public void RequestEqualizer (SoundChannel channel)
+		{
+			WatchedEqualizerChannels.Add(channel);
+			SendCommand(new RequestEqualizerCommand(channel));
+		}
+
+		public void RequestEqualizerPresets (SoundChannel channel)
+		{
+			SendCommand(new RequestEqualizerPresetsCommand(channel));
+		}
+
+		public void SetEqualizerEnabled (SoundChannel channel, bool enabled)
+		{
+			SendCommand(new SetEqualizerEnabledCommand(channel, enabled));
+		}
+
+		public void SelectEqualizerPreset (SoundChannel channel, string presetId)
+		{
+			SendCommand(new SelectEqualizerPresetCommand(channel, presetId));
+		}
+
+		public void SaveEqualizerPreset (SoundChannel channel, EqualizerSettings settings, string? newPresetName)
+		{
+			SendCommand(new SaveEqualizerPresetCommand(channel, settings, newPresetName));
+		}
+
+		public void ImportEqualizerPreset (SoundChannel channel, string parametricEqText, string? newPresetName)
+		{
+			SendCommand(new ImportEqualizerPresetCommand(channel, parametricEqText, newPresetName));
 		}
 
 		private void Reconnect ()
@@ -273,6 +314,19 @@ namespace SteelSeriesSonarCompanion.External.App.Connection
 				UpdateChannelState(channelMuteEvent.Channel, GetChannelVolume(channelMuteEvent.Channel), channelMuteEvent.Mute);
 				ChannelMuteChanged(null, channelMuteEvent.Channel, channelMuteEvent.Mute);
 			}
+			else if (externalEvent is EqualizerEvent equalizerEvent)
+			{
+				EqualizerStateMap[equalizerEvent.Equalizer.Channel] = equalizerEvent.Equalizer;
+				EqualizerChanged(equalizerEvent.Equalizer);
+			}
+			else if (externalEvent is EqualizerPresetsEvent presetsEvent)
+			{
+				EqualizerPresetsReceived(presetsEvent.Channel, presetsEvent.Presets);
+			}
+			else if (externalEvent is EqualizerSaveResultEvent saveResultEvent)
+			{
+				EqualizerSaveCompleted(saveResultEvent.Channel, saveResultEvent.IsSuccess);
+			}
 		}
 
 		private void OnAuthenticated (AuthenticatedEvent authenticatedEvent)
@@ -292,6 +346,11 @@ namespace SteelSeriesSonarCompanion.External.App.Connection
 			IsAuthenticated = true;
 			SetStatus(CONNECTED_MESSAGE);
 			SendCommand(new RequestVolumeSetupCommand());
+
+			foreach (SoundChannel channel in WatchedEqualizerChannels)
+			{
+				SendCommand(new RequestEqualizerCommand(channel));
+			}
 		}
 
 		private void OnVolumeSetupReceived (List<VolumeData> volumeDataCollection)

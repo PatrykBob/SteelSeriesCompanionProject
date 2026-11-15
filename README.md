@@ -12,7 +12,7 @@ The project was created in .NET, and its architecture allows for simple extensio
 - Picks up master volume changes made outside the companion (keyboard volume keys, Windows mixer) and passes them to all extensions and remote apps.
 - Finds Sonar automatically and reconnects when SteelSeries GG restarts.
 - If a change fails, every device goes back to the last confirmed value.
-- Equalizer for every Sonar channel except master (available to extensions; no UI yet):
+- Equalizer for every Sonar channel except master (used by the remote app's Equalizer panel and available to extensions):
   - Turn the equalizer on or off and switch between Sonar presets.
   - Edit the filters (type, frequency, gain, Q) and the preamp, then overwrite the current preset or save as a new one. SteelSeries presets are never overwritten.
   - Import an Equalizer APO / [AutoEQ](https://autoeq.app) `ParametricEQ.txt` file (up to 10 filters), as a new preset or over the current one.
@@ -25,6 +25,7 @@ The project was created in .NET, and its architecture allows for simple extensio
 - Pairing: Remote App > Pair New Device opens a 60-second pairing window; only paired devices can connect.
 - Tray items: Pair New Device, Forget Paired Devices, Restart Communication Server.
 - Volume changes made on one device are sent to all other connected remote apps.
+- Equalizer changes (on/off, preset, edits, imports) are sent to every connected remote app.
 
 ### Hardware extension
 - Controls the Game, Chat and Media volumes with three potentiometers on an Arduino (sketch in `Arduino/`).
@@ -43,6 +44,10 @@ The project was created in .NET, and its architecture allows for simple extensio
 - Volume Mixer panel: a volume slider and mute toggle for each channel.
   - Its settings choose which channels it shows and in what order.
   - Sliders can be vertical or horizontal, and the mute buttons can be hidden.
+- Equalizer panel for one channel (chosen in its settings):
+  - Equalizer on/off switch, preset picker (your presets first) and a frequency response curve.
+  - Edit: change the preamp and each filter with a live preview, then save over the current preset or as a new one.
+  - Import: pick an AutoEQ `ParametricEQ.txt` file and save it as a new preset or over the current one.
 - Finds the PC on the LAN, pairs with it from the menu (Pair with PC) and remembers the pairing.
 - Sliders stay in sync with changes made on the PC or other devices.
 
@@ -51,7 +56,7 @@ The project was created in .NET, and its architecture allows for simple extensio
 To run the application, build CoreApp and the selected extensions. Extensions are loaded from the `Extension` folder next to the CoreApp executable (e.g. `CoreApp\bin\Debug\net10.0-windows\Extension`). Building an extension copies its .dll there automatically (see `Directory.Build.targets`); close the application before building, otherwise the files are locked and the build only shows a warning. To install an extension manually, copy only its main .dll file into that folder (for ExternalCommunication, also ExternalCommunicationShared.dll). Never copy the SteelSeriesSonarCompanion.Shared.* files there, because CoreApp already provides them.
 
 ## Future plans
-- Equalizer controls in the UI extension and the remote app
+- Equalizer controls in the UI extension
 - Option to enable/disable other Sonar features (e.g. bass boost, noise cancellation)
 - Support for Streamer Mode
 - Chat Mix control for extensions and the remote app

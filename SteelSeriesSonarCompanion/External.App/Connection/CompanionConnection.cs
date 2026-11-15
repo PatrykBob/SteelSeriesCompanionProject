@@ -17,6 +17,7 @@ namespace SteelSeriesSonarCompanion.External.App.Connection
 		public event Action<EqualizerData> EqualizerChanged = delegate { };
 		public event Action<SoundChannel, List<EqualizerPreset>> EqualizerPresetsReceived = delegate { };
 		public event Action<SoundChannel, bool> EqualizerSaveCompleted = delegate { };
+		public event Action<MediaData> MediaChanged = delegate { };
 
 		public string Status { get; private set; } = NOT_CONNECTED_MESSAGE;
 
@@ -33,6 +34,8 @@ namespace SteelSeriesSonarCompanion.External.App.Connection
 		private HashSet<SoundChannel> ThrottledChannels { get; } = new();
 		private Dictionary<SoundChannel, EqualizerData> EqualizerStateMap { get; } = new();
 		private HashSet<SoundChannel> WatchedEqualizerChannels { get; } = new();
+		private MediaData? MediaState { get; set; }
+		private bool IsMediaWatched { get; set; }
 
 		private static readonly TimeSpan VOLUME_SEND_INTERVAL = TimeSpan.FromMilliseconds(50);
 		private static readonly TimeSpan DISCOVERY_TIMEOUT = TimeSpan.FromSeconds(3);
@@ -137,6 +140,33 @@ namespace SteelSeriesSonarCompanion.External.App.Connection
 		public void ImportEqualizerPreset (SoundChannel channel, string parametricEqText, string? newPresetName)
 		{
 			SendCommand(new ImportEqualizerPresetCommand(channel, parametricEqText, newPresetName));
+		}
+
+		public bool TryGetMediaState (out MediaData? media)
+		{
+			media = MediaState;
+			return media != null;
+		}
+
+		public void RequestMedia ()
+		{
+			IsMediaWatched = true;
+			SendCommand(new RequestMediaCommand());
+		}
+
+		public void ToggleMediaPlayPause ()
+		{
+			SendCommand(new ToggleMediaPlayPauseCommand());
+		}
+
+		public void SkipMediaNext ()
+		{
+			SendCommand(new SkipMediaNextCommand());
+		}
+
+		public void SkipMediaPrevious ()
+		{
+			SendCommand(new SkipMediaPreviousCommand());
 		}
 
 		private void Reconnect ()
@@ -327,6 +357,11 @@ namespace SteelSeriesSonarCompanion.External.App.Connection
 			{
 				EqualizerSaveCompleted(saveResultEvent.Channel, saveResultEvent.IsSuccess);
 			}
+			else if (externalEvent is MediaEvent mediaEvent)
+			{
+				MediaState = mediaEvent.Media;
+				MediaChanged(mediaEvent.Media);
+			}
 		}
 
 		private void OnAuthenticated (AuthenticatedEvent authenticatedEvent)
@@ -350,6 +385,11 @@ namespace SteelSeriesSonarCompanion.External.App.Connection
 			foreach (SoundChannel channel in WatchedEqualizerChannels)
 			{
 				SendCommand(new RequestEqualizerCommand(channel));
+			}
+
+			if (IsMediaWatched == true)
+			{
+				SendCommand(new RequestMediaCommand());
 			}
 		}
 

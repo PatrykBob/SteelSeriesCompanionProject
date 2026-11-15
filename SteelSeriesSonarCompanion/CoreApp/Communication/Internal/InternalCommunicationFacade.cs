@@ -28,15 +28,6 @@ namespace SteelSeriesSonarCompanion.CoreApp.Communication.Internal
 			AudioController.Dispose();
 		}
 
-		public async Task<List<ChannelConfigResponse>?> GetConfig ()
-		{
-			return await CommunicationController.GetConfig();
-		}
-
-		public async Task<ChannelConfigResponse?> PostConfig (ChannelConfigResponse config)
-		{
-			return await CommunicationController.PostConfig(config);
-		}
 
 		public async Task<List<VolumeData>> GetVolumeSettings ()
 		{

@@ -44,15 +44,34 @@ namespace SteelSeriesSonarCompanion.CoreApp.Communication.Internal
             return request.RequestUri?.IsLoopback == true;
         }
 
-        public async Task<List<ChannelConfigResponse>?> GetConfig ()
+        public async Task<List<ChannelConfigResponse>?> GetSelectedConfigs ()
         {
             return (await SendRequest<List<ChannelConfigResponse>>(HttpMethod.Get, InternalCommunicationAddressProvider.GetConfigSelectedAddress)).Value;
         }
 
-        public async Task<ChannelConfigResponse?> PostConfig (ChannelConfigResponse config)
+        public async Task<List<ChannelConfigResponse>?> GetConfigs (string virtualAudioDevice)
         {
-            string json = JsonConverter.ConvertToJSON(config);
-            return (await SendRequest<ChannelConfigResponse>(HttpMethod.Put, InternalCommunicationAddressProvider.GetConfigAddress, () => new StringContent(json, Encoding.UTF8, "application/json"))).Value;
+            return (await SendRequest<List<ChannelConfigResponse>>(HttpMethod.Get, port => InternalCommunicationAddressProvider.GetConfigsByDeviceAddress(port, virtualAudioDevice))).Value;
+        }
+
+        public async Task<ChannelConfigResponse?> AddConfig (ChannelConfigResponse config)
+        {
+            return (await SendRequest<ChannelConfigResponse>(HttpMethod.Post, InternalCommunicationAddressProvider.GetConfigAddress, () => CreateJsonContent(config))).Value;
+        }
+
+        public async Task<bool> TryUpdateConfig (ChannelConfigResponse config)
+        {
+            return (await SendRequest<object>(HttpMethod.Put, InternalCommunicationAddressProvider.GetConfigAddress, () => CreateJsonContent(config))).IsSuccess;
+        }
+
+        public async Task<bool> TrySelectConfig (string configId)
+        {
+            return (await SendRequest<object>(HttpMethod.Put, port => InternalCommunicationAddressProvider.GetSelectConfigAddress(port, configId))).IsSuccess;
+        }
+
+        private static StringContent CreateJsonContent<T> (T value)
+        {
+            return new StringContent(JsonConverter.ConvertToJSON(value), Encoding.UTF8, "application/json");
         }
 
         public async Task<VolumeSettingsResponse?> GetVolumeSettings ()

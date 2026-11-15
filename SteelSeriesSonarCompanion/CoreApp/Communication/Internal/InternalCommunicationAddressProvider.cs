@@ -14,6 +14,8 @@ namespace SteelSeriesSonarCompanion.CoreApp.Communication.Internal
 		private const string CHAT_MIX_ENDPOINT_FORMAT = "{0}:{1}/ChatMix?balance={2}";
 		private const string CONFIG_ENDPOINT_FORMAT = "{0}:{1}/configs";
 		private const string CONFIG_SELECTED_ENDPOINT_FORMAT = "{0}:{1}/configs/selected";
+		private const string CONFIGS_BY_DEVICE_ENDPOINT_FORMAT = "{0}:{1}/configs?vad={2}";
+		private const string SELECT_CONFIG_ENDPOINT_FORMAT = "{0}:{1}/configs/{2}/select";
 		private const string CLASSIC_REDIRECTIONS_ENDPOINT_FORMAT = "{0}:{1}/classicRedirections";
 
 		public static Uri GetSubAppsAddress (int port)
@@ -49,6 +51,16 @@ namespace SteelSeriesSonarCompanion.CoreApp.Communication.Internal
 		public static Uri GetConfigSelectedAddress (int port)
 		{
 			return new Uri(string.Format(CONFIG_SELECTED_ENDPOINT_FORMAT, LOCALHOST_ADDRESS, port));
+		}
+
+		public static Uri GetConfigsByDeviceAddress (int port, string virtualAudioDevice)
+		{
+			return new Uri(string.Format(CONFIGS_BY_DEVICE_ENDPOINT_FORMAT, LOCALHOST_ADDRESS, port, Uri.EscapeDataString(virtualAudioDevice)));
+		}
+
+		public static Uri GetSelectConfigAddress (int port, string configId)
+		{
+			return new Uri(string.Format(SELECT_CONFIG_ENDPOINT_FORMAT, LOCALHOST_ADDRESS, port, Uri.EscapeDataString(configId)));
 		}
 
 		public static Uri GetClassicRedirectionsAddress (int port)

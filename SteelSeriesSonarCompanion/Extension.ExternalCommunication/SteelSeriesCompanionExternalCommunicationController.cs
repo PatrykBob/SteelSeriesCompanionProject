@@ -29,6 +29,7 @@ namespace SteelSeriesSonarCompanion.Extension.ExternalCommunication
 		private static readonly TimeSpan AUTHENTICATION_TIMEOUT = TimeSpan.FromSeconds(5);
 		private const int MAX_DEVICE_NAME_LENGTH = 64;
 		private const string UNKNOWN_DEVICE_NAME = "Unknown device";
+		private const int MAX_IMPORT_TEXT_LENGTH = 65536;
 
 		public override void Initialize (ISteelSeriesCompanionCore companionCore)
 		{
@@ -53,6 +54,7 @@ namespace SteelSeriesSonarCompanion.Extension.ExternalCommunication
 			CompanionCore!.VolumeSetupChanged -= OnVolumeSetupChanged;
 			CompanionCore.ChannelVolumeChanged -= OnChannelVolumeChanged;
 			CompanionCore.ChannelMuteChanged -= OnChannelMuteChanged;
+			CompanionCore.ChannelEqualizerChanged -= OnChannelEqualizerChanged;
 			StopCommunicationServer();
 		}
 
@@ -79,6 +81,7 @@ namespace SteelSeriesSonarCompanion.Extension.ExternalCommunication
 			CompanionCore!.VolumeSetupChanged += OnVolumeSetupChanged;
 			CompanionCore.ChannelVolumeChanged += OnChannelVolumeChanged;
 			CompanionCore.ChannelMuteChanged += OnChannelMuteChanged;
+			CompanionCore.ChannelEqualizerChanged += OnChannelEqualizerChanged;
 		}
 
 		private void OnChannelVolumeChanged (object? sender, ChannelVolumeChangedEventArgs e)
@@ -96,6 +99,11 @@ namespace SteelSeriesSonarCompanion.Extension.ExternalCommunication
 			SendEvent(new VolumeSetupEvent(volumeDataCollection));
 		}
 
+		private void OnChannelEqualizerChanged (object? sender, ChannelEqualizerChangedEventArgs e)
+		{
+			SendEvent(new EqualizerEvent(e.Equalizer));
+		}
+
 		private void SendEvent (BaseExternalCommunicationEvent externalEvent, RemoteClientConnection? excludedConnection = null)
 		{
 			string json = ExternalCommunicationEventConverter.ConvertToJson(externalEvent);
@@ -109,12 +117,22 @@ namespace SteelSeriesSonarCompanion.Extension.ExternalCommunication
 						continue;
 					}
 
-					if (connection.TryQueueMessage(json) == false)
-					{
-						Trace.WriteLine($"Remote app is not reading events, closing connection (dropped {externalEvent.EventName})");
-						connection.Client.Close();
-					}
+					QueueMessage(connection, json, externalEvent.EventName);
 				}
+			}
+		}
+
+		private void SendEventTo (RemoteClientConnection connection, BaseExternalCommunicationEvent externalEvent)
+		{
+			QueueMessage(connection, ExternalCommunicationEventConverter.ConvertToJson(externalEvent), externalEvent.EventName);
+		}
+
+		private void QueueMessage (RemoteClientConnection connection, string json, string eventName)
+		{
+			if (connection.TryQueueMessage(json) == false)
+			{
+				Trace.WriteLine($"Remote app is not reading events, closing connection (dropped {eventName})");
+				connection.Client.Close();
 			}
 		}
 
@@ -373,10 +391,96 @@ namespace SteelSeriesSonarCompanion.Extension.ExternalCommunication
 				case RefreshAudioDeviceCommand:
 					CompanionCore!.RefreshAudioDevice(connection);
 					break;
+				case RequestEqualizerCommand equalizerCommand:
+					_ = SendEqualizer(connection, equalizerCommand.channel);
+					break;
+				case RequestEqualizerPresetsCommand presetsCommand:
+					_ = SendEqualizerPresets(connection, presetsCommand.channel);
+					break;
+				case SetEqualizerEnabledCommand enabledCommand:
+					CompanionCore!.SetEqualizerEnabled(connection, enabledCommand.channel, enabledCommand.enabled);
+					break;
+				case SelectEqualizerPresetCommand selectCommand when selectCommand.presetId != null:
+					CompanionCore!.SelectEqualizerPreset(connection, selectCommand.channel, selectCommand.presetId);
+					break;
+				case SaveEqualizerPresetCommand saveCommand:
+					_ = SaveEqualizerPreset(connection, saveCommand);
+					break;
+				case ImportEqualizerPresetCommand importCommand:
+					_ = ImportEqualizerPreset(connection, importCommand);
+					break;
 				default:
 					Trace.WriteLine($"Unhandled command: {command.CommandName}");
 					break;
 			}
+		}
+
+		private async Task SendEqualizer (RemoteClientConnection connection, SoundChannel channel)
+		{
+			try
+			{
+				EqualizerData? equalizer = await CompanionCore!.GetEqualizer(channel);
+
+				if (equalizer != null)
+				{
+					SendEventTo(connection, new EqualizerEvent(equalizer));
+				}
+			}
+			catch (Exception e)
+			{
+				Trace.WriteLine($"Failed to send {channel} equalizer: {e.Message}");
+			}
+		}
+
+		private async Task SendEqualizerPresets (RemoteClientConnection connection, SoundChannel channel)
+		{
+			try
+			{
+				List<EqualizerPreset> presets = await CompanionCore!.GetEqualizerPresets(channel);
+				SendEventTo(connection, new EqualizerPresetsEvent(channel, presets));
+			}
+			catch (Exception e)
+			{
+				Trace.WriteLine($"Failed to send {channel} equalizer presets: {e.Message}");
+			}
+		}
+
+		private async Task SaveEqualizerPreset (RemoteClientConnection connection, SaveEqualizerPresetCommand command)
+		{
+			bool isSuccess = false;
+
+			try
+			{
+				if (command.settings?.Filters != null)
+				{
+					isSuccess = await CompanionCore!.TrySaveEqualizerPreset(connection, command.channel, command.settings, command.newPresetName);
+				}
+			}
+			catch (Exception e)
+			{
+				Trace.WriteLine($"Failed to save {command.channel} equalizer preset: {e.Message}");
+			}
+
+			SendEventTo(connection, new EqualizerSaveResultEvent(command.channel, isSuccess));
+		}
+
+		private async Task ImportEqualizerPreset (RemoteClientConnection connection, ImportEqualizerPresetCommand command)
+		{
+			bool isSuccess = false;
+
+			try
+			{
+				if (command.parametricEqText != null && command.parametricEqText.Length <= MAX_IMPORT_TEXT_LENGTH)
+				{
+					isSuccess = await CompanionCore!.TryImportEqualizerPreset(connection, command.channel, command.parametricEqText, command.newPresetName);
+				}
+			}
+			catch (Exception e)
+			{
+				Trace.WriteLine($"Failed to import {command.channel} equalizer preset: {e.Message}");
+			}
+
+			SendEventTo(connection, new EqualizerSaveResultEvent(command.channel, isSuccess));
 		}
 
 		private void CacheListenerPort ()

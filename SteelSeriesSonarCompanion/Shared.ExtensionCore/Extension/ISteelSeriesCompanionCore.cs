@@ -18,5 +18,6 @@ namespace SteelSeriesSonarCompanion.Shared.ExtensionCore.Extension
 		public Task<EqualizerData?> GetEqualizer (SoundChannel channel);
 		public Task<List<EqualizerPreset>> GetEqualizerPresets (SoundChannel channel);
 		public Task SetEqualizerEnabled (object? sender, SoundChannel channel, bool enabled);
+		public Task SelectEqualizerPreset (object? sender, SoundChannel channel, string presetId);
 	}
 }

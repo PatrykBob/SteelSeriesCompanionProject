@@ -117,6 +117,19 @@ namespace SteelSeriesSonarCompanion.CoreApp.Communication.Internal
 			return await CommunicationController.TryUpdateConfig(config);
 		}
 
+		public async Task<bool> TrySelectEqualizerPreset (SoundChannel channel, string presetId)
+		{
+			List<ChannelConfigResponse>? configs = await CommunicationController.GetConfigs(ConvertSoundChannel(channel));
+
+			if (configs?.Any(config => config.id == presetId) != true)
+			{
+				Trace.WriteLine($"Preset {presetId} not found for {channel}");
+				return false;
+			}
+
+			return await CommunicationController.TrySelectConfig(presetId);
+		}
+
 		private async Task<ChannelConfigResponse?> GetSelectedConfig (SoundChannel channel)
 		{
 			string virtualAudioDevice = ConvertSoundChannel(channel);

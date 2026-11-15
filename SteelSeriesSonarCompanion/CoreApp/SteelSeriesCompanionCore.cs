@@ -174,6 +174,23 @@ namespace SteelSeriesSonarCompanion.CoreApp
 			await PublishEqualizer(sender, channel);
 		}
 
+		public async Task SelectEqualizerPreset (object? sender, SoundChannel channel, string presetId)
+		{
+			if (IsEqualizerChannel(channel) == false)
+			{
+				return;
+			}
+
+			if (await InternalFacade.TrySelectEqualizerPreset(channel, presetId) == false)
+			{
+				Trace.WriteLine($"Failed to select {channel} equalizer preset {presetId}, restoring current state");
+				await PublishEqualizer(this, channel);
+				return;
+			}
+
+			await PublishEqualizer(sender, channel);
+		}
+
 		private async Task PublishEqualizer (object? sender, SoundChannel channel)
 		{
 			EqualizerData? equalizer = await InternalFacade.GetEqualizerData(channel);

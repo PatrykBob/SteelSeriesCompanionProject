@@ -27,6 +27,10 @@ namespace SteelSeriesSonarCompanion.CoreApp
 			"Could not connect to SteelSeries Sonar. Make sure SteelSeries GG is running; the companion will connect automatically.";
 		private const string AUDIO_DEVICE_REFRESHED_MESSAGE = "Audio device refreshed.";
 		private const string REFRESH_AUDIO_DEVICE_MENU_TEXT = "Refresh Audio Device";
+		private const string INVALID_EQUALIZER_SETTINGS_MESSAGE = "Equalizer preset was not saved: it needs 1 to 10 filters with valid values.";
+		private const string INVALID_PRESET_NAME_MESSAGE = "Equalizer preset was not saved: the preset name is empty.";
+		private const string FACTORY_PRESET_OVERWRITE_MESSAGE = "SteelSeries presets cannot be overwritten. Save the equalizer as a new preset instead.";
+		private const string EQUALIZER_SAVE_FAILED_MESSAGE_FORMAT = "Could not save the {0} equalizer preset.";
 
 		public async Task<List<VolumeData>> GetVolumeSettings ()
 		{
@@ -189,6 +193,54 @@ namespace SteelSeriesSonarCompanion.CoreApp
 			}
 
 			await PublishEqualizer(sender, channel);
+		}
+
+		public async Task<bool> TrySaveEqualizerPreset (object? sender, SoundChannel channel, EqualizerSettings settings, string? newPresetName)
+		{
+			if (IsEqualizerChannel(channel) == false)
+			{
+				return false;
+			}
+
+			return await TrySaveEqualizer(sender, channel, settings, newPresetName);
+		}
+
+		private async Task<bool> TrySaveEqualizer (object? sender, SoundChannel channel, EqualizerSettings settings, string? newPresetName)
+		{
+			if (IsValidEqualizerSettings(settings) == false)
+			{
+				ShowNotification(INVALID_EQUALIZER_SETTINGS_MESSAGE);
+				return false;
+			}
+
+			if (newPresetName != null && string.IsNullOrWhiteSpace(newPresetName) == true)
+			{
+				ShowNotification(INVALID_PRESET_NAME_MESSAGE);
+				return false;
+			}
+
+			switch (await InternalFacade.SaveEqualizerSettings(channel, settings, newPresetName?.Trim()))
+			{
+				case EqualizerSaveResult.SAVED:
+					await PublishEqualizer(sender, channel);
+					return true;
+				case EqualizerSaveResult.FACTORY_PRESET:
+					ShowNotification(FACTORY_PRESET_OVERWRITE_MESSAGE);
+					return false;
+				default:
+					ShowNotification(string.Format(EQUALIZER_SAVE_FAILED_MESSAGE_FORMAT, channel));
+					return false;
+			}
+		}
+
+		private bool IsValidEqualizerSettings (EqualizerSettings settings)
+		{
+			if (settings.Filters.Count == 0 || settings.Filters.Count > EqualizerLimits.MAX_FILTER_COUNT || double.IsFinite(settings.Preamp) == false)
+			{
+				return false;
+			}
+
+			return settings.Filters.All(filter => Enum.IsDefined(filter.Type) == true && double.IsFinite(filter.Frequency) == true && double.IsFinite(filter.Gain) == true && double.IsFinite(filter.QFactor) == true);
 		}
 
 		private async Task PublishEqualizer (object? sender, SoundChannel channel)

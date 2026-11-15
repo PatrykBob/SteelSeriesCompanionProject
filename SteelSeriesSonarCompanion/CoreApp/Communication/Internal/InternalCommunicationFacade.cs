@@ -130,6 +130,55 @@ namespace SteelSeriesSonarCompanion.CoreApp.Communication.Internal
 			return await CommunicationController.TrySelectConfig(presetId);
 		}
 
+		public async Task<EqualizerSaveResult> SaveEqualizerSettings (SoundChannel channel, EqualizerSettings settings, string? newPresetName)
+		{
+			ChannelConfigResponse? config = await GetSelectedConfig(channel);
+
+			if (config == null)
+			{
+				return EqualizerSaveResult.FAILED;
+			}
+
+			if (newPresetName == null && config.isPreset == true)
+			{
+				return EqualizerSaveResult.FACTORY_PRESET;
+			}
+
+			if (EqualizerConfigConverter.TryApplySettings(config, settings) == false)
+			{
+				Trace.WriteLine($"Could not apply equalizer settings to {channel}");
+				return EqualizerSaveResult.FAILED;
+			}
+
+			if (newPresetName == null)
+			{
+				return await CommunicationController.TryUpdateConfig(config) == true ? EqualizerSaveResult.SAVED : EqualizerSaveResult.FAILED;
+			}
+
+			return await TryAddAndSelectConfig(config, newPresetName) == true ? EqualizerSaveResult.SAVED : EqualizerSaveResult.FAILED;
+		}
+
+		private async Task<bool> TryAddAndSelectConfig (ChannelConfigResponse config, string name)
+		{
+			config.id = null;
+			config.name = name;
+			config.createdAt = null;
+			config.updatedAt = null;
+			config.isPreset = false;
+			config.isFavorite = false;
+			config.favoritePosition = 0;
+
+			ChannelConfigResponse? addedConfig = await CommunicationController.AddConfig(config);
+
+			if (addedConfig?.id == null)
+			{
+				Trace.WriteLine($"Sonar did not add preset {name}");
+				return false;
+			}
+
+			return await CommunicationController.TrySelectConfig(addedConfig.id);
+		}
+
 		private async Task<ChannelConfigResponse?> GetSelectedConfig (SoundChannel channel)
 		{
 			string virtualAudioDevice = ConvertSoundChannel(channel);

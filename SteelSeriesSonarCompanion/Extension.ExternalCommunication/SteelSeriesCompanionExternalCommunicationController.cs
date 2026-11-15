@@ -55,6 +55,7 @@ namespace SteelSeriesSonarCompanion.Extension.ExternalCommunication
 			CompanionCore.ChannelVolumeChanged -= OnChannelVolumeChanged;
 			CompanionCore.ChannelMuteChanged -= OnChannelMuteChanged;
 			CompanionCore.ChannelEqualizerChanged -= OnChannelEqualizerChanged;
+			CompanionCore.MediaChanged -= OnMediaChanged;
 			StopCommunicationServer();
 		}
 
@@ -82,6 +83,7 @@ namespace SteelSeriesSonarCompanion.Extension.ExternalCommunication
 			CompanionCore.ChannelVolumeChanged += OnChannelVolumeChanged;
 			CompanionCore.ChannelMuteChanged += OnChannelMuteChanged;
 			CompanionCore.ChannelEqualizerChanged += OnChannelEqualizerChanged;
+			CompanionCore.MediaChanged += OnMediaChanged;
 		}
 
 		private void OnChannelVolumeChanged (object? sender, ChannelVolumeChangedEventArgs e)
@@ -102,6 +104,11 @@ namespace SteelSeriesSonarCompanion.Extension.ExternalCommunication
 		private void OnChannelEqualizerChanged (object? sender, ChannelEqualizerChangedEventArgs e)
 		{
 			SendEvent(new EqualizerEvent(e.Equalizer));
+		}
+
+		private void OnMediaChanged (object? sender, MediaChangedEventArgs e)
+		{
+			SendEvent(new MediaEvent(e.Media));
 		}
 
 		private void SendEvent (BaseExternalCommunicationEvent externalEvent, RemoteClientConnection? excludedConnection = null)
@@ -409,6 +416,18 @@ namespace SteelSeriesSonarCompanion.Extension.ExternalCommunication
 				case ImportEqualizerPresetCommand importCommand:
 					_ = ImportEqualizerPreset(connection, importCommand);
 					break;
+				case RequestMediaCommand:
+					_ = SendMedia(connection);
+					break;
+				case ToggleMediaPlayPauseCommand:
+					CompanionCore!.TryToggleMediaPlayPause();
+					break;
+				case SkipMediaNextCommand:
+					CompanionCore!.TrySkipMediaNext();
+					break;
+				case SkipMediaPreviousCommand:
+					CompanionCore!.TrySkipMediaPrevious();
+					break;
 				default:
 					Trace.WriteLine($"Unhandled command: {command.CommandName}");
 					break;
@@ -429,6 +448,18 @@ namespace SteelSeriesSonarCompanion.Extension.ExternalCommunication
 			catch (Exception e)
 			{
 				Trace.WriteLine($"Failed to send {channel} equalizer: {e.Message}");
+			}
+		}
+
+		private async Task SendMedia (RemoteClientConnection connection)
+		{
+			try
+			{
+				SendEventTo(connection, new MediaEvent(await CompanionCore!.GetMedia()));
+			}
+			catch (Exception e)
+			{
+				Trace.WriteLine($"Failed to send media state: {e.Message}");
 			}
 		}
 

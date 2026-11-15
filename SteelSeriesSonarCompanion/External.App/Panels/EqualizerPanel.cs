@@ -47,6 +47,17 @@ namespace SteelSeriesSonarCompanion.External.App.Panels
 		private const string CHANNEL_TITLE_FORMAT = "{0} equalizer";
 		private const string CHANNEL_PICKER_TITLE = "Equalizer channel";
 		private const string CANCEL_TEXT = "Cancel";
+		private const string EDIT_TEXT = "Edit";
+		private const string SAVE_FAILED_TITLE = "Equalizer";
+		private const string SAVE_FAILED_MESSAGE = "The preset was not saved. The notification on the PC says why.";
+		private const string OK_TEXT = "OK";
+
+		private bool IsSavePending { get; set; }
+		private HorizontalStackLayout ButtonLayout { get; } = new()
+		{
+			Spacing = 12,
+			HorizontalOptions = LayoutOptions.End
+		};
 
 		public EqualizerPanel (CompanionConnection connection, JObject? settings) : base(connection, settings)
 		{
@@ -78,6 +89,7 @@ namespace SteelSeriesSonarCompanion.External.App.Panels
 		{
 			Connection.EqualizerChanged -= OnEqualizerChanged;
 			Connection.EqualizerPresetsReceived -= OnEqualizerPresetsReceived;
+			Connection.EqualizerSaveCompleted -= OnEqualizerSaveCompleted;
 		}
 
 		private View CreateContent ()
@@ -97,13 +109,63 @@ namespace SteelSeriesSonarCompanion.External.App.Panels
 			RootLayout.Add(PresetPicker, 0, 1);
 			ResponseView.Drawable = ResponseDrawable;
 			RootLayout.Add(ResponseView, 0, 2);
+			ButtonLayout.Add(CreateButton(EDIT_TEXT, OnEditClicked));
+			RootLayout.Add(ButtonLayout, 0, 3);
 			return RootLayout;
+		}
+
+		private Button CreateButton (string text, Action onClicked)
+		{
+			Button button = new()
+			{
+				Text = text
+			};
+
+			button.Clicked += (sender, e) => onClicked();
+			return button;
 		}
 
 		private void AttachToEvents ()
 		{
 			Connection.EqualizerChanged += OnEqualizerChanged;
 			Connection.EqualizerPresetsReceived += OnEqualizerPresetsReceived;
+			Connection.EqualizerSaveCompleted += OnEqualizerSaveCompleted;
+		}
+
+		private async void OnEditClicked ()
+		{
+			Page? hostPage = Window?.Page;
+
+			if (CurrentEqualizer == null || hostPage == null)
+			{
+				return;
+			}
+
+			EqualizerEditResult? result = await EqualizerEditorPage.Show(hostPage, CurrentEqualizer);
+
+			if (result == null)
+			{
+				return;
+			}
+
+			IsSavePending = true;
+			Connection.SaveEqualizerPreset(Channel, result.Settings, result.NewPresetName);
+		}
+
+		private async void OnEqualizerSaveCompleted (SoundChannel channel, bool isSuccess)
+		{
+			if (channel != Channel || IsSavePending == false)
+			{
+				return;
+			}
+
+			IsSavePending = false;
+			Page? hostPage = Window?.Page;
+
+			if (isSuccess == false && hostPage != null)
+			{
+				await hostPage.DisplayAlertAsync(SAVE_FAILED_TITLE, SAVE_FAILED_MESSAGE, OK_TEXT);
+			}
 		}
 
 		private void ShowChannel (SoundChannel channel)

@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using SteelSeriesSonarCompanion.CoreApp.Communication.Internal;
+using SteelSeriesSonarCompanion.CoreApp.Equalizer;
 using SteelSeriesSonarCompanion.CoreApp.Extension;
 using SteelSeriesSonarCompanion.CoreApp.Tray;
 using SteelSeriesSonarCompanion.Shared.Core;
@@ -30,6 +31,7 @@ namespace SteelSeriesSonarCompanion.CoreApp
 		private const string INVALID_EQUALIZER_SETTINGS_MESSAGE = "Equalizer preset was not saved: it needs 1 to 10 filters with valid values.";
 		private const string INVALID_PRESET_NAME_MESSAGE = "Equalizer preset was not saved: the preset name is empty.";
 		private const string FACTORY_PRESET_OVERWRITE_MESSAGE = "SteelSeries presets cannot be overwritten. Save the equalizer as a new preset instead.";
+		private const string EQUALIZER_IMPORT_FAILED_MESSAGE = "Equalizer preset was not imported: expected an Equalizer APO / AutoEQ ParametricEQ.txt file.";
 		private const string EQUALIZER_SAVE_FAILED_MESSAGE_FORMAT = "Could not save the {0} equalizer preset.";
 
 		public async Task<List<VolumeData>> GetVolumeSettings ()
@@ -199,6 +201,22 @@ namespace SteelSeriesSonarCompanion.CoreApp
 		{
 			if (IsEqualizerChannel(channel) == false)
 			{
+				return false;
+			}
+
+			return await TrySaveEqualizer(sender, channel, settings, newPresetName);
+		}
+
+		public async Task<bool> TryImportEqualizerPreset (object? sender, SoundChannel channel, string parametricEqText, string? newPresetName)
+		{
+			if (IsEqualizerChannel(channel) == false)
+			{
+				return false;
+			}
+
+			if (EqualizerApoParser.TryParse(parametricEqText, out EqualizerSettings settings) == false)
+			{
+				ShowNotification(EQUALIZER_IMPORT_FAILED_MESSAGE);
 				return false;
 			}
 

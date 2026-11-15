@@ -1,5 +1,8 @@
-﻿namespace SteelSeriesSonarCompanion.CoreApp.Communication.Internal
+﻿using Newtonsoft.Json;
+
+namespace SteelSeriesSonarCompanion.CoreApp.Communication.Internal
 {
+    [JsonObject(ItemNullValueHandling = NullValueHandling.Ignore)]
     public class ChannelConfigResponse
     {
         public string? id;
@@ -16,31 +19,39 @@
         public int favoritePosition;
         public string? releaseVersion;
 
+        [JsonObject(ItemNullValueHandling = NullValueHandling.Ignore)]
         public class GroupDataResponse
         {
             public BaseDataResponse? bassBoostState;
             public BaseDataResponse? trebleBoostState;
             public BaseDataResponse? voiceClarityState;
             public SmartVolumeDataResponse? smartVolume;
-            public float generalGain;
+            public double? generalGain;
             public EqualizerResponse? parametricEQ;
-            public bool virtualSurroundState;
+            public bool? virtualSurroundState;
             public GroupVirtualSurroundChannelResponse? virtualSurroundChannels;
-            public float reverbGainDB;
+            public double? reverbGainDB;
             public string? formFactor;
-            public bool globalEnableState;
+            public bool? globalEnableState;
+            public bool? acousticEchoCancelingState;
+            public BaseDataResponse? automaticNoiseGateState;
+            public BaseDataResponse? impactNoiseReductionState;
+            public BaseDataResponse? noiseCancelingState;
+            public BaseDataResponse? noiseGateState;
+            public BaseDataResponse? noiseReductionState;
+            public BaseDataResponse? volumeStabilizerState;
         }
 
         public class BaseDataResponse
         {
             public bool enabled;
-            public float value;
+            public double value;
         }
 
         public class SmartVolumeDataResponse
         {
 			public bool enabled;
-			public float volumeLevel;
+			public double volumeLevel;
 			public string? loudness;
         }
 
@@ -62,9 +73,9 @@
         public class EqualizerFilterResponse
         {
             public bool enabled;
-            public float qFactor;
-            public float frequency;
-            public float gain;
+            public double qFactor;
+            public double frequency;
+            public double gain;
             public string? type;
         }
 
@@ -82,8 +93,8 @@
 
         public class VirtualSurroundChannelResponse
         {
-            public float position;
-            public float gain;
+            public double position;
+            public double gain;
         }
     }
 }
